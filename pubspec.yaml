@@ -39,6 +39,7 @@ dependencies:
   geolocator:
   intl:
   url_launcher:
+  intro_slider:
 
 dev_dependencies:
   flutter_test:

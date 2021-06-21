@@ -11,6 +11,7 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/routes.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
+import 'package:fulbito_app/screens/intro/intro_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 

@@ -355,7 +355,8 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                               );
 
                               if (completeUserProfileResponse['success'] == true) {
-                                Navigator.pushReplacementNamed(context, 'matches');
+                                // TODO show intro sliders
+                                Navigator.pushReplacementNamed(context, 'intro');
 
                                 BlocProvider.of<CompleteProfileBloc>(context).add(
                                     ProfileCompletedEvent()

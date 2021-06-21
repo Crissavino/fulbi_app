@@ -113,7 +113,11 @@ class SearchLocation extends SearchDelegate<Suggestion?> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           // we will display the data returned from our future here
-                          title: Text(snapshot.data![index].description!),
+                          title: Text(
+                              snapshot.data![index].description != null
+                                  ? snapshot.data![index].description!
+                                  : '${snapshot.data![0].details!.lat.toString()} ${snapshot.data![0].details!.lng.toString()}'
+                          ),
                           onTap: () async {
                             final UserLocation locationDetails =
                                 await PlaceApiProvider(sessionToken)

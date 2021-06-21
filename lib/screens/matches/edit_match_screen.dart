@@ -79,6 +79,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           city: location.city,
           lat: location.lat,
           lng: location.lng,
+          isByLatLng: location.isByLatLng != null ? location.isByLatLng : false
         );
         Match match = response['match'];
         this.whenPlay = DateFormat('dd/MM/yyyy HH:mm').format(match.whenPlay);
@@ -209,7 +210,12 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
         if (result != null) {
           setState(() {
-            this.userLocationDesc = result.description!;
+            this.userLocationDesc = result.description != null
+                ? result.description!
+                : '${result.details!.lat.toString()} ${result.details!.lng.toString()}';
+            this.userLocationDetails.isByLatLng = result.description != null
+                ? false
+                : true;
             this.userLocationDetails = result.details!;
             this.userLocationDetails.placeId = result.placeId;
             this.userLocationDetails.formattedAddress = result.description;
@@ -720,6 +726,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               'province_code': this.userLocationDetails.provinceCode,
               'country': this.userLocationDetails.country,
               'country_code': this.userLocationDetails.countryCode,
+              'is_by_lat_lng': this.userLocationDetails.isByLatLng,
             };
 
             int? genreId = this.matchGender.firstWhere((Genre genre) {

@@ -27,7 +27,7 @@ class CreateMatchScreen extends StatefulWidget {
 
 class _CreateMatchScreenState extends State<CreateMatchScreen> {
   String userLocationDesc = '';
-  late UserLocation userLocationDetails;
+  UserLocation? userLocationDetails;
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay(
     hour: DateTime.now().hour,
@@ -136,10 +136,15 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
         if (result != null) {
           setState(() {
-            userLocationDesc = result.description!;
-            userLocationDetails = result.details!;
-            userLocationDetails.placeId = result.placeId;
-            userLocationDetails.formattedAddress = result.description;
+            this.userLocationDesc = result.description != null
+                ? result.description!
+                : '${result.details!.lat.toString()} ${result.details!.lng.toString()}';
+            this.userLocationDetails = result.details!;
+            this.userLocationDetails!.isByLatLng = result.description != null
+                ? false
+                : true;
+            this.userLocationDetails!.placeId = result.placeId;
+            this.userLocationDetails!.formattedAddress = result.description;
           });
         }
       },
@@ -624,17 +629,18 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
             }
 
             final locationData = {
-              'lat': this.userLocationDetails.lat,
-              'lng': this.userLocationDetails.lng,
-              'formatted_address': this.userLocationDetails.formattedAddress == null
+              'lat': this.userLocationDetails!.lat,
+              'lng': this.userLocationDetails!.lng,
+              'formatted_address': this.userLocationDetails!.formattedAddress == null
                   ? this.userLocationDesc
-                  : this.userLocationDetails.formattedAddress,
-              'place_id': this.userLocationDetails.placeId,
-              'city': this.userLocationDetails.city,
-              'province': this.userLocationDetails.province,
-              'province_code': this.userLocationDetails.provinceCode,
-              'country': this.userLocationDetails.country,
-              'country_code': this.userLocationDetails.countryCode,
+                  : this.userLocationDetails!.formattedAddress,
+              'place_id': this.userLocationDetails!.placeId,
+              'city': this.userLocationDetails!.city,
+              'province': this.userLocationDetails!.province,
+              'province_code': this.userLocationDetails!.provinceCode,
+              'country': this.userLocationDetails!.country,
+              'country_code': this.userLocationDetails!.countryCode,
+              'is_by_lat_lng': this.userLocationDetails!.isByLatLng,
             };
 
             int? genreId = this.matchGender.firstWhere((Genre genre) {

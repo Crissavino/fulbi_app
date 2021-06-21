@@ -20,6 +20,7 @@ class Location {
     required this.city,
     required this.placeId,
     required this.formattedAddress,
+    this.isByLatLng,
     required this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -35,6 +36,7 @@ class Location {
   String city;
   String placeId;
   String formattedAddress;
+  bool? isByLatLng;
   dynamic deletedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -50,6 +52,7 @@ class Location {
     city: json["city"],
     placeId: json["place_id"],
     formattedAddress: json["formatted_address"],
+    isByLatLng: (json["is_by_lat_lng"] == 1) ? true : false,
     deletedAt: json["deleted_at"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
@@ -66,6 +69,7 @@ class Location {
     "city": city,
     "place_id": placeId,
     "formatted_address": formattedAddress,
+    "is_by_lat_lng": isByLatLng,
     "deleted_at": deletedAt,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),

@@ -8,6 +8,7 @@ class UserLocation {
   String? formattedAddress;
   double? lat;
   double? lng;
+  bool? isByLatLng;
 
   UserLocation({
     this.country,
@@ -19,6 +20,7 @@ class UserLocation {
     this.city,
     this.lat,
     this.lng,
+    this.isByLatLng,
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,5 +33,6 @@ class UserLocation {
     "city": city,
     "lat": lat,
     "lng": lng,
+    "is_by_lat_lng": isByLatLng,
   };
 }

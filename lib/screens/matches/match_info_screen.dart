@@ -11,6 +11,7 @@ import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/utils/maps_util.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -202,104 +203,12 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            child: Text(
-                                              translations[localeName]![
-                                                      'match.itPlayedIn']! +
-                                                  ' ' +
-                                                  location.formattedAddress,
-                                              style: TextStyle(),
-                                              overflow: TextOverflow.clip,
-                                            ),
-                                            width: _width / 1.5,
-                                          ),
-                                          Container(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                print('ver mapa');
-                                              },
-                                              child: Column(
-                                                children: [
-                                                  Container(
-                                                    child: Icon(
-                                                        Icons.location_on,
-                                                        color:
-                                                            Colors.blueAccent),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5.0,
-                                                  ),
-                                                  Container(
-                                                    child: Text(
-                                                      'Ver mapa',
-                                                      style: TextStyle(
-                                                          color: Colors
-                                                              .blueAccent),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(top: 40.0),
-                                        child: Text(
-                                          localeName == 'es'
-                                              ? 'El ${DateFormat('d').format(match.whenPlay)} de ${DateFormat('MMMM').format(match.whenPlay)} de ${DateFormat('y').format(match.whenPlay)}'
-                                              : 'On ${DateFormat('MMMM').format(match.whenPlay)} ${DateFormat('d').format(match.whenPlay)}, ${DateFormat('y').format(match.whenPlay)}',
-                                          style: TextStyle(),
-                                          overflow: TextOverflow.clip,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(top: 40.0),
-                                        child: Text(
-                                          translations[localeName]![
-                                                  'match.isMatchType']! +
-                                              ' ' +
-                                              type.name!,
-                                          style: TextStyle(),
-                                          overflow: TextOverflow.clip,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(top: 40.0),
-                                        child: Text(
-                                          translations[localeName]!['general.for']! + ' ' + genre.name!,
-                                          style: TextStyle(),
-                                          overflow: TextOverflow.clip,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(top: 40.0),
-                                        child: Text(
-                                          translations[localeName]![
-                                                  'match.aproxCost']! +
-                                              ' ' +
-                                              currencySymbol +
-                                              match.cost.toString(),
-                                          style: TextStyle(),
-                                          overflow: TextOverflow.clip,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(top: 40.0),
-                                        child: Text(
-                                          localeName == 'es'
-                                              ? 'Quedan $spotsAvailable lugares disponibles'
-                                              : 'There are $spotsAvailable spots available',
-                                          style: TextStyle(),
-                                          overflow: TextOverflow.clip,
-                                        ),
-                                      ),
+                                      _buildPlaysIn(location, _width),
+                                      _buildPlaysOn(match),
+                                      _buildMatchType(type),
+                                      _buildMatchGenre(genre),
+                                      _buildMatchCost(currencySymbol, match),
+                                      _buildMatchSpots(spotsAvailable),
                                     ],
                                   ),
                                 )
@@ -320,6 +229,115 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
+  Container _buildMatchSpots(String spotsAvailable) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Text(
+        localeName == 'es'
+            ? 'Quedan $spotsAvailable lugares disponibles'
+            : 'There are $spotsAvailable spots available',
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  Container _buildMatchCost(String currencySymbol, Match match) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Text(
+        translations[localeName]!['match.aproxCost']! +
+            ' ' +
+            currencySymbol +
+            match.cost.toString(),
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  Container _buildMatchGenre(Genre genre) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Text(
+        translations[localeName]!['general.for']! + ' ' + genre.name!,
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  Container _buildMatchType(Type type) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Text(
+        translations[localeName]!['match.isMatchType']! + ' ' + type.name!,
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  Container _buildPlaysOn(Match match) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Text(
+        localeName == 'es'
+            ? 'El ${DateFormat('d').format(match.whenPlay)} de ${DateFormat('MMMM').format(match.whenPlay)} de ${DateFormat('y').format(match.whenPlay)}'
+            : 'On ${DateFormat('MMMM').format(match.whenPlay)} ${DateFormat('d').format(match.whenPlay)}, ${DateFormat('y').format(match.whenPlay)}',
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  Row _buildPlaysIn(Location location, double _width) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          child: Text(
+            translations[localeName]!['match.itPlayedIn']! +
+                ' ' +
+                location.formattedAddress,
+            style: TextStyle(),
+            overflow: TextOverflow.clip,
+          ),
+          width: _width / 1.5,
+        ),
+        Container(
+          child: GestureDetector(
+            onTap: () async {
+              if(location.isByLatLng!) {
+                await MapsUtil.openMapWithAddress(location.formattedAddress);
+                // await MapsUtil.openMap(location.lat, location.lng);
+              } else {
+                await MapsUtil.openMapWithAddress(location.formattedAddress);
+              }
+            },
+            child: Column(
+              children: [
+                Container(
+                  child: Icon(Icons.location_on, color: Colors.blueAccent),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Container(
+                  child: Text(
+                    'Ver mapa',
+                    style: TextStyle(color: Colors.blueAccent),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _navigateToSection(index) async {
     switch (index) {
       case 1:
@@ -336,30 +354,29 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         User currentUser = await UserRepository.getCurrentUser();
         bool imIn = false;
         if (widget.match.participants!.isNotEmpty) {
-          imIn = (widget.match.participants!.firstWhere((user) => user.id == currentUser.id)) != null;
+          imIn = (widget.match.participants!
+                  .firstWhere((user) => user.id == currentUser.id)) !=
+              null;
         }
 
         if (!imIn) {
           return showAlertWithEvent(
             context,
             translations[localeName]!['match.chat.join']!,
-                () async {
+            () async {
               final response =
-              await MatchRepository().joinMatch(widget.match.id);
+                  await MatchRepository().joinMatch(widget.match.id);
               if (response['success']) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => MatchChatScreen(
-                        match: widget.match,
-                        currentUser: currentUser
-                    ),
+                        match: widget.match, currentUser: currentUser),
                   ),
                 );
               } else {
                 Navigator.pop(context);
-                showAlert(
-                    context, 'Error', 'Oooops ocurrio un error');
+                showAlert(context, 'Error', 'Oooops ocurrio un error');
               }
             },
           );
@@ -368,9 +385,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MatchChatScreen(
-                  match: widget.match,
-                  currentUser: currentUser
-              ),
+                  match: widget.match, currentUser: currentUser),
             ),
           );
         }

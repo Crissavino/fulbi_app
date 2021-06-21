@@ -23,7 +23,6 @@ class PlayersScreen extends StatefulWidget {
 }
 
 class _PlayersScreenState extends State<PlayersScreen> {
-
   dynamic search = '';
   List<Genre> _searchedGender = Genre().genres;
   List<Position> _searchedPlayerPositions = Position().positions;
@@ -43,8 +42,13 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
-  Future getUsersOffers(int range, int? genreId, List<int?> positionsIds) async {
-    final response = await UserRepository().getUserOffers(range, genreId!, positionsIds,);
+  Future getUsersOffers(
+      int range, int? genreId, List<int?> positionsIds) async {
+    final response = await UserRepository().getUserOffers(
+      range,
+      genreId!,
+      positionsIds,
+    );
     if (response['success']) {
       setState(() {
         this.players = response['players'];
@@ -56,7 +60,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -98,18 +101,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 hintStyle: kHintTextStyle,
               ),
               onChanged: (val) async {
-                SharedPreferences localStorage = await SharedPreferences.getInstance();
+                SharedPreferences localStorage =
+                    await SharedPreferences.getInstance();
                 List players = jsonDecode(localStorage.getString('players')!);
                 setState(() {
-                  this.players = players.map((user) => User.fromJson(user)).toList();
+                  this.players =
+                      players.map((user) => User.fromJson(user)).toList();
                   this.players = this.players.where((player) {
-                    return player!.name.contains(val) || player.nickname.contains(val);
+                    return player!.name.contains(val) ||
+                        player.nickname.contains(val);
                   }).toList();
                   // search = val
                 });
                 if (val.isEmpty) {
                   setState(() {
-                    this.players = players.map((user) => User.fromJson(user)).toList();
+                    this.players =
+                        players.map((user) => User.fromJson(user)).toList();
                   });
                 }
               },
@@ -138,12 +145,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
                 print(filteredPlayers);
 
-                if(filteredPlayers != null) {
+                if (filteredPlayers != null) {
                   setState(() {
                     this.players = filteredPlayers;
                   });
                 }
-
               },
             ),
           ),
@@ -209,11 +215,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                       AsyncSnapshot<dynamic> snapshot) {
                                     dynamic response = snapshot.data;
 
-                                    if (snapshot.connectionState == ConnectionState.done && !snapshot.hasData) {
+                                    if (snapshot.connectionState ==
+                                            ConnectionState.done &&
+                                        !snapshot.hasData) {
                                       return Container(
                                         width: _width,
                                         height: _height,
-                                        child: Center(child: Text(translations[localeName]!['general.noPlayers']!)),
+                                        child: Center(
+                                            child: Text(
+                                                translations[localeName]![
+                                                    'general.noPlayers']!)),
                                       );
                                     }
 
@@ -223,9 +234,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                         height: _height,
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           children: [circularLoading],
                                         ),
                                       );
@@ -236,22 +247,36 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                           'Oops, ocurrió un error');
                                     }
 
-                                    if (this.players != null && this.players.isEmpty) {
+                                    if (this.players != null &&
+                                        this.players.isEmpty) {
                                       return Container(
                                         width: _width,
                                         height: _height,
-                                        child: Center(child: Text(translations[localeName]!['general.noPlayers']!)),
+                                        child: Center(
+                                            child: Text(
+                                                translations[localeName]![
+                                                    'general.noPlayers']!)),
                                       );
                                     }
 
-                                    return ListView.builder(
-                                      itemBuilder: (
+                                    return RefreshIndicator(
+                                      onRefresh: () => getRefreshData(
+                                        _searchedRange['distance']!.toInt(),
+                                        _searchedGender.first.id,
+                                        _searchedPlayerPositions
+                                            .map((Position pos) => pos.id)
+                                            .toList(),
+                                      ),
+                                      child: ListView.builder(
+                                        itemBuilder: (
                                           BuildContext context,
                                           int index,
-                                          ) {
-                                        return _buildPlayerRow(this.players[index]!);
-                                      },
-                                      itemCount: this.players.length,
+                                        ) {
+                                          return _buildPlayerRow(
+                                              this.players[index]!);
+                                        },
+                                        itemCount: this.players.length,
+                                      ),
                                     );
                                   },
                                 ),
@@ -272,67 +297,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
-  void _navigateToSection(index) {
-    switch (index) {
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => MatchesScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => PrivateProfileScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      default:
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBarRounded() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 0,
-      onTap: (index) {
-        if (index != 0) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Jugadores'),
-          icon: Icon(Icons.groups_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Partidos'),
-          icon: Icon(
-            Icons.sports_soccer,
-          ),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Perfil'),
-          icon: Icon(Icons.person_outline),
-        ),
-      ],
+  Future<void> getRefreshData(
+    range,
+    genreId,
+    positionsIds,
+  ) async {
+    final response = await UserRepository().getUserOffers(
+      range,
+      genreId!,
+      positionsIds,
     );
+    if (response['success']) {
+      setState(() {
+        this.players = response['players'];
+      });
+    }
   }
 
   Widget _buildPlayerRow(User user) {
@@ -407,4 +386,67 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
+  void _navigateToSection(index) {
+    switch (index) {
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => MatchesScreen(),
+            transitionDuration: Duration(seconds: 0),
+          ),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) =>
+                PrivateProfileScreen(),
+            transitionDuration: Duration(seconds: 0),
+          ),
+        );
+        break;
+      default:
+        return;
+    }
+  }
+
+  Widget _buildBottomNavigationBarRounded() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      elevation: 0.0,
+      iconSize: 30,
+      showSelectedLabels: false,
+      showUnselectedLabels: false,
+      selectedItemColor: Colors.green[400],
+      unselectedItemColor: Colors.green[900],
+      backgroundColor: Colors.white,
+      currentIndex: 0,
+      onTap: (index) {
+        if (index != 0) {
+          _navigateToSection(index);
+        }
+      },
+      items: [
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Jugadores'),
+          icon: Icon(Icons.groups_outlined),
+        ),
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Partidos'),
+          icon: Icon(
+            Icons.sports_soccer,
+          ),
+        ),
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Perfil'),
+          icon: Icon(Icons.person_outline),
+        ),
+      ],
+    );
+  }
 }

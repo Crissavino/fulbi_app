@@ -44,6 +44,15 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
     return response;
   }
 
+  Future<void> getRefreshData() async {
+    final response = await MatchRepository().getMyMatches();
+    if (response['success']) {
+      setState(() {
+        this.matches = response['matches'];
+      });
+    }
+  }
+
   Future getMyUser() async {
     final user = await UserRepository.getCurrentUser();
     setState(() {
@@ -151,14 +160,17 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                 );
                               }
 
-                              return ListView.builder(
-                                itemBuilder: (
-                                  BuildContext context,
-                                  int index,
-                                ) {
-                                  return _buildMatchRow(this.matches[index]!);
-                                },
-                                itemCount: this.matches.length,
+                              return RefreshIndicator(
+                                onRefresh: () => this.getRefreshData(),
+                                child: ListView.builder(
+                                  itemBuilder: (
+                                    BuildContext context,
+                                    int index,
+                                  ) {
+                                    return _buildMatchRow(this.matches[index]!);
+                                  },
+                                  itemCount: this.matches.length,
+                                ),
                               );
                             },
                           ),

@@ -345,12 +345,6 @@ class _MatchesFilterState extends State<MatchesFilter> {
       child: Center(
         child: TextButton(
           onPressed: () async {
-            // TODO filtrar partidos
-            print('Filtrar los partidos');
-            // print(widget.searchedGender);
-            // print(widget.searchedRange);
-            // print(widget.searchedMatchType);
-
             Genre gender = widget.searchedGender.firstWhere((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {

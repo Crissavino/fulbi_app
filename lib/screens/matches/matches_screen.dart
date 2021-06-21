@@ -38,7 +38,11 @@ class _MatchesState extends State<MatchesScreen> {
   }
 
   Future getMatchesOffers(int range, Genre genre, List<int?> types) async {
-    final response = await MatchRepository().getMatchesOffers(range, genre, types,);
+    final response = await MatchRepository().getMatchesOffers(
+      range,
+      genre,
+      types,
+    );
     if (response['success']) {
       setState(() {
         this.matches = response['matches'];
@@ -50,7 +54,6 @@ class _MatchesState extends State<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -103,7 +106,6 @@ class _MatchesState extends State<MatchesScreen> {
                     this.matches = matches;
                   });
                 }
-
               },
             ),
           ),
@@ -137,7 +139,7 @@ class _MatchesState extends State<MatchesScreen> {
                               right: 0,
                               child: Container(
                                 decoration: horizontalGradient,
-                                padding: EdgeInsets.only(left: 10.0, top: 33.0),
+                                padding: EdgeInsets.only(left: 10.0, top: 40.0),
                                 alignment: Alignment.center,
                                 child: _buildMatchesMenu(),
                               ),
@@ -169,11 +171,16 @@ class _MatchesState extends State<MatchesScreen> {
                                       AsyncSnapshot<dynamic> snapshot) {
                                     dynamic response = snapshot.data;
 
-                                    if (snapshot.connectionState == ConnectionState.done && !snapshot.hasData) {
+                                    if (snapshot.connectionState ==
+                                            ConnectionState.done &&
+                                        !snapshot.hasData) {
                                       return Container(
                                         width: _width,
                                         height: _height,
-                                        child: Center(child: Text(translations[localeName]!['general.noMatches']!)),
+                                        child: Center(
+                                            child: Text(
+                                                translations[localeName]![
+                                                    'general.noMatches']!)),
                                       );
                                     }
 
@@ -200,18 +207,33 @@ class _MatchesState extends State<MatchesScreen> {
                                       return Container(
                                         width: _width,
                                         height: _height,
-                                        child: Center(child: Text(translations[localeName]!['general.noMatches']!)),
+                                        child: Center(
+                                            child: Text(
+                                                translations[localeName]![
+                                                    'general.noMatches']!)),
                                       );
                                     }
-
-                                    return ListView.builder(
-                                      itemBuilder: (
-                                        BuildContext context,
-                                        int index,
-                                      ) {
-                                        return _buildMatchRow(this.matches[index]);
-                                      },
-                                      itemCount: this.matches.length,
+                                    return RefreshIndicator(
+                                      onRefresh: () => this.getRefreshData(
+                                        this
+                                            ._searchedRange['distance']!
+                                            .toInt(),
+                                        this._searchedGender.first,
+                                        this
+                                            ._searchedMatchType
+                                            .map((Type type) => type.id)
+                                            .toList(),
+                                      ),
+                                      child: ListView.builder(
+                                        itemBuilder: (
+                                            BuildContext context,
+                                            int index,
+                                            ) {
+                                          return _buildMatchRow(
+                                              this.matches[index]);
+                                        },
+                                        itemCount: this.matches.length,
+                                      ),
                                     );
                                   },
                                 ),
@@ -232,67 +254,21 @@ class _MatchesState extends State<MatchesScreen> {
     );
   }
 
-  void _navigateToSection(index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => PlayersScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => PrivateProfileScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      default:
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBarRounded() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 1,
-      onTap: (index) {
-        if (index != 1) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Jugadores'),
-          icon: Icon(Icons.groups_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Partidos'),
-          icon: Icon(
-            Icons.sports_soccer,
-          ),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Perfil'),
-          icon: Icon(Icons.person_outline),
-        ),
-      ],
+  Future<void> getRefreshData(
+    range,
+    genre,
+    types,
+  ) async {
+    final response = await MatchRepository().getMatchesOffers(
+      range,
+      genre,
+      types,
     );
+    if (response['success']) {
+      setState(() {
+        this.matches = response['matches'];
+      });
+    }
   }
 
   Widget _buildMatchRow(match) {
@@ -361,6 +337,70 @@ class _MatchesState extends State<MatchesScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _navigateToSection(index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => PlayersScreen(),
+            transitionDuration: Duration(seconds: 0),
+          ),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) =>
+                PrivateProfileScreen(),
+            transitionDuration: Duration(seconds: 0),
+          ),
+        );
+        break;
+      default:
+        return;
+    }
+  }
+
+  Widget _buildBottomNavigationBarRounded() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      elevation: 0.0,
+      iconSize: 30,
+      showSelectedLabels: false,
+      showUnselectedLabels: false,
+      selectedItemColor: Colors.green[400],
+      unselectedItemColor: Colors.green[900],
+      backgroundColor: Colors.white,
+      currentIndex: 1,
+      onTap: (index) {
+        if (index != 1) {
+          _navigateToSection(index);
+        }
+      },
+      items: [
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Jugadores'),
+          icon: Icon(Icons.groups_outlined),
+        ),
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Partidos'),
+          icon: Icon(
+            Icons.sports_soccer,
+          ),
+        ),
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          title: Text('Perfil'),
+          icon: Icon(Icons.person_outline),
+        ),
+      ],
     );
   }
 }

@@ -52,7 +52,7 @@ class Location {
     city: json["city"],
     placeId: json["place_id"],
     formattedAddress: json["formatted_address"],
-    isByLatLng: (json["is_by_lat_lng"] == 1) ? true : false,
+    isByLatLng: ((json["is_by_lat_lng"] == 1) || json["is_by_lat_lng"] == true) ? true : false,
     deletedAt: json["deleted_at"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),

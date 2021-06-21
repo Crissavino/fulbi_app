@@ -273,4 +273,45 @@ class UserRepository {
     return body;
   }
 
+  Future<dynamic> changeNickname(String? newNickname) async {
+
+    final data = {
+      "new_nickname": newNickname,
+    };
+
+    final res = await api.postData(data, '/user/change-nickname');
+
+    final body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      final user = body['user'];
+      body['user'] = User.fromJson(user);
+      await localStorage.setString('user', json.encode(body['user']));
+
+    }
+
+    return body;
+  }
+
+  Future<dynamic> changePassword(String newPassword) async {
+
+    final data = {
+      "new_password": newPassword,
+    };
+
+    final res = await api.postData(data, '/user/change-password');
+
+    final body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      final user = body['user'];
+      body['user'] = User.fromJson(user);
+      await localStorage.setString('user', json.encode(body['user']));
+    }
+
+    return body;
+  }
+
 }

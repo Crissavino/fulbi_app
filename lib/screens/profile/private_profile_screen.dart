@@ -525,7 +525,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           ],
         ),
         child: ListTile(
-          title: Text('Configuración'),
+          title: Text(translations[localeName]!['profile.config']!),
           trailing: Icon(
             Icons.keyboard_arrow_up_outlined,
             size: 40.0,
@@ -533,15 +533,21 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
         ),
       ),
       onTap: () async {
-        showModalBottomSheet(
+        final user = await showModalBottomSheet(
           backgroundColor: Colors.transparent,
           context: context,
           enableDrag: true,
           isScrollControlled: true,
           builder: (BuildContext context) {
-            return YourSettings();
+            return YourSettings(
+              user: this._currentUser
+            );
           },
         );
+
+        if (user != null) {
+          this._currentUser = user;
+        }
       },
     );
   }

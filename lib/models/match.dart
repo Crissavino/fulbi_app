@@ -50,7 +50,7 @@ class Match {
     genreId: json["genre_id"],
     typeId: json["type_id"],
     numPlayers: json["num_players"],
-    cost: double.parse(json["cost"]),
+    cost: double.tryParse(json["cost"].toString())!,
     chatId: json["chat_id"],
     ownerId: json["owner_id"],
     deletedAt: json["deleted_at"],

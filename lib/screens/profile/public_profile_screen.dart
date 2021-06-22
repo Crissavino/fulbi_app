@@ -121,6 +121,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
                                           SizedBox(height: 75.0),
+                                          _buildUserNickname(innerWidth),
+                                          SizedBox(height: 15.0),
                                           _buildUserReviews(innerWidth),
                                           SizedBox(height: 45.0),
                                           _buildUserLocation(innerWidth),
@@ -248,6 +250,16 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               }
             }),
       ],
+    );
+  }
+
+  _buildUserNickname(innerWidth) {
+    return Container(
+      child: Text(
+        '@${this._user!.nickname}',
+        style: TextStyle(),
+        overflow: TextOverflow.clip,
+      ),
     );
   }
 

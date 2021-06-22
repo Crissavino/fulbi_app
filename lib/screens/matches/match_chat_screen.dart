@@ -3,31 +3,37 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fulbito_app/models/message.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/repositories/chat_repository.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/widgets/chat_message.dart';
+import 'package:fulbito_app/widgets/header_message.dart';
 
 // ignore: must_be_immutable
 class MatchChatScreen extends StatefulWidget {
   Match match;
   User currentUser;
 
-  MatchChatScreen({Key? key, required this.match, required this.currentUser}) : super(key: key);
+  MatchChatScreen({Key? key, required this.match, required this.currentUser})
+      : super(key: key);
 
   @override
   _MatchChatScreenState createState() => _MatchChatScreenState();
 }
 
-class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderStateMixin {
+class _MatchChatScreenState extends State<MatchChatScreen>
+    with TickerProviderStateMixin {
   String localeName = Platform.localeName.split('_')[0];
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  late String textMessage;
-  List<ChatMessage> _messages = [];
+  String textMessage = '';
+  List _messages = [];
+  bool isLoading = false;
 
   _getLatestValue() {
     setState(() {
@@ -39,6 +45,7 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
   void initState() {
     // TODO: implement initState
     super.initState();
+    _loadHistory();
     _textController.addListener(_getLatestValue);
   }
 
@@ -51,7 +58,6 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Stack(
@@ -116,16 +122,62 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
   }
 
   Widget _buildMessagesScreen() {
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: ListView.builder(
-          reverse: true,
-          padding: EdgeInsets.only(top: 15.0),
-          itemCount: _messages.length,
-          itemBuilder: (BuildContext context, int index) => _messages[index]
-        // _buildItem(_messages[index], currentUser),
-      ),
+      child: this.isLoading
+          ? Container(
+              width: _width,
+              height: _height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [circularLoading],
+              ),
+            )
+          : ListView.builder(
+              reverse: true,
+              padding: EdgeInsets.only(top: 15.0),
+              itemCount: _messages.length,
+              itemBuilder: (BuildContext context, int index) =>
+                  _messages[index]),
     );
+  }
+
+  void _loadHistory() async {
+    this.isLoading = true;
+    final historyResponse =
+        await ChatRepository().getMyChatMessages(widget.match.id);
+    print(historyResponse['messages'].length > 0);
+    if (historyResponse['messages'].length > 0) {
+      List<Message> myMessages = historyResponse['messages'];
+      AnimationController _animationController = AnimationController(
+        vsync: this,
+        duration: Duration(
+          milliseconds: 0,
+        ),
+      )..forward();
+
+      final history = myMessages.map((m) => ChatMessage(
+            text: m.text,
+            sender: m.owner,
+            currentUser: widget.currentUser,
+            time: m.createdAt.toString(),
+            animationController: _animationController,
+          ));
+
+      this.isLoading = false;
+      setState(() {
+        _messages.insertAll(0, history);
+        _messages.insert(3, HeaderMessage(text: 'Pepito se unio al partido', animationController: _animationController));
+      });
+    } else {
+      setState(() {
+        this.isLoading = false;
+      });
+    }
   }
 
   Widget _buildMessageComposer() {
@@ -151,25 +203,26 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
                   controller: _textController,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration.collapsed(
-                    hintText: translations[localeName]!['match.chat.sendMessage'],
+                    hintText:
+                        translations[localeName]!['match.chat.sendMessage'],
                   ),
                   focusNode: _focusNode,
                 ),
               ),
               Platform.isIOS
                   ? CupertinoButton(
-                child: Text(
-                  translations[localeName]!['match.chat.send']!,
-                  style: TextStyle(color: Colors.green[400]),
-                ),
-                onPressed: () => _handleSubmit(),
-              )
+                      child: Text(
+                        translations[localeName]!['match.chat.send']!,
+                        style: TextStyle(color: Colors.green[400]),
+                      ),
+                      onPressed: () => _handleSubmit(),
+                    )
                   : IconButton(
-                icon: Icon(Icons.send),
-                iconSize: 25.0,
-                color: Colors.green[400],
-                onPressed: () => _handleSubmit(),
-              ),
+                      icon: Icon(Icons.send),
+                      iconSize: 25.0,
+                      color: Colors.green[400],
+                      onPressed: () => _handleSubmit(),
+                    ),
             ],
           )
         ],
@@ -178,7 +231,7 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
   }
 
   _handleSubmit() {
-    if (this.textMessage == null || this.textMessage.length == 0) {
+    if (this.textMessage == '' || this.textMessage.length == 0) {
       return;
     }
 
@@ -195,6 +248,13 @@ class _MatchChatScreenState extends State<MatchChatScreen> with TickerProviderSt
     this._messages.insert(0, newMessage);
     // desp de insertar el mensaje disparo la animacion
     newMessage.animationController.forward();
+
+    ChatRepository().sendMessage(
+      widget.match.id,
+      newMessage.text!,
+      newMessage.currentUser!.id,
+      widget.match.chatId,
+    );
 
     this._focusNode.requestFocus();
     this._textController.clear();

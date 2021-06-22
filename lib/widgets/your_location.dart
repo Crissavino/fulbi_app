@@ -10,6 +10,7 @@ import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 
 // ignore: must_be_immutable
 class YourLocation extends StatefulWidget {
@@ -97,7 +98,7 @@ class _YourLocationState extends State<YourLocation> {
     }
 
     return Container(
-        height: _height / 1.4,
+        height: _height / 1.1,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -108,7 +109,6 @@ class _YourLocationState extends State<YourLocation> {
         child: Container(
           alignment: Alignment.center,
           margin: EdgeInsets.only(
-            top: 40.0,
             left: 20.0,
             right: 20.0,
           ),
@@ -127,107 +127,115 @@ class _YourLocationState extends State<YourLocation> {
                 );
               }
 
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+              return Stack(
                 children: [
-                  SizedBox(height: 30.0,),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                    ),
-                    width: double.infinity,
-                    child: Center(
-                      child: Text(
-                        userLocationDesc!,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // SizedBox(height: 30.0,),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.0,
                         ),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.clip,
-                        maxLines: 2,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30.0,),
-                  _buildSearchLocationBar(),
-                  Container(
-                    height: 250.0,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.green[600]!,
-                                Colors.green[500]!,
-                                Colors.green[500]!,
-                                Colors.green[600]!,
-                              ],
-                              stops: [0.1, 0.4, 0.7, 0.9],
+                        margin: EdgeInsets.only(
+                          top: 40.0,
+                        ),
+                        width: double.infinity,
+                        child: Center(
+                          child: Text(
+                            userLocationDesc!,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.green[100]!,
-                                blurRadius: 10.0,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                            color: Colors.green[400],
-                            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.clip,
+                            maxLines: 2,
                           ),
-                          width: _width * .40,
-                          height: 50.0,
-                          child: Center(
-                            child: TextButton(
-                              onPressed: () async {
+                        ),
+                      ),
+                      // SizedBox(height: 50.0,),
+                      _buildSearchLocationBar(),
+                      Container(
+                        height: 250.0,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.green[600]!,
+                                    Colors.green[500]!,
+                                    Colors.green[500]!,
+                                    Colors.green[600]!,
+                                  ],
+                                  stops: [0.1, 0.4, 0.7, 0.9],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green[100]!,
+                                    blurRadius: 10.0,
+                                    offset: Offset(0, 5),
+                                  ),
+                                ],
+                                color: Colors.green[400],
+                                borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                              ),
+                              width: _width * .40,
+                              height: 50.0,
+                              child: Center(
+                                child: TextButton(
+                                  onPressed: () async {
 
-                                if (userLocationDetails == null) {
-                                  return Navigator.pop(context);
-                                }
+                                    if (userLocationDetails == null) {
+                                      return Navigator.pop(context);
+                                    }
 
-                                BlocProvider.of<ProfileBloc>(context).add(
-                                    ProfileLoadingEvent()
-                                );
-                                final editUserLocationResponse =
-                                await UserRepository().editUserLocation(
-                                  userLocationDetails,
-                                );
+                                    BlocProvider.of<ProfileBloc>(context).add(
+                                        ProfileLoadingEvent()
+                                    );
+                                    final editUserLocationResponse =
+                                    await UserRepository().editUserLocation(
+                                      userLocationDetails,
+                                    );
 
-                                if (editUserLocationResponse['success'] == true) {
-                                  Navigator.pop(context, true);
+                                    if (editUserLocationResponse['success'] == true) {
+                                      Navigator.pop(context, true);
 
-                                  BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileCompleteEvent()
-                                  );
-                                } else {
-                                  BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileErrorEvent()
-                                  );
-                                  return showAlert(
-                                    context,
-                                    'Error!',
-                                    'Ocurrió un error al guardar tu ubicacion!',
-                                  );
-                                }
-                              },
-                              child: Text(
-                                translations[localeName]!['general.save']!.toUpperCase(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'OpenSans',
-                                  fontSize: 16.0,
+                                      BlocProvider.of<ProfileBloc>(context).add(
+                                          ProfileCompleteEvent()
+                                      );
+                                    } else {
+                                      BlocProvider.of<ProfileBloc>(context).add(
+                                          ProfileErrorEvent()
+                                      );
+                                      return showAlert(
+                                        context,
+                                        'Error!',
+                                        'Ocurrió un error al guardar tu ubicacion!',
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                    translations[localeName]!['general.save']!.toUpperCase(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'OpenSans',
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  )
+                      )
+                    ],
+                  ),
+                  ModalTopBar()
                 ],
               );
             },

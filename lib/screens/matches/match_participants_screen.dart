@@ -13,6 +13,7 @@ import 'package:fulbito_app/screens/profile/public_profile_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class MatchParticipantsScreen extends StatefulWidget {
@@ -101,7 +102,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
 
                         if (participants.isNotEmpty) {
                           User? me = participants
-                              .firstWhere((user) => user!.id == myUser.id, orElse: () => null);
+                              .firstWhereOrNull((user) => user!.id == myUser.id);
                           imInscribed = me != null;
                         }
 
@@ -189,9 +190,11 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
+        final resp = await MatchRepository().getMatch(widget.match.id);
+        Match match = resp['match'];
         bool imIn = false;
-        if (widget.match.participants!.isNotEmpty) {
-          imIn = (widget.match.participants!.firstWhere((user) => user.id == currentUser.id)) != null;
+        if (match.participants!.isNotEmpty) {
+          imIn = (match.participants?.firstWhereOrNull((user) => user.id == currentUser.id)) != null;
         }
 
         if (!imIn) {
@@ -202,6 +205,9 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
               final response =
               await MatchRepository().joinMatch(widget.match.id);
               if (response['success']) {
+                setState(() {
+                  widget.match = response['match'];
+                });
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(

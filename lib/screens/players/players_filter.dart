@@ -8,8 +8,10 @@ import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/players/players_filter_positions.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class PlayersFilter extends StatefulWidget {
@@ -41,7 +43,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
     final _height = MediaQuery.of(context).size.height;
 
     return Container(
-        height: _height / 1.3,
+        height: _height / 1.1,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -49,22 +51,27 @@ class _PlayersFilterState extends State<PlayersFilter> {
             topRight: Radius.circular(30.0),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: [
-            SizedBox(height: 10.0),
-            _buildName(),
-            // SizedBox(height: 5.0),
-            _buildFilterDistance(),
-            // SizedBox(height: 5.0),
-            _buildFilterBySex(),
-            SizedBox(height: 5.0),
-            // _buildFilterDaysAvailable(),
-            // SizedBox(height: 5.0),
-            _buildFilterPositions(),
-            // SizedBox(height: 5.0),
-            _buildFilterButton(),
-            SizedBox(height: 10.0),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(height: 10.0),
+                _buildName(),
+                // SizedBox(height: 5.0),
+                _buildFilterDistance(),
+                // SizedBox(height: 5.0),
+                _buildFilterBySex(),
+                SizedBox(height: 5.0),
+                // _buildFilterDaysAvailable(),
+                // SizedBox(height: 5.0),
+                _buildFilterPositions(),
+                // SizedBox(height: 5.0),
+                _buildFilterButton(),
+                SizedBox(height: 10.0),
+              ],
+            ),
+            ModalTopBar()
           ],
         ));
   }
@@ -318,7 +325,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
               );
             } else {
 
-              Genre gender = widget.searchedGender.firstWhere((Genre genre) {
+              Genre? gender = widget.searchedGender.firstWhereOrNull((Genre genre) {
                 bool? isChecked = genre.checked;
                 if (isChecked == null) {
                   return false;
@@ -336,7 +343,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
 
               dynamic filterResponse = await UserRepository().getUserOffers(
                 widget.searchedRange['distance']!.toInt(),
-                gender.id,
+                gender!.id,
                 positions.map((Position position) => position.id).toList(),
               );
 

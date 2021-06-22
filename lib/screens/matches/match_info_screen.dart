@@ -16,6 +16,7 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:intl/intl.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class MatchInfoScreen extends StatefulWidget {
@@ -352,11 +353,11 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
+        final resp = await MatchRepository().getMatch(widget.match.id);
+        Match match = resp['match'];
         bool imIn = false;
-        if (widget.match.participants!.isNotEmpty) {
-          imIn = (widget.match.participants!
-                  .firstWhere((user) => user.id == currentUser.id)) !=
-              null;
+        if (match.participants!.isNotEmpty) {
+          imIn = (match.participants?.firstWhereOrNull((user) => user.id == currentUser.id)) != null;
         }
 
         if (!imIn) {
@@ -367,6 +368,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
               final response =
                   await MatchRepository().joinMatch(widget.match.id);
               if (response['success']) {
+                setState(() {
+                  widget.match = response['match'];
+                });
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(

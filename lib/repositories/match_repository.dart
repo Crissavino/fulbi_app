@@ -84,6 +84,8 @@ class MatchRepository {
 
       List matches = body['matches'];
       body['matches'] = matches.map((match) => Match.fromJson(match)).toList();
+      final match = body['match'];
+      body['match'] = Match.fromJson(match);
 
     }
 

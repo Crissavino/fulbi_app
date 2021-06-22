@@ -17,6 +17,7 @@ import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:collection/collection.dart';
 
 class CreateMatchScreen extends StatefulWidget {
   const CreateMatchScreen({Key? key}) : super(key: key);
@@ -643,23 +644,23 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               'is_by_lat_lng': this.userLocationDetails!.isByLatLng,
             };
 
-            int? genreId = this.matchGender.firstWhere((Genre genre) {
+            int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {
                 return false;
               }
               return isChecked;
-            }).id;
+            })!.id;
 
-            int? typeId = this.matchType.firstWhere((Type type) {
+            int? typeId = this.matchType.firstWhereOrNull((Type type) {
               bool? isChecked = type.checked;
               if (isChecked == null) {
                 return false;
               }
               return isChecked;
-            }).id;
+            })!.id;
 
-            int? currencyId = this.currencies.firstWhere((Currency currency) => currency.code == this.currencySelected).id;
+            int? currencyId = this.currencies.firstWhereOrNull((Currency currency) => currency.code == this.currencySelected)!.id;
 
             final response = await MatchRepository().create(
               locationData,

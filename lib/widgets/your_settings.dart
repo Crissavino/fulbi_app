@@ -4,6 +4,7 @@ import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 
 // ignore: must_be_immutable
 class YourSettings extends StatefulWidget {
@@ -22,12 +23,13 @@ class _YourSettingsState extends State<YourSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Container(
-        height: _height / 1.4,
+        height: _height / 1.1,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -35,28 +37,33 @@ class _YourSettingsState extends State<YourSettings> {
             topRight: Radius.circular(30.0),
           ),
         ),
-        child: Container(
-          alignment: Alignment.center,
-          margin: EdgeInsets.only(
-            top: 40.0,
-            left: 20.0,
-            right: 20.0,
-          ),
-          child: Center(
-            child: Container(
-              height: _height / 1.4,
-              padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildNickname(),
-                    SizedBox(height: 40.0,),
-                    _buildPassword(),
-                  ],
+        child: Stack(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(
+                top: 40.0,
+                left: 20.0,
+                right: 20.0,
+              ),
+              child: Center(
+                child: Container(
+                  height: _height / 1.3,
+                  padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildNickname(),
+                        SizedBox(height: 40.0,),
+                        _buildPassword(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            ModalTopBar()
+          ],
         ),
       ),
     );

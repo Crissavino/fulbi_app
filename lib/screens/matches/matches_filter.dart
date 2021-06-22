@@ -7,8 +7,10 @@ import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/match_type_filter.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class MatchesFilter extends StatefulWidget {
@@ -38,7 +40,7 @@ class _MatchesFilterState extends State<MatchesFilter> {
     final _height = MediaQuery.of(context).size.height;
 
     return Container(
-      height: _height / 1.3,
+      height: _height / 1.1,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -46,21 +48,26 @@ class _MatchesFilterState extends State<MatchesFilter> {
           topRight: Radius.circular(30.0),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
         children: [
-          SizedBox(height: 10.0),
-          //_buildName(),
-          // SizedBox(height: 5.0),
-          _buildFilterDistance(),
-          SizedBox(height: 5.0),
-          _buildFilterBySex(),
-          SizedBox(height: 5.0),
-          _buildFilterMatchType(),
-          SizedBox(height: 5.0),
-          // SizedBox(height: 5.0),
-          _buildFilterButton(),
-          SizedBox(height: 10.0),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(height: 10.0),
+              //_buildName(),
+              // SizedBox(height: 5.0),
+              _buildFilterDistance(),
+              SizedBox(height: 5.0),
+              _buildFilterBySex(),
+              SizedBox(height: 5.0),
+              _buildFilterMatchType(),
+              SizedBox(height: 5.0),
+              // SizedBox(height: 5.0),
+              _buildFilterButton(),
+              SizedBox(height: 10.0),
+            ],
+          ),
+          ModalTopBar()
         ],
       ),
     );
@@ -345,7 +352,7 @@ class _MatchesFilterState extends State<MatchesFilter> {
       child: Center(
         child: TextButton(
           onPressed: () async {
-            Genre gender = widget.searchedGender.firstWhere((Genre genre) {
+            Genre? gender = widget.searchedGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {
                 return false;
@@ -363,7 +370,7 @@ class _MatchesFilterState extends State<MatchesFilter> {
 
             dynamic filterResponse = await MatchRepository().getMatchesOffers(
               widget.searchedRange!['distance']!.toInt(),
-              gender,
+              gender!,
               types.map((Type type) => type.id).toList(),
             );
 

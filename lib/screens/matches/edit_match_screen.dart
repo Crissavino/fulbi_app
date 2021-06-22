@@ -20,6 +20,7 @@ import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class EditMatchScreen extends StatefulWidget {
@@ -86,11 +87,11 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         Genre genre = response['genre'];
         this
             .matchGender
-            .firstWhere((gender) => gender.id == genre.id!)
+            .firstWhereOrNull((gender) => gender.id == genre.id!)!
             .checked = true;
 
         Type type = response['type'];
-        this.matchType.firstWhere((mType) => mType.id == type.id!).checked =
+        this.matchType.firstWhereOrNull((mType) => mType.id == type.id!)!.checked =
             true;
 
         String currencySymbol = response['currency'];
@@ -729,26 +730,26 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               'is_by_lat_lng': this.userLocationDetails.isByLatLng,
             };
 
-            int? genreId = this.matchGender.firstWhere((Genre genre) {
+            int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {
                 return false;
               }
               return isChecked;
-            }).id;
+            })!.id;
 
-            int? typeId = this.matchType.firstWhere((Type type) {
+            int? typeId = this.matchType.firstWhereOrNull((Type type) {
               bool? isChecked = type.checked;
               if (isChecked == null) {
                 return false;
               }
               return isChecked;
-            }).id;
+            })!.id;
 
             int? currencyId = this
                 .currencies
-                .firstWhere((Currency currency) =>
-                    currency.code == this.currencySelected)
+                .firstWhereOrNull((Currency currency) =>
+                    currency.code == this.currencySelected)!
                 .id;
 
             final response = await MatchRepository().edit(

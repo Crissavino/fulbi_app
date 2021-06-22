@@ -40,6 +40,8 @@ dependencies:
   intl:
   url_launcher:
   intro_slider:
+  image_picker:
+  path_provider:
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +62,7 @@ flutter:
   assets:
     - assets/profile.png
     - assets/profile_cs.jpg
+    - assets/profile-default.png
     - assets/logos/facebook.jpg
     - assets/logos/google.png
     - assets/logos/apple.png

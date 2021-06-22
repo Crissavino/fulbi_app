@@ -314,4 +314,24 @@ class UserRepository {
     return body;
   }
 
+  Future<dynamic> updateProfilePicture(String profileImagePath) async {
+
+    final data = {
+      "profile_image_path": profileImagePath,
+    };
+
+    final res = await api.postData(data, '/user/update-profile-picture');
+
+    final body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      final user = body['user'];
+      body['user'] = User.fromJson(user);
+      await localStorage.setString('user', json.encode(body['user']));
+    }
+
+    return body;
+  }
+
 }

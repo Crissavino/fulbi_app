@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/location.dart';
@@ -11,6 +13,9 @@ import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/your_location.dart';
 import 'package:fulbito_app/widgets/your_positions.dart';
 import 'package:fulbito_app/widgets/your_settings.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 class PrivateProfileScreen extends StatefulWidget {
   const PrivateProfileScreen({Key? key}) : super(key: key);
@@ -24,6 +29,31 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   User? _currentUser;
   List<PositionDB>? _userPositions;
   Location? _userLocation;
+  File? _image;
+  final picker = ImagePicker();
+  String? profileImagePath;
+
+  Future updateProfileImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      _image = File(pickedFile.path);
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+
+      final fileName = basename(_image!.path);
+      final File localImage = await _image!.copy('$appDocPath/$fileName');
+      this.profileImagePath = localImage.path;
+
+      await UserRepository().updateProfilePicture(
+          this.profileImagePath!
+      );
+      setState(() {});
+
+    } else {
+      print('No image selected.');
+    }
+  }
 
   @override
   void initState() {
@@ -39,6 +69,12 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
       this._currentUser = response['user'];
       this._userPositions = response['positions'];
       this._userLocation = response['location'];
+      if(this._currentUser!.profileImage != null) {
+        this.profileImagePath = this._currentUser!.profileImage!;
+      } else {
+        this.profileImagePath = '';
+
+      }
     }
 
     return response;
@@ -102,15 +138,15 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                             SizedBox(height: 5.0),
                                             _buildUserReviews(innerWidth),
                                             SizedBox(height: 5.0),
-                                            _buildUserPositions(innerWidth),
+                                            _buildUserPositions(innerWidth, context),
                                             // SizedBox(height: 5.0),
                                             // _buildUserSettings(innerWidth),
                                             SizedBox(height: 5.0),
-                                            _buildUserLocation(innerWidth),
+                                            _buildUserLocation(innerWidth, context),
                                             SizedBox(height: 5.0),
-                                            _buildUserSettings(innerWidth),
+                                            _buildUserSettings(innerWidth, context),
                                             SizedBox(height: 10.0),
-                                            _buildLogOutButton(),
+                                            _buildLogOutButton(context),
                                             SizedBox(height: 10.0),
                                           ],
                                         ),
@@ -121,10 +157,37 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                       left: 0.0,
                                       right: 0.0,
                                       child: Center(
-                                        child: CircleAvatar(
+                                        child: this.profileImagePath == ''
+                                            ? CircleAvatar(
+                                          backgroundColor: Colors.white,
                                           radius: 60,
                                           backgroundImage: AssetImage(
-                                              'assets/profile_cs.jpg'),
+                                              'assets/profile-default.png',
+                                          ),
+                                        )
+                                        : CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          radius: 60,
+                                          backgroundImage: AssetImage(
+                                            this.profileImagePath!,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 80.0,
+                                      left: 80.0,
+                                      right: 0.0,
+                                      child: Center(
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.white,
+                                          child: Container(
+                                            child: IconButton(
+                                              icon: Icon(Icons.edit, color: Colors.blue,),
+                                              onPressed: () async => updateProfileImage(),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -136,7 +199,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                         ),
                       ),
                     ),
-                    bottomNavigationBar: _buildBottomNavigationBarRounded(),
+                    bottomNavigationBar: _buildBottomNavigationBarRounded(context),
                   ),
                 );
               } else {
@@ -202,8 +265,11 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                       right: 0.0,
                                       child: Center(
                                         child: CircleAvatar(
+                                          backgroundColor: Colors.white,
                                           radius: 60,
-                                          backgroundImage: null,
+                                          backgroundImage: AssetImage(
+                                            'assets/profile-default.png',
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -215,7 +281,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                         ),
                       ),
                     ),
-                    bottomNavigationBar: _buildBottomNavigationBarRounded(),
+                    bottomNavigationBar: _buildBottomNavigationBarRounded(context),
                   ),
                 );
               }
@@ -423,7 +489,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildUserPositions(innerWidth) {
+  _buildUserPositions(innerWidth, BuildContext context) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -466,7 +532,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildUserLocation(innerWidth) {
+  _buildUserLocation(innerWidth, BuildContext context) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -509,7 +575,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildUserSettings(innerWidth) {
+  _buildUserSettings(innerWidth, BuildContext context) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -552,14 +618,14 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildLogOutButton() {
+  _buildLogOutButton(BuildContext context) {
     return Center(
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: TextButton(
-          onPressed: _logout,
+          onPressed: () => _logout(context),
           child: Text(
             translations[localeName]!['profile.logout']!,
             style: TextStyle(color: Colors.black),
@@ -569,7 +635,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  void _logout() async {
+  void _logout(BuildContext context) async {
     if (await UserRepository().logout()) {
       Navigator.pushReplacementNamed(context, 'login');
     } else {
@@ -577,7 +643,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     }
   }
 
-  void _navigateToSection(index) {
+  void _navigateToSection(index, BuildContext context) {
     switch (index) {
       case 0:
         Navigator.pushReplacement(
@@ -602,7 +668,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     }
   }
 
-  Widget _buildBottomNavigationBarRounded() {
+  Widget _buildBottomNavigationBarRounded(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       elevation: 0.0,
@@ -615,7 +681,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
       currentIndex: 2,
       onTap: (index) {
         if (index != 2) {
-          _navigateToSection(index);
+          _navigateToSection(index, context);
         }
         print(index);
         // Navigator.pushReplacementNamed(context, 'profile');

@@ -28,6 +28,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   User? _user;
   List<PositionDB>? _userPositions;
   Location? _userLocation;
+  String profileImagePath = '';
 
   @override
   void initState() {
@@ -56,6 +57,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             future: this._future,
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               if (snapshot.hasData) {
+                if(this._user!.profileImage != null) {
+                  this.profileImagePath = this._user!.profileImage!;
+                }
                 return SafeArea(
                   top: false,
                   bottom: false,
@@ -140,10 +144,20 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     left: 0.0,
                                     right: 0.0,
                                     child: Center(
-                                      child: CircleAvatar(
+                                      child: this.profileImagePath == ''
+                                          ? CircleAvatar(
+                                        backgroundColor: Colors.white,
                                         radius: 60,
                                         backgroundImage: AssetImage(
-                                            'assets/profile_cs.jpg'),
+                                          'assets/profile-default.png',
+                                        ),
+                                      )
+                                          : CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 60,
+                                        backgroundImage: AssetImage(
+                                          this.profileImagePath,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -233,8 +247,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     right: 0.0,
                                     child: Center(
                                       child: CircleAvatar(
+                                        backgroundColor: Colors.white,
                                         radius: 60,
-                                        backgroundImage: null,
+                                        backgroundImage: AssetImage(
+                                            'assets/profile-default.png',
+                                        ),
                                       ),
                                     ),
                                   ),

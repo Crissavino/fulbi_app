@@ -18,6 +18,7 @@ class User {
     required this.isFullySet,
     required this.premium,
     required this.matchesCreated,
+    this.profileImage,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -30,6 +31,7 @@ class User {
   bool isFullySet;
   bool premium;
   int matchesCreated;
+  String? profileImage;
   DateTime createdAt;
   DateTime updatedAt;
 
@@ -42,6 +44,7 @@ class User {
     isFullySet: ((json["is_fully_set"] == 1) || json["is_fully_set"] == true) ? true : false,
     premium: ((json["premium"] == 1) || json["premium"] == true) ? true : false,
     matchesCreated: json["matches_created"],
+    profileImage: json["profile_image"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
   );
@@ -55,6 +58,7 @@ class User {
     "is_fully_set": isFullySet,
     "premium": premium,
     "matches_created": matchesCreated,
+    "profile_image": profileImage,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
   };

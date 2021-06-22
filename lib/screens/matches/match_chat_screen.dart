@@ -90,7 +90,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   70.0,
                 ),
               ),
-              resizeToAvoidBottomInset: false,
+              resizeToAvoidBottomInset: true,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
                 value: SystemUiOverlayStyle.light,
                 child: Center(

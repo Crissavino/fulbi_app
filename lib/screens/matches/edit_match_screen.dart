@@ -287,7 +287,6 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       lastDate: DateTime(this.selectedDate.year + 1),
     );
     if (picked != null) {
-      print(picked);
       setState(() {
         this.selectedDate = picked;
       });

@@ -145,8 +145,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                       context,
                       translations[localeName]!['match.join']!,
                       () async {
-                        print('unirese');
-                        // TODO unirse al partido
                         final response =
                             await MatchRepository().joinMatch(widget.match.id);
                         if (response['success']) {
@@ -257,7 +255,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         if (index != 1) {
           _navigateToSection(index);
         }
-        print(index);
       },
       items: [
         BottomNavigationBarItem(

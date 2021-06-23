@@ -148,8 +148,10 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                           ? CircleAvatar(
                                         backgroundColor: Colors.white,
                                         radius: 60,
-                                        backgroundImage: AssetImage(
-                                          'assets/profile-default.png',
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.green[700],
+                                          size: 100.0,
                                         ),
                                       )
                                           : CircleAvatar(
@@ -249,9 +251,14 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                       child: CircleAvatar(
                                         backgroundColor: Colors.white,
                                         radius: 60,
-                                        backgroundImage: AssetImage(
-                                            'assets/profile-default.png',
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.green[700],
+                                          size: 100.0,
                                         ),
+                                        // backgroundImage: AssetImage(
+                                        //     'assets/profile-default.png',
+                                        // ),
                                       ),
                                     ),
                                   ),

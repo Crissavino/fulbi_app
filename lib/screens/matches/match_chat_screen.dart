@@ -150,7 +150,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     this.isLoading = true;
     final historyResponse =
         await ChatRepository().getMyChatMessages(widget.match.id);
-    print(historyResponse['messages'].length > 0);
     if (historyResponse['messages'].length > 0) {
       List<Message> myMessages = historyResponse['messages'];
       AnimationController _animationController = AnimationController(
@@ -302,7 +301,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         if (index != 2) {
           _navigateToSection(index);
         }
-        print(index);
       },
       items: [
         BottomNavigationBarItem(

@@ -57,6 +57,30 @@ class _MatchesState extends State<MatchesScreen> {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
+    Positioned _buildNotification() {
+      return Positioned(
+        top: 6.0,
+        right: 5.0,
+        child: Container(
+          width: 15.0,
+          height: 15.0,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.all(
+              Radius.circular(50.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10.0,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     Widget _buildMatchesMenu() {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -71,15 +95,20 @@ class _MatchesState extends State<MatchesScreen> {
               },
             ),
           ),
-          Container(
-            child: IconButton(
-              icon: Icon(Icons.calendar_today),
-              iconSize: 30.0,
-              color: Colors.white,
-              onPressed: () {
-                Navigator.pushNamed(context, 'my_matches');
-              },
-            ),
+          Stack(
+            children: [
+              Container(
+                child: IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  iconSize: 30.0,
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.pushNamed(context, 'my_matches');
+                  },
+                ),
+              ),
+              _buildNotification()
+            ],
           ),
           Container(
             child: IconButton(

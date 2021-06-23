@@ -120,7 +120,6 @@ class _MatchesFilterState extends State<MatchesFilter> {
                   widget.searchedRange!['distance'] = value;
                 },
               );
-              print(widget.searchedRange!['distance']);
             },
           ),
         ),

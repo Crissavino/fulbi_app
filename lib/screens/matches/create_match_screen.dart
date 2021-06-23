@@ -213,7 +213,6 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       lastDate: DateTime(this.selectedDate.year + 1),
     );
     if (picked != null) {
-      print(picked);
       setState(() {
         this.selectedDate = picked;
       });

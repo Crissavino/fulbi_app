@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/player.dart';
@@ -314,24 +315,24 @@ class UserRepository {
     return body;
   }
 
-  Future<dynamic> updateProfilePicture(String profileImagePath) async {
+  Future<dynamic> updateProfilePicture(File localImage) async {
 
-    final data = {
-      "profile_image_path": profileImagePath,
-    };
+    User user = await getCurrentUser();
+    final response = await Api().addImage(
+        user.id,
+        'profile-image',
+        localImage,
+        '/user/update-profile-picture'
+    );
 
-    final res = await api.postData(data, '/user/update-profile-picture');
-
-    final body = json.decode(res.body);
-
-    if (body.containsKey('success') && body['success'] == true) {
+    if (response.containsKey('success') && response['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      final user = body['user'];
-      body['user'] = User.fromJson(user);
-      await localStorage.setString('user', json.encode(body['user']));
+      final user = response['user'];
+      response['user'] = User.fromJson(user);
+      await localStorage.setString('user', json.encode(response['user']));
     }
 
-    return body;
+    return response;
   }
 
 }

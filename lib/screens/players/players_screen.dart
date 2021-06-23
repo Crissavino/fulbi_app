@@ -143,8 +143,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   },
                 );
 
-                print(filteredPlayers);
-
                 if (filteredPlayers != null) {
                   setState(() {
                     this.players = filteredPlayers;
@@ -361,11 +359,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
             leading: CircleAvatar(
               radius: 30.0,
               backgroundColor: Colors.white,
-              child: Icon(
-                Icons.person,
-                color: Colors.green[700],
-                size: 40.0,
-              ),
+              child: user.profileImage!.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      color: Colors.green[700],
+                      size: 40.0,
+                    )
+                  : null,
+              backgroundImage: user.profileImage!.isEmpty
+                  ? null
+                  : AssetImage(user.profileImage!),
             ),
             title: Text(
               user.name,

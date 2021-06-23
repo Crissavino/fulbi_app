@@ -43,15 +43,20 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
 
       final fileName = basename(_image!.path);
       final File localImage = await _image!.copy('$appDocPath/$fileName');
-      this.profileImagePath = localImage.path;
 
-      await UserRepository().updateProfilePicture(
-          this.profileImagePath!
+      final response = await UserRepository().updateProfilePicture(
+          localImage
       );
-      setState(() {});
 
+      if (response['success']) {
+        User user = response['user'];
+        this.profileImagePath = user.profileImage;
+      }
+
+      setState(() {});
     } else {
-      print('No image selected.');
+      //User canceled the picker. You need do something here, or just add return
+      return;
     }
   }
 
@@ -161,16 +166,16 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                             ? CircleAvatar(
                                           backgroundColor: Colors.white,
                                           radius: 60,
-                                          backgroundImage: AssetImage(
-                                              'assets/profile-default.png',
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.green[700],
+                                            size: 100.0,
                                           ),
                                         )
                                         : CircleAvatar(
                                           backgroundColor: Colors.white,
                                           radius: 60,
-                                          backgroundImage: AssetImage(
-                                            this.profileImagePath!,
-                                          ),
+                                          backgroundImage: NetworkImage(this.profileImagePath!),
                                         ),
                                       ),
                                     ),
@@ -185,7 +190,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                           child: Container(
                                             child: IconButton(
                                               icon: Icon(Icons.edit, color: Colors.blue,),
-                                              onPressed: () async => updateProfileImage(),
+                                              onPressed: updateProfileImage,
                                             ),
                                           ),
                                         ),
@@ -267,8 +272,10 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                         child: CircleAvatar(
                                           backgroundColor: Colors.white,
                                           radius: 60,
-                                          backgroundImage: AssetImage(
-                                            'assets/profile-default.png',
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.green[700],
+                                            size: 100.0,
                                           ),
                                         ),
                                       ),
@@ -683,8 +690,6 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
         if (index != 2) {
           _navigateToSection(index, context);
         }
-        print(index);
-        // Navigator.pushReplacementNamed(context, 'profile');
       },
       items: [
         BottomNavigationBarItem(

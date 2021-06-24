@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class HeaderMessage extends StatelessWidget {
   final String? text;
+  final String? time;
   final AnimationController animationController;
 
   const HeaderMessage({
     required this.text,
+    this.time,
     required this.animationController,
   });
 

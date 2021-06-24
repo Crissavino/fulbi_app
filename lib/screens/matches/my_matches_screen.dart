@@ -411,7 +411,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           )
               : Container(),
         ),
-        _buildNotification(),
+        match.haveNotifications ? _buildNotification() : Container(),
       ],
     );
   }

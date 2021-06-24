@@ -34,6 +34,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   String textMessage = '';
   List _messages = [];
   bool isLoading = false;
+  bool noMoreMessages = false;
 
   _getLatestValue() {
     setState(() {
@@ -137,19 +138,30 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                 children: [circularLoading],
               ),
             )
-          : ListView.builder(
-              reverse: true,
-              padding: EdgeInsets.only(top: 15.0),
-              itemCount: _messages.length,
-              itemBuilder: (BuildContext context, int index) =>
-                  _messages[index]),
+          : NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (!isLoading && scrollInfo.metrics.pixels ==
+              scrollInfo.metrics.maxScrollExtent && this.noMoreMessages == false) {
+            final lastMessage = this._messages.last;
+            print(lastMessage.time);
+            _loadMoreMessages(lastMessage.time!);
+          }
+          return true;
+        },
+        child: ListView.builder(
+            reverse: true,
+            padding: EdgeInsets.only(top: 15.0),
+            itemCount: _messages.length,
+            itemBuilder: (BuildContext context, int index) =>
+            _messages[index]),
+      ),
     );
   }
 
   void _loadHistory() async {
     this.isLoading = true;
     final historyResponse =
-        await ChatRepository().getMyChatMessages(widget.match.id);
+    await ChatRepository().getMyChatMessages(widget.match.id, null);
     if (historyResponse['messages'].length > 0) {
       List<Message> myMessages = historyResponse['messages'];
       AnimationController _animationController = AnimationController(
@@ -159,22 +171,75 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         ),
       )..forward();
 
-      final history = myMessages.map((m) => ChatMessage(
-            text: m.text,
-            sender: m.owner,
+      final history = myMessages.map((message) {
+        if (message.type == Message.TYPES['text']) {
+          return ChatMessage(
+            text: message.text,
+            sender: message.owner,
             currentUser: widget.currentUser,
-            time: m.createdAt.toString(),
+            time: message.createdAt.toString(),
             animationController: _animationController,
-          ));
+          );
+        } else if(message.type == Message.TYPES['header']) {
+          return HeaderMessage(
+              text: message.text,
+              time: message.createdAt.toString(),
+              animationController: _animationController
+          );
+        }
+      });
 
       this.isLoading = false;
       setState(() {
         _messages.insertAll(0, history);
-        _messages.insert(3, HeaderMessage(text: 'Pepito se unio al partido', animationController: _animationController));
+        // _messages.insert(3, HeaderMessage(text: 'Pepito se unio al partido', animationController: _animationController));
       });
     } else {
       setState(() {
         this.isLoading = false;
+      });
+    }
+  }
+
+  void _loadMoreMessages(String timeLastMessage) async {
+    this.isLoading = true;
+    final historyResponse =
+    await ChatRepository().getMyChatMessages(widget.match.id, timeLastMessage);
+    if (historyResponse['messages'].length > 0) {
+      List<Message> myMessages = historyResponse['messages'];
+      AnimationController _animationController = AnimationController(
+        vsync: this,
+        duration: Duration(
+          milliseconds: 0,
+        ),
+      )..forward();
+
+      final history = myMessages.map((message) {
+        if (message.type == Message.TYPES['text']) {
+          return ChatMessage(
+            text: message.text,
+            sender: message.owner,
+            currentUser: widget.currentUser,
+            time: message.createdAt.toString(),
+            animationController: _animationController,
+          );
+        } else if(message.type == Message.TYPES['header']) {
+          return HeaderMessage(
+              text: message.text,
+              time: message.createdAt.toString(),
+              animationController: _animationController
+          );
+        }
+      });
+
+      this.isLoading = false;
+      setState(() {
+        _messages.insertAll(_messages.length, history);
+      });
+    } else {
+      setState(() {
+        this.isLoading = false;
+        this.noMoreMessages = true;
       });
     }
   }

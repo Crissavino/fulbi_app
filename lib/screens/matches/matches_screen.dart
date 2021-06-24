@@ -12,6 +12,7 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
+import 'package:collection/collection.dart';
 
 class MatchesScreen extends StatefulWidget {
   @override
@@ -24,6 +25,7 @@ class _MatchesState extends State<MatchesScreen> {
   Map<String, double> _searchedRange = {'distance': 20.0};
   List<Match?> matches = [];
   Future? _future;
+  bool areNotifications = false;
 
   @override
   void initState() {
@@ -43,8 +45,12 @@ class _MatchesState extends State<MatchesScreen> {
       genre,
       types,
     );
+    final responseMyMatches = await MatchRepository().getMyMatches();
+
     if (response['success']) {
       setState(() {
+        List<Match> myMatches = responseMyMatches['matches'];
+        this.areNotifications = myMatches.firstWhereOrNull((match) => match.haveNotifications == true) != null;
         this.matches = response['matches'];
       });
     }
@@ -107,7 +113,7 @@ class _MatchesState extends State<MatchesScreen> {
                   },
                 ),
               ),
-              _buildNotification()
+              this.areNotifications ? _buildNotification() : Container(),
             ],
           ),
           Container(
@@ -293,8 +299,12 @@ class _MatchesState extends State<MatchesScreen> {
       genre,
       types,
     );
+    final responseMyMatches = await MatchRepository().getMyMatches();
+
     if (response['success']) {
       setState(() {
+        List<Match> myMatches = responseMyMatches['matches'];
+        this.areNotifications = myMatches.firstWhereOrNull((match) => match.haveNotifications == true) != null;
         this.matches = response['matches'];
       });
     }

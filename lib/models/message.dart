@@ -11,6 +11,14 @@ Message messageFromJson(String str) => Message.fromJson(json.decode(str));
 String messageToJson(Message data) => json.encode(data.toJson());
 
 class Message {
+
+  static const TYPES = {
+    'text': 1,
+    'image': 2,
+    'audio': 3,
+    'header': 4,
+  };
+
   Message({
     required this.id,
     required this.text,
@@ -18,6 +26,7 @@ class Message {
     required this.owner,
     required this.chatId,
     this.language,
+    required this.type,
     this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -29,6 +38,7 @@ class Message {
   User owner;
   int chatId;
   dynamic language;
+  int type;
   dynamic deletedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -40,6 +50,7 @@ class Message {
     owner: User.fromJson(json["owner"]),
     chatId: json["chat_id"],
     language: json["language"],
+    type: json["type"],
     deletedAt: json["deleted_at"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
@@ -52,6 +63,7 @@ class Message {
     "owner": owner,
     "chat_id": chatId,
     "language": language,
+    "type": type,
     "deleted_at": deletedAt,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),

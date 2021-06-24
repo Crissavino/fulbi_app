@@ -94,7 +94,7 @@ class MatchRepository {
 
   Future getMyMatches() async {
 
-    final res = await api.getData('/get-my-matches');
+    final res = await api.getData('/matches/get-my-matches');
 
     Map body = json.decode(res.body);
 

@@ -10,6 +10,7 @@ import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
+import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/maps_util.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
@@ -310,7 +311,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         Container(
           child: GestureDetector(
             onTap: () async {
-              if(location.isByLatLng!) {
+              if (location.isByLatLng!) {
                 await MapsUtil.openMapWithAddress(location.formattedAddress);
                 // await MapsUtil.openMap(location.lat, location.lng);
               } else {
@@ -340,24 +341,26 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   void _navigateToSection(index) async {
+    final resp = await MatchRepository().getMatch(widget.match.id);
+    Match match = resp['match'];
     switch (index) {
       case 1:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => MatchParticipantsScreen(
-              match: widget.match,
+              match: match,
             ),
           ),
         );
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
-        final resp = await MatchRepository().getMatch(widget.match.id);
-        Match match = resp['match'];
         bool imIn = false;
         if (match.participants!.isNotEmpty) {
-          imIn = (match.participants?.firstWhereOrNull((user) => user.id == currentUser.id)) != null;
+          imIn = (match.participants
+                  ?.firstWhereOrNull((user) => user.id == currentUser.id)) !=
+              null;
         }
 
         if (!imIn) {
@@ -431,9 +434,40 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
           title: Text('Chat'),
-          icon: Icon(Icons.chat_bubble_outline),
+          icon: widget.match.haveNotifications
+              ? Stack(
+                  children: [
+                    Icon(Icons.chat_bubble_outline),
+                    _buildNotification(),
+                  ],
+                )
+              : Icon(Icons.chat_bubble_outline),
         ),
       ],
+    );
+  }
+
+  Positioned _buildNotification() {
+    return Positioned(
+      top: 0.0,
+      right: 0.0,
+      child: Container(
+        width: 12.0,
+        height: 12.0,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.all(
+            Radius.circular(50.0),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

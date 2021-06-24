@@ -31,10 +31,11 @@ class ChatRepository {
     return body;
   }
 
-  Future getMyChatMessages(int matchId) async {
+  Future getMyChatMessages(int matchId, String? time) async {
 
     final data = {
       "match_id": matchId,
+      "created_at": time,
     };
 
     final res = await api.postData(data, '/chat/my-messages');

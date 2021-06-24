@@ -21,6 +21,7 @@ class Match {
     required this.cost,
     required this.chatId,
     required this.ownerId,
+    required this.haveNotifications,
     required this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -37,6 +38,7 @@ class Match {
   double cost;
   int chatId;
   int ownerId;
+  bool haveNotifications;
   dynamic deletedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -53,6 +55,7 @@ class Match {
     cost: double.tryParse(json["cost"].toString())!,
     chatId: json["chat_id"],
     ownerId: json["owner_id"],
+    haveNotifications: ((json["have_notifications"] == 1) || json["have_notifications"] == true) ? true : false,
     deletedAt: json["deleted_at"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
@@ -70,6 +73,7 @@ class Match {
     "cost": cost,
     "chat_id": chatId,
     "owner_id": ownerId,
+    "have_notifications": haveNotifications,
     "deleted_at": deletedAt,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),

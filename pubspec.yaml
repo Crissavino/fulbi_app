@@ -42,6 +42,8 @@ dependencies:
   intro_slider:
   image_picker:
   path_provider:
+  firebase_messaging:
+  firebase_core: ^1.3.0
 
 dev_dependencies:
   flutter_test:

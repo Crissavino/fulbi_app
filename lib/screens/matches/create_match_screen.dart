@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -71,7 +73,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                   child: AppBar(
                     backwardsCompatibility: false,
                     systemOverlayStyle:
-                        SystemUiOverlayStyle(statusBarColor: Colors.white),
+                    SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
                     title: Text(
@@ -91,7 +93,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     width: _width,

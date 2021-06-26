@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -49,6 +51,10 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   String? currencySelected;
   Future? _future;
 
+  // controllers
+  final _myNumPlayersController = TextEditingController();
+  final _myMatchCostController = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -62,6 +68,17 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     this.matchGender[1].checked = false;
     this.matchGender[2].checked = false;
     this._future = getMatch();
+    this._myNumPlayersController.text = widget.match.numPlayers.toString();
+    this._myNumPlayersController.addListener(_printLatestPlayerForMatchValue);
+
+    this._myMatchCostController.text = widget.match.cost.toString();
+    this._myMatchCostController.addListener(_printLatestMatchCostValue);
+  }
+
+  @override
+  void dispose() {
+    _myNumPlayersController.dispose();
+    super.dispose();
   }
 
   Future getMatch() async {
@@ -142,7 +159,9 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     width: _width,
@@ -168,7 +187,6 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
                           int playersEnrolled =
                               widget.match.participants!.length;
-                          this.playersForMatch = widget.match.numPlayers;
 
                           return SingleChildScrollView(
                             physics: AlwaysScrollableScrollPhysics(),
@@ -494,6 +512,18 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
+  void _printLatestMatchCostValue() {
+    if (this._myMatchCostController.text.isNotEmpty) {
+      if (this._myMatchCostController.text.contains(',')) {
+        this.matchCost = double.parse(this._myMatchCostController.text.replaceFirst(RegExp(','), '.'));
+      } else {
+        this.matchCost = double.parse(this._myMatchCostController.text);
+      }
+    } else {
+      this.matchCost = 0;
+    }
+  }
+
   Widget _buildMatchCost(playersEnrolled) {
     final _width = MediaQuery.of(context).size.width;
 
@@ -520,8 +550,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         width: _width,
         child: Container(
           child: TextFormField(
+            controller: this._myMatchCostController,
             enabled: playersEnrolled > 0 ? false : true,
-            initialValue: this.matchCost.toString(),
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -538,16 +568,6 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               hintText: translations[localeName]!['match.create.aproxCost']!,
               hintStyle: kHintTextStyle,
             ),
-            onChanged: (val) {
-              if (val.isNotEmpty) {
-                if (val.contains(',')) val = val.replaceFirst(RegExp(','), '.');
-                setState(() {
-                  this.matchCost = double.parse(val);
-                });
-              } else {
-                this.matchCost = 0.0;
-              }
-            },
           ),
         ),
       ),
@@ -585,6 +605,14 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
+  void _printLatestPlayerForMatchValue() {
+    if (this._myNumPlayersController.text.isNotEmpty) {
+      this.playersForMatch = int.parse(this._myNumPlayersController.text);
+    } else {
+      this.playersForMatch = 0;
+    }
+  }
+
   Widget _buildPlayerForMatch() {
     final _width = MediaQuery.of(context).size.width;
 
@@ -611,7 +639,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         width: _width,
         child: Container(
           child: TextFormField(
-            initialValue: this.playersForMatch.toString(),
+            controller: this._myNumPlayersController,
             keyboardType: TextInputType.number,
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -633,17 +661,6 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                   translations[localeName]!['match.create.playerForMatch']!,
               hintStyle: kHintTextStyle,
             ),
-            onChanged: (val) {
-              if (val.isNotEmpty) {
-                setState(() {
-                  this.playersForMatch = int.parse(val);
-                });
-              } else {
-                setState(() {
-                  this.playersForMatch = 0;
-                });
-              }
-            },
           ),
         ),
       ),
@@ -705,7 +722,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               );
             }
 
-            if (this.playersForMatch == 0) {
+            if (this._myNumPlayersController.text.toString() == '0' || this._myNumPlayersController.text.isEmpty) {
               return showAlert(
                 context,
                 'Atencion!',
@@ -759,7 +776,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               typeId!,
               currencyId!,
               this.matchCost,
-              this.playersForMatch,
+              int.parse(this._myNumPlayersController.text),
             );
 
             if (response['success']) {

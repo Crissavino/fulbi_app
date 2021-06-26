@@ -56,7 +56,7 @@ class MatchRepository {
       "types": jsonEncode(types),
     };
 
-    final res = await api.postData(data, '/get-matches-offers');
+    final res = await api.postData(data, '/matches/get-matches-offers');
 
     Map body = json.decode(res.body);
 
@@ -128,6 +128,26 @@ class MatchRepository {
     return body;
   }
 
+  Future rejectInvitationToMatch(int matchId) async {
+
+    final data = {
+      "match_id": matchId,
+    };
+
+    final res = await api.postData(data, '/matches/reject-invitation');
+
+    Map body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+
+      List matches = body['matches'];
+      body['matches'] = matches.map((match) => Match.fromJson(match)).toList();
+
+    }
+
+    return body;
+  }
+
   Future getMyCreatedMatches() async {
 
     final res = await api.getData('/get-my-created-matches');
@@ -151,13 +171,9 @@ class MatchRepository {
       "match_id": matchId,
     };
 
-    final res = await api.postData(data, '/send-invitation-to-user');
+    final res = await api.postData(data, '/matches/send-invitation-to-user');
 
     Map body = json.decode(res.body);
-
-    if (body.containsKey('success') && body['success'] == true) {
-
-    }
 
     return body;
   }
@@ -208,6 +224,8 @@ class MatchRepository {
       "cost": cost,
       "num_players": playersForMatch,
     };
+    print('Edit data');
+    print(data);
 
     final res = await api.postData(data, '/match/edit');
 

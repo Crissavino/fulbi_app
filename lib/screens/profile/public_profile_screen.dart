@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/location.dart';
@@ -90,7 +92,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: SystemUiOverlayStyle.light,
+                      value: Platform.isIOS
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark,
                       child: Center(
                         child: Container(
                           height: _height,
@@ -195,7 +199,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: SystemUiOverlayStyle.light,
+                      value: Platform.isIOS
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark,
                       child: Center(
                         child: Container(
                           height: _height,

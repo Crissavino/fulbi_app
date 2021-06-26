@@ -95,3 +95,60 @@ showAlertWithEvent(BuildContext context, String title, Function()? onPressed) {
     ),
   );
 }
+
+showAlertWithEventAcceptAndCancel(BuildContext context, String title, Function()? onAcceptPressed, Function()? onCancelPressed) {
+  if (Platform.isAndroid) {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        actions: [
+          MaterialButton(
+            onPressed: onCancelPressed,
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            color: Colors.blue,
+            elevation: 5,
+          ),
+          MaterialButton(
+            onPressed: onAcceptPressed,
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            color: Colors.blue,
+            elevation: 5,
+          ),
+        ],
+      ),
+    );
+  }
+
+  return showCupertinoDialog(
+    context: context,
+    builder: (_) => CupertinoAlertDialog(
+      title: Text(title),
+      actions: [
+        CupertinoDialogAction(
+          child: Text(
+            translations[localeName]!['general.cancel']!,
+            style: TextStyle(fontWeight: FontWeight.normal),
+          ),
+          isDefaultAction: true,
+          onPressed: onCancelPressed,
+          textStyle: TextStyle(fontWeight: FontWeight.w100),
+        ),
+        CupertinoDialogAction(
+          child: Text(
+            translations[localeName]!['general.accept']!,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          isDefaultAction: false,
+          onPressed: onAcceptPressed,
+        ),
+      ],
+    ),
+  );
+}

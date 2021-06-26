@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -65,6 +67,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
+    final args = ModalRoute.of(context)?.settings.arguments ?? 'No data';
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -115,7 +118,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
               ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                  value: Platform.isIOS
+                      ? SystemUiOverlayStyle.light
+                      : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     child: LayoutBuilder(
@@ -192,9 +197,108 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
     bool imTheCreator = this.myUser!.id == match.ownerId;
     bool imParticipating;
     if (match.participants!.isNotEmpty) {
-      imParticipating = (match.participants?.firstWhereOrNull((user) => user.id == this.myUser!.id)) != null;
+      imParticipating = (match.participants
+              ?.firstWhereOrNull((user) => user.id == this.myUser!.id)) !=
+          null;
     } else {
       imParticipating = false;
+    }
+
+    if (!match.isConfirmed && !imTheCreator) {
+      return GestureDetector(
+        onTap: () {
+          showAlertWithEventAcceptAndCancel(
+            context,
+            translations[localeName]!['match.join']!,
+            () async {
+              final response = await MatchRepository().joinMatch(match.id);
+              if (response['success']) {
+                setState(() {
+                  this.matches = response['matches'];
+                });
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchInfoScreen(
+                      match: match,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.pop(context);
+                showAlert(context, 'Error', 'Oooops ocurrio un error');
+              }
+            },
+            () async {
+              final response = await MatchRepository().rejectInvitationToMatch(match.id);
+              if (response['success']) {
+                setState(() {
+                  this.matches = response['matches'];
+                });
+                Navigator.pop(context);
+              } else {
+                Navigator.pop(context);
+                showAlert(context, 'Error', 'Oooops ocurrio un error');
+              }
+            },
+          );
+        },
+        child: Container(
+          margin: EdgeInsets.only(bottom: 20.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green[600]!,
+                Colors.green[500]!,
+                Colors.green[500]!,
+                Colors.green[600]!,
+              ],
+              stops: [0.1, 0.4, 0.7, 0.9],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green[100]!,
+                blurRadius: 6.0,
+                offset: Offset(0, 4),
+              ),
+            ],
+            color: Colors.green[400]!.withOpacity(0.5),
+            borderRadius: BorderRadius.all(
+              Radius.circular(30.0),
+            ),
+          ),
+          width: MediaQuery.of(context).size.width,
+          height: 80.0,
+          child: Center(
+            child: ListTile(
+              leading: CircleAvatar(
+                radius: 30.0,
+                backgroundColor: Colors.white.withOpacity(0.5),
+                child: Icon(
+                  Icons.sports_soccer,
+                  color: Colors.green[700]!.withOpacity(0.5),
+                  size: 40.0,
+                ),
+              ),
+              title: Text(
+                DateFormat('dd/MM HH:mm').format(match.whenPlay),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              trailing: Icon(
+                Icons.keyboard_arrow_right,
+                color: Colors.white,
+                size: 40.0,
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     return Stack(
@@ -229,8 +333,8 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.green[100]!,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 8),
+                    blurRadius: 6.0,
+                    offset: Offset(0, 4),
                   ),
                 ],
                 color: Colors.green[400],
@@ -278,8 +382,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 final resp = await showAlertWithEvent(
                   context,
                   translations[localeName]!['match.leave']!,
-                      () async {
-                    final response = await MatchRepository().leaveMatch(match.id);
+                  () async {
+                    final response =
+                        await MatchRepository().leaveMatch(match.id);
                     if (response['success']) {
                       setState(() {
                         this.matches = response['matches'];
@@ -299,8 +404,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 final resp = await showAlertWithEvent(
                   context,
                   translations[localeName]!['match.delete']!,
-                      () async {
-                    final response = await MatchRepository().deleteMatch(match.id);
+                  () async {
+                    final response =
+                        await MatchRepository().deleteMatch(match.id);
                     if (response['success']) {
                       setState(() {
                         this.matches = response['matches'];
@@ -356,59 +462,59 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ((!imTheCreator && imParticipating) ||
-                      (imTheCreator && imParticipating))
+                          (imTheCreator && imParticipating))
                       ? Icon(
-                    Icons.remove_circle,
-                    color: Colors.white,
-                    size: 40.0,
-                  )
+                          Icons.remove_circle,
+                          color: Colors.white,
+                          size: 40.0,
+                        )
                       : imTheCreator && !imParticipating
-                      ? Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                    size: 40.0,
-                  )
-                      : Container(),
+                          ? Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 40.0,
+                            )
+                          : Container(),
                 ],
               ),
             ),
           ),
           background: imTheCreator
               ? Container(
-            margin: EdgeInsets.only(bottom: 20.0),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue[600]!,
-                  Colors.blue[500]!,
-                  Colors.blue[500]!,
-                  Colors.blue[600]!,
-                ],
-                stops: [0.1, 0.4, 0.7, 0.9],
-              ),
-              borderRadius: BorderRadius.all(
-                Radius.circular(30.0),
-              ),
-            ),
-            child: Container(
-              padding: EdgeInsets.only(
-                left: 20.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                    size: 40.0,
+                  margin: EdgeInsets.only(bottom: 20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.blue[600]!,
+                        Colors.blue[500]!,
+                        Colors.blue[500]!,
+                        Colors.blue[600]!,
+                      ],
+                      stops: [0.1, 0.4, 0.7, 0.9],
+                    ),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(30.0),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          )
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      left: 20.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                          size: 40.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : Container(),
         ),
         match.haveNotifications ? _buildNotification() : Container(),
@@ -439,5 +545,4 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
       ),
     );
   }
-
 }

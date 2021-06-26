@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -165,7 +166,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
             child: Scaffold(
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     decoration: horizontalGradient,
@@ -190,6 +193,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                               top: 80.0,
                               left: 0.0,
                               right: 0.0,
+                              bottom: -20.0,
                               child: Container(
                                 decoration: BoxDecoration(
                                   boxShadow: [
@@ -266,6 +270,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                             .toList(),
                                       ),
                                       child: ListView.builder(
+                                        physics: AlwaysScrollableScrollPhysics(),
                                         itemBuilder: (
                                           BuildContext context,
                                           int index,

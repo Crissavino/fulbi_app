@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
+import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_filter.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
@@ -50,7 +53,9 @@ class _MatchesState extends State<MatchesScreen> {
     if (response['success']) {
       setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
-        this.areNotifications = myMatches.firstWhereOrNull((match) => match.haveNotifications == true) != null;
+        this.areNotifications = myMatches
+                .firstWhereOrNull((match) => match.haveNotifications == true) !=
+            null;
         this.matches = response['matches'];
       });
     }
@@ -97,7 +102,15 @@ class _MatchesState extends State<MatchesScreen> {
               iconSize: 30.0,
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, 'create_match');
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        CreateMatchScreen(),
+                    transitionDuration: Duration(seconds: 0),
+                  ),
+                );
+                // Navigator.pushNamed(context, 'create_match');
               },
             ),
           ),
@@ -158,7 +171,9 @@ class _MatchesState extends State<MatchesScreen> {
             child: Scaffold(
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     decoration: horizontalGradient,
@@ -166,7 +181,6 @@ class _MatchesState extends State<MatchesScreen> {
                       builder:
                           (BuildContext context, BoxConstraints constraints) {
                         return Stack(
-                          fit: StackFit.expand,
                           children: [
                             Positioned(
                               top: 0,
@@ -183,6 +197,7 @@ class _MatchesState extends State<MatchesScreen> {
                               top: 80.0,
                               left: 0.0,
                               right: 0.0,
+                              bottom: -20.0,
                               child: Container(
                                 decoration: BoxDecoration(
                                   boxShadow: [
@@ -199,7 +214,6 @@ class _MatchesState extends State<MatchesScreen> {
                                     bottom: 20.0, left: 20.0, right: 20.0),
                                 margin: EdgeInsets.only(top: 20.0),
                                 width: _width,
-                                height: _height,
                                 child: FutureBuilder(
                                   future: this._future,
                                   builder: (BuildContext context,
@@ -261,9 +275,9 @@ class _MatchesState extends State<MatchesScreen> {
                                       ),
                                       child: ListView.builder(
                                         itemBuilder: (
-                                            BuildContext context,
-                                            int index,
-                                            ) {
+                                          BuildContext context,
+                                          int index,
+                                        ) {
                                           return _buildMatchRow(
                                               this.matches[index]);
                                         },
@@ -304,7 +318,9 @@ class _MatchesState extends State<MatchesScreen> {
     if (response['success']) {
       setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
-        this.areNotifications = myMatches.firstWhereOrNull((match) => match.haveNotifications == true) != null;
+        this.areNotifications = myMatches
+                .firstWhereOrNull((match) => match.haveNotifications == true) !=
+            null;
         this.matches = response['matches'];
       });
     }
@@ -316,9 +332,10 @@ class _MatchesState extends State<MatchesScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MatchInfoScreen(
-                    match: match,
-                  )),
+            builder: (context) => MatchInfoScreen(
+              match: match,
+            ),
+          ),
         );
       },
       child: Container(
@@ -338,7 +355,7 @@ class _MatchesState extends State<MatchesScreen> {
           boxShadow: [
             BoxShadow(
               color: Colors.green[100]!,
-              blurRadius: 10.0,
+              blurRadius: 6.0,
               offset: Offset(0, 8),
             ),
           ],

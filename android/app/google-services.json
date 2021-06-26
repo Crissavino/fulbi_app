@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "265189331222",
+    "project_id": "fulbito-78d91",
+    "storage_bucket": "fulbito-78d91.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265189331222:android:88a5a8701928dc631e8037",
+        "android_client_info": {
+          "package_name": "com.crissavino.fulbito.fulbito_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "265189331222-9r086sf5s80tmt0d9tk4b6sjf5pro4lm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crissavino.fulbito.fulbito_app",
+            "certificate_hash": "b2aa58ca759c1cd876c8611534fc9e8b48fea11c"
+          }
+        },
+        {
+          "client_id": "265189331222-u4u3kp6crqh7odfavru2dnmq7pltj08q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcD56idwWwj_JrBIre2n0lXh6X8mVnUpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "265189331222-u4u3kp6crqh7odfavru2dnmq7pltj08q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

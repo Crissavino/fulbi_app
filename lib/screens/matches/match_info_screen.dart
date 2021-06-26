@@ -160,7 +160,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
               ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: FutureBuilder(
                     future: MatchRepository().getMatch(widget.match.id),

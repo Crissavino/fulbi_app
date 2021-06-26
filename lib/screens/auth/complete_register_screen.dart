@@ -275,7 +275,9 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+          value: Platform.isIOS
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark,
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Stack(

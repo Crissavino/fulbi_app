@@ -101,7 +101,9 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                   child: Scaffold(
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: SystemUiOverlayStyle.light,
+                      value: Platform.isIOS
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark,
                       child: Center(
                         child: Container(
                           height: _height,
@@ -214,7 +216,9 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                   child: Scaffold(
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: SystemUiOverlayStyle.light,
+                      value: Platform.isIOS
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark,
                       child: Center(
                         child: Container(
                           height: _height,

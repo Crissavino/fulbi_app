@@ -7,22 +7,127 @@ import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
 import 'package:fulbito_app/bloc/login/login_bloc.dart';
 import 'package:fulbito_app/bloc/profile/profile_bloc.dart';
 import 'package:fulbito_app/bloc/register/register_bloc.dart';
+import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/routes.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/intro/intro_screen.dart';
+import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
+import 'package:fulbito_app/screens/matches/match_info_screen.dart';
+import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
+import 'package:fulbito_app/services/push_notification_service.dart';
+import 'package:fulbito_app/utils/custom_snack_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/matches/matches_screen.dart';
 
-void main() {
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await PushNotificationService.initializeApp();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+  final GlobalKey<ScaffoldMessengerState> messengerKey = new GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    PushNotificationService.messageStream.listen((notificationData) {
+
+      if (notificationData.containsKey('chatMessage')) {
+        if (notificationData['inApp']) {
+          messengerKey.currentState?.showSnackBar(customSnackBar(notificationData['title'], () {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => MatchChatScreen(
+                  match: notificationData['match'],
+                  currentUser: notificationData['currentUser'],
+                ),
+              ),
+            );
+          }));
+        } else {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => MatchChatScreen(
+                match: notificationData['match'],
+                currentUser: notificationData['currentUser'],
+              ),
+            ),
+          );
+        }
+      }
+      if (notificationData.containsKey('goToMyMatches')) {
+        if (notificationData['inApp']) {
+          messengerKey.currentState?.showSnackBar(customSnackBar(notificationData['title'], () {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => MyMatchesScreen(),
+              ),
+            );
+          }));
+        } else {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => MyMatchesScreen(),
+            ),
+          );
+        }
+      }
+      if (notificationData.containsKey('goToMatchInfo')) {
+        if (notificationData['inApp']) {
+          messengerKey.currentState?.showSnackBar(customSnackBar(notificationData['title'], () {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => MatchInfoScreen(
+                  match: notificationData['match'],
+                ),
+              ),
+            );
+          }));
+        } else {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => MatchInfoScreen(
+                match: notificationData['match'],
+              ),
+            ),
+          );
+        }
+      }
+      if (notificationData.containsKey('goToMatchesScreen')) {
+        if (notificationData['inApp']) {
+          messengerKey.currentState?.showSnackBar(customSnackBar(notificationData['title'], () {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => MatchesScreen(),
+              ),
+            );
+          }));
+        } else {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => MatchesScreen(),
+            ),
+          );
+        }
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -35,19 +140,12 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Fulbito',
         theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
           primarySwatch: Colors.blue,
         ),
         debugShowCheckedModeBanner: false,
         routes: routes,
+        navigatorKey: navigatorKey, //Navigator
+        scaffoldMessengerKey: messengerKey, // Snack
         home: CheckAuth(),
         // home: CompleteRegisterScreen(),
         localizationsDelegates: [

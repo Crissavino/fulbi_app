@@ -69,7 +69,9 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
               ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Container(
                   padding:
                       EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),

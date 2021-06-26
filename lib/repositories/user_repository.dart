@@ -81,6 +81,7 @@ class UserRepository {
     if (body.containsKey('success') && body['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       await localStorage.setString('token', json.encode(body['token']));
+      await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
       await localStorage.setString('user', json.encode(body['user']));
       await localStorage.setString('userPositions', json.encode(body['user']!['player']!['positions']!));
       await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
@@ -111,6 +112,7 @@ class UserRepository {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       await localStorage.setString('token', json.encode(body['token']));
       await localStorage.setString('user', json.encode(body['user']));
+      await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
       String? userStr = localStorage.getString("user");
       body['user'] = User.fromJson(jsonDecode(userStr!));
     }

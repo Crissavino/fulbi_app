@@ -22,6 +22,7 @@ class Match {
     required this.chatId,
     required this.ownerId,
     required this.haveNotifications,
+    required this.isConfirmed,
     required this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -39,6 +40,7 @@ class Match {
   int chatId;
   int ownerId;
   bool haveNotifications;
+  bool isConfirmed;
   dynamic deletedAt;
   DateTime createdAt;
   DateTime updatedAt;
@@ -56,6 +58,7 @@ class Match {
     chatId: json["chat_id"],
     ownerId: json["owner_id"],
     haveNotifications: ((json["have_notifications"] == 1) || json["have_notifications"] == true) ? true : false,
+    isConfirmed: ((json["is_confirmed"] == 1) || json["is_confirmed"] == true) ? true : false,
     deletedAt: json["deleted_at"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
@@ -74,6 +77,7 @@ class Match {
     "chat_id": chatId,
     "owner_id": ownerId,
     "have_notifications": haveNotifications,
+    "is_confirmed": isConfirmed,
     "deleted_at": deletedAt,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),

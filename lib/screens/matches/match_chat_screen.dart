@@ -19,8 +19,7 @@ class MatchChatScreen extends StatefulWidget {
   Match match;
   User currentUser;
 
-  MatchChatScreen({Key? key, required this.match, required this.currentUser})
-      : super(key: key);
+  MatchChatScreen({required this.match, required this.currentUser});
 
   @override
   _MatchChatScreenState createState() => _MatchChatScreenState();
@@ -93,7 +92,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               ),
               resizeToAvoidBottomInset: true,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.light,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Column(
                     children: <Widget>[

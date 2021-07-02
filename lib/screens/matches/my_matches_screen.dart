@@ -77,109 +77,122 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
             top: false,
             bottom: false,
             child: Scaffold(
-              appBar: new PreferredSize(
-                child: new Container(
-                  decoration: horizontalGradient,
-                  child: AppBar(
-                    leading: Container(
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) =>
-                                  MatchesScreen(),
-                              transitionDuration: Duration(seconds: 0),
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.arrow_back_ios),
-                      ),
-                    ),
-                    backwardsCompatibility: false,
-                    systemOverlayStyle:
-                        SystemUiOverlayStyle(statusBarColor: Colors.white),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0.0,
-                    title: Text(
-                      translations[localeName]!['general.myMatches']!,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                preferredSize: new Size(
-                  MediaQuery.of(context).size.width,
-                  70.0,
-                ),
-              ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: Platform.isIOS
-                      ? SystemUiOverlayStyle.light
-                      : SystemUiOverlayStyle.dark,
+                value: Platform.isIOS
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: Container(
                     child: LayoutBuilder(
                       builder:
                           (BuildContext context, BoxConstraints constraints) {
-                        return Container(
-                          padding: EdgeInsets.only(
-                              bottom: 20.0, left: 20.0, right: 20.0),
-                          margin: EdgeInsets.only(top: 20.0),
-                          width: _width,
-                          height: _height,
-                          child: FutureBuilder(
-                            future: this._future,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<dynamic> snapshot) {
-                              dynamic response = snapshot.data;
+                            double innerHeight = constraints.maxHeight;
+                            double innerWidth = constraints.maxWidth;
 
-                              if (!snapshot.hasData) {
-                                return Container(
-                                  width: _width,
-                                  height: _height,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [circularLoading],
+                        return Stack(
+                          children: [
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                decoration: horizontalGradient,
+                                padding: EdgeInsets.only(left: 10.0, top: 0.0),
+                                alignment: Alignment.center,
+                                child: Container(
+                                  decoration: horizontalGradient,
+                                  child: AppBar(
+                                    backwardsCompatibility: false,
+                                    systemOverlayStyle:
+                                    SystemUiOverlayStyle(statusBarColor: Colors.white),
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0.0,
+                                    leading: IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: Icon(Icons.arrow_back_ios),
+                                      splashColor: Colors.transparent,
+                                    ),
+                                    title: Text(
+                                      'Mis partidos',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                );
-                              }
-
-                              if (!response['success']) {
-                                return showAlert(
-                                    context, 'Error', 'Oops, ocurrió un error');
-                              }
-
-                              if (this.matches.isEmpty) {
-                                return Container(
-                                  width: _width,
-                                  height: _height,
-                                  child: Center(
-                                      child: Text(translations[localeName]![
-                                          'general.noMatches']!)),
-                                );
-                              }
-
-                              return RefreshIndicator(
-                                onRefresh: () => this.getRefreshData(),
-                                child: ListView.builder(
-                                  itemBuilder: (
-                                    BuildContext context,
-                                    int index,
-                                  ) {
-                                    return _buildMatchRow(this.matches[index]!);
-                                  },
-                                  itemCount: this.matches.length,
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 50.0,
+                              left: 0.0,
+                              right: 0.0,
+                              bottom: 0.0,
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                                child: SingleChildScrollView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                        bottom: 20.0, left: 20.0, right: 20.0),
+                                    margin: EdgeInsets.only(top: 20.0),
+                                    width: _width,
+                                    height: innerHeight - 50,
+                                    child: FutureBuilder(
+                                      future: this._future,
+                                      builder: (BuildContext context,
+                                          AsyncSnapshot<dynamic> snapshot) {
+                                        dynamic response = snapshot.data;
+
+                                        if (!snapshot.hasData) {
+                                          return Container(
+                                            width: _width,
+                                            height: _height,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [circularLoading],
+                                            ),
+                                          );
+                                        }
+
+                                        if (!response['success']) {
+                                          return showAlert(
+                                              context, 'Error', 'Oops, ocurrió un error');
+                                        }
+
+                                        if (this.matches.isEmpty) {
+                                          return Container(
+                                            width: _width,
+                                            height: _height,
+                                            child: Center(
+                                                child: Text(translations[localeName]![
+                                                'general.noMatches']!)),
+                                          );
+                                        }
+
+                                        return RefreshIndicator(
+                                          onRefresh: () => this.getRefreshData(),
+                                          child: ListView.builder(
+                                            itemBuilder: (
+                                                BuildContext context,
+                                                int index,
+                                                ) {
+                                              return _buildMatchRow(this.matches[index]!);
+                                            },
+                                            itemCount: this.matches.length,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),

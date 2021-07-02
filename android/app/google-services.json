@@ -37,6 +37,13 @@
             {
               "client_id": "265189331222-u4u3kp6crqh7odfavru2dnmq7pltj08q.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "265189331222-qb7uvump0qp6mjg1u11eb2opp7cts18s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.crissavino.fulbito.fulbitoApp"
+              }
             }
           ]
         }

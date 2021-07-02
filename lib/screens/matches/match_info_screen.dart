@@ -343,6 +343,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   void _navigateToSection(index) async {
+    // TODO usar sockets para esto
     final resp = await MatchRepository().getMatch(widget.match.id);
     Match match = resp['match'];
     switch (index) {

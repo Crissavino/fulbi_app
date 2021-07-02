@@ -9,6 +9,7 @@ import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_filter.dart';
+import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
@@ -102,15 +103,11 @@ class _MatchesState extends State<MatchesScreen> {
               iconSize: 30.0,
               color: Colors.white,
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation1, animation2) =>
-                        CreateMatchScreen(),
-                    transitionDuration: Duration(seconds: 0),
-                  ),
-                );
-                // Navigator.pushNamed(context, 'create_match');
+                Navigator.push(context, PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) =>
+                      CreateMatchScreen(),
+                  transitionDuration: Duration(seconds: 0),
+                ),);
               },
             ),
           ),
@@ -122,7 +119,11 @@ class _MatchesState extends State<MatchesScreen> {
                   iconSize: 30.0,
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pushNamed(context, 'my_matches');
+                    Navigator.push(context, PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          MyMatchesScreen(),
+                      transitionDuration: Duration(seconds: 0),
+                    ),);
                   },
                 ),
               ),

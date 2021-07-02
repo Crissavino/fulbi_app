@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/environment.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,14 +11,20 @@ class Api {
   final String _url = Environment.apiUrl;
   //if you are using android studio emulator, change localhost to 10.0.2.2
   var token;
+  String? fcmToken;
 
   _getToken() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     token = jsonDecode(localStorage.getString("token")!);
   }
 
+  _getFCMToken() async {
+    fcmToken = PushNotificationService.token;
+  }
+
   authData(data, apiUrl) async {
     Uri fullUrl = Uri.parse(_url + apiUrl);
+    await _getFCMToken();
     return await http.post(
         fullUrl,
         body: jsonEncode(data),
@@ -28,6 +35,7 @@ class Api {
   getData(apiUrl) async {
     Uri fullUrl = Uri.parse(_url + apiUrl);
     await _getToken();
+    await _getFCMToken();
     return await http.get(
         fullUrl,
         headers: _setHeaders()
@@ -37,6 +45,7 @@ class Api {
   postData(data, apiUrl) async {
     Uri fullUrl = Uri.parse(_url + apiUrl);
     await _getToken();
+    await _getFCMToken();
     return await http.post(
         fullUrl,
         body: jsonEncode(data),
@@ -81,12 +90,14 @@ class Api {
   _setHeaders() => {
     'Content-type' : 'application/json',
     'Accept' : 'application/json',
-    'Authorization' : 'Bearer $token'
+    'Authorization' : 'Bearer $token',
+    'Fcm-Token': '$fcmToken'
   };
 
   _setFileHeaders() => {
     'Content-type' : 'multipart/form-data',
-    'Authorization' : 'Bearer $token'
+    'Authorization' : 'Bearer $token',
+    'Fcm-Token': '$fcmToken'
   };
 
 }

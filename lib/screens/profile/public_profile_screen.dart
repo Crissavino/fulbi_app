@@ -66,30 +66,30 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   top: false,
                   bottom: false,
                   child: Scaffold(
-                    appBar: new PreferredSize(
-                      child: new Container(
-                        decoration: horizontalGradient,
-                        child: AppBar(
-                          backwardsCompatibility: false,
-                          systemOverlayStyle:
-                          SystemUiOverlayStyle(statusBarColor: Colors.white),
-                          backgroundColor: Colors.transparent,
-                          elevation: 0.0,
-                          title: Text(
-                            this._user!.name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      preferredSize: new Size(
-                        MediaQuery.of(context).size.width,
-                        70.0,
-                      ),
-                    ),
+                    // appBar: new PreferredSize(
+                    //   child: new Container(
+                    //     decoration: horizontalGradient,
+                    //     child: AppBar(
+                    //       backwardsCompatibility: false,
+                    //       systemOverlayStyle:
+                    //       SystemUiOverlayStyle(statusBarColor: Colors.white),
+                    //       backgroundColor: Colors.transparent,
+                    //       elevation: 0.0,
+                    //       title: Text(
+                    //         this._user!.name,
+                    //         style: TextStyle(
+                    //           color: Colors.white,
+                    //           fontWeight: FontWeight.bold,
+                    //         ),
+                    //         textAlign: TextAlign.center,
+                    //       ),
+                    //     ),
+                    //   ),
+                    //   preferredSize: new Size(
+                    //     MediaQuery.of(context).size.width,
+                    //     70.0,
+                    //   ),
+                    // ),
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
                       value: Platform.isIOS
@@ -108,11 +108,39 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                 fit: StackFit.expand,
                                 children: [
                                   Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      decoration: horizontalGradient,
+                                      padding: EdgeInsets.only(left: 10.0, top: 0.0),
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        decoration: horizontalGradient,
+                                        child: AppBar(
+                                          backwardsCompatibility: false,
+                                          systemOverlayStyle:
+                                          SystemUiOverlayStyle(statusBarColor: Colors.white),
+                                          backgroundColor: Colors.transparent,
+                                          elevation: 0.0,
+                                          title: Text(
+                                            this._user!.name,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
                                     bottom: 0.0,
                                     left: 0.0,
                                     right: 0.0,
                                     child: Container(
-                                      height: innerHeight * 0.9,
+                                      height: innerHeight * 0.8,
                                       width: innerWidth,
                                       decoration: BoxDecoration(
                                         borderRadius: screenBorders,
@@ -144,7 +172,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     ),
                                   ),
                                   Positioned(
-                                    top: 0.0,
+                                    top: 80.0,
                                     left: 0.0,
                                     right: 0.0,
                                     child: Center(

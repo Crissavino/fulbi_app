@@ -13,6 +13,7 @@ import 'package:fulbito_app/models/user_location.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
+import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/screens/search/search_location.dart';
 import 'package:fulbito_app/services/place_service.dart';
@@ -67,110 +68,32 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
             top: false,
             bottom: false,
             child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: Platform.isIOS
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark,
-                child: Center(
-                  child: Container(
-                    width: _width,
-                    height: _height,
-                    child: LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        return Stack(
-                          children: [
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                decoration: horizontalGradient,
-                                padding: EdgeInsets.only(left: 10.0, top: 0.0),
-                                alignment: Alignment.center,
-                                child: Container(
-                                  decoration: horizontalGradient,
-                                  child: AppBar(
-                                    backwardsCompatibility: false,
-                                    systemOverlayStyle:
-                                    SystemUiOverlayStyle(statusBarColor: Colors.white),
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0.0,
-                                    leading: IconButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      icon: Icon(Icons.arrow_back_ios),
-                                      splashColor: Colors.transparent,
-                                    ),
-                                    title: Text(
-                                      'Crear partido',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 100.0,
-                              left: 0.0,
-                              right: 0.0,
-                              bottom: 10.0,
-                              child: Padding(
-                                padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
-                                child: SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: Column(
-                                    children: [
-                                      _buildWherePlay(),
-                                      _buildWhenPlay(),
-                                      _buildMatchSex(),
-                                      _buildMatchType(),
-                                      _buildMatchCost(),
-                                      _buildPlayerForMatch(),
-                                      SizedBox(height: 30.0,),
-                                      _buildCreateMatchButton()
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-
-    // WORKING
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Stack(
-        children: [
-          SafeArea(
-            top: false,
-            bottom: false,
-            child: Scaffold(
               appBar: new PreferredSize(
                 child: new Container(
                   decoration: horizontalGradient,
                   child: AppBar(
+                    leading: Container(
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2) =>
+                                  MatchesScreen(),
+                              transitionDuration: Duration(seconds: 0),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.arrow_back_ios),
+                      ),
+                    ),
                     backwardsCompatibility: false,
                     systemOverlayStyle:
                     SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
                     title: Text(
-                      'Crear partido',
+                      translations[localeName]!['general.createMatch']!,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

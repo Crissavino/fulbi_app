@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:linkable/linkable.dart';
 
 class ChatMessage extends StatelessWidget {
   final String? text;
@@ -87,14 +88,14 @@ class ChatMessage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.0),
-          Text(
-            this.text!,
+          Linkable(
+            text: this.text!,
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
               fontWeight: FontWeight.w400,
             ),
-          ),
+          )
         ],
       ),
     );

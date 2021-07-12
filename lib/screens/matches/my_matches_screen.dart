@@ -87,8 +87,8 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                     child: LayoutBuilder(
                       builder:
                           (BuildContext context, BoxConstraints constraints) {
-                            double innerHeight = constraints.maxHeight;
-                            double innerWidth = constraints.maxWidth;
+                        double innerHeight = constraints.maxHeight;
+                        double innerWidth = constraints.maxWidth;
 
                         return Stack(
                           children: [
@@ -104,17 +104,29 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                   decoration: horizontalGradient,
                                   child: AppBar(
                                     backwardsCompatibility: false,
-                                    systemOverlayStyle:
-                                    SystemUiOverlayStyle(statusBarColor: Colors.white),
+                                    systemOverlayStyle: SystemUiOverlayStyle(
+                                        statusBarColor: Colors.white),
                                     backgroundColor: Colors.transparent,
                                     elevation: 0.0,
                                     leading: IconButton(
-                                      onPressed: () => Navigator.pop(context),
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          PageRouteBuilder(
+                                            pageBuilder: (context, animation1,
+                                                    animation2) =>
+                                                MatchesScreen(),
+                                            transitionDuration:
+                                                Duration(seconds: 0),
+                                          ),
+                                        );
+                                      },
                                       icon: Icon(Icons.arrow_back_ios),
                                       splashColor: Colors.transparent,
                                     ),
                                     title: Text(
-                                      'Mis partidos',
+                                      translations[localeName]![
+                                          'general.myMatches']!,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -131,7 +143,10 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                               right: 0.0,
                               bottom: 0.0,
                               child: Padding(
-                                padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                                padding: EdgeInsets.only(
+                                    bottom: (MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom)),
                                 child: SingleChildScrollView(
                                   physics: AlwaysScrollableScrollPhysics(),
                                   child: Container(
@@ -151,17 +166,18 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                             width: _width,
                                             height: _height,
                                             child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                                  CrossAxisAlignment.center,
                                               children: [circularLoading],
                                             ),
                                           );
                                         }
 
                                         if (!response['success']) {
-                                          return showAlert(
-                                              context, 'Error', 'Oops, ocurrió un error');
+                                          return showAlert(context, 'Error',
+                                              'Oops, ocurrió un error');
                                         }
 
                                         if (this.matches.isEmpty) {
@@ -169,19 +185,22 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                             width: _width,
                                             height: _height,
                                             child: Center(
-                                                child: Text(translations[localeName]![
-                                                'general.noMatches']!)),
+                                                child: Text(
+                                                    translations[localeName]![
+                                                        'general.noMatches']!)),
                                           );
                                         }
 
                                         return RefreshIndicator(
-                                          onRefresh: () => this.getRefreshData(),
+                                          onRefresh: () =>
+                                              this.getRefreshData(),
                                           child: ListView.builder(
                                             itemBuilder: (
-                                                BuildContext context,
-                                                int index,
-                                                ) {
-                                              return _buildMatchRow(this.matches[index]!);
+                                              BuildContext context,
+                                              int index,
+                                            ) {
+                                              return _buildMatchRow(
+                                                  this.matches[index]!);
                                             },
                                             itemCount: this.matches.length,
                                           ),
@@ -243,7 +262,8 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
               }
             },
             () async {
-              final response = await MatchRepository().rejectInvitationToMatch(match.id);
+              final response =
+                  await MatchRepository().rejectInvitationToMatch(match.id);
               if (response['success']) {
                 setState(() {
                   this.matches = response['matches'];

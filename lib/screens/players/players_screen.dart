@@ -364,16 +364,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
             leading: CircleAvatar(
               radius: 30.0,
               backgroundColor: Colors.white,
-              child: user.profileImage!.isEmpty
+              child: user.profileImage == null
                   ? Icon(
                       Icons.person,
                       color: Colors.green[700],
                       size: 40.0,
                     )
                   : null,
-              backgroundImage: user.profileImage!.isEmpty
+              backgroundImage: user.profileImage == null
                   ? null
-                  : AssetImage(user.profileImage!),
+                  : NetworkImage(user.profileImage!),
             ),
             title: Text(
               user.name,

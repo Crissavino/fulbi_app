@@ -359,53 +359,52 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.center,
                 decoration: verticalGradient,
                 height: availableHeight,
-                child: SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 40.0,
-                    vertical: 30.0,
-                  ),
-                  child: BlocBuilder<LoginBloc, LoginState>(
-                    builder: (BuildContext context, state) {
+                padding: EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
+                child: BlocBuilder<LoginBloc, LoginState>(
+                  builder: (BuildContext context, state) {
 
-                      if (state is LoggingInState) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            whiteCircularLoading
-                          ],
-                        );
-                      }
-
+                    if (state is LoggingInState) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          _buildPageTitle(),
-                          SizedBox(height: 30.0),
-                          Form(
-                            key: _formKey,
-                            child: Column(
-                              children: [
-                                _buildEmailTF(),
-                                SizedBox(
-                                  height: 30.0,
-                                ),
-                                _buildPasswordTF(),
-                                _buildForgotPasswordBtn(),
-                                // _buildRememberMeCheckbox(),
-                                _buildLoginBtn(),
-                                _buildSignInWithText(),
-                                _buildSocialBtnRow(),
-                                _buildSignUpBtn(),
-                              ],
-                            ),
-                          )
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          whiteCircularLoading
                         ],
                       );
-                    },
-                  ),
+                    }
 
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                      child: SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            _buildPageTitle(),
+                            SizedBox(height: 30.0),
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  _buildEmailTF(),
+                                  SizedBox(
+                                    height: 30.0,
+                                  ),
+                                  _buildPasswordTF(),
+                                  _buildForgotPasswordBtn(),
+                                  // _buildRememberMeCheckbox(),
+                                  _buildLoginBtn(),
+                                  _buildSignInWithText(),
+                                  _buildSocialBtnRow(),
+                                  _buildSignUpBtn(),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               )
             ],

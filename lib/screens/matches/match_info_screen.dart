@@ -34,6 +34,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool imInscribed = false;
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -189,6 +190,15 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                       String spotsAvailable =
                           (match.numPlayers - playersEnrolled).toString();
 
+                      List<User?> participants = match.participants!;
+                      User myUser = snapshot.data['myUser'];
+
+                      if (participants.isNotEmpty) {
+                        User? me = participants.firstWhereOrNull(
+                                (user) => user!.id == myUser.id);
+                        imInscribed = me != null;
+                      }
+
                       return Container(
                         child: LayoutBuilder(
                           builder: (BuildContext context,
@@ -224,6 +234,40 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     },
                   ),
                 ),
+              ),
+              floatingActionButton: FloatingActionButton(
+                child: Icon(
+                  Icons.add_circle_outline,
+                  size: 40.0,
+                ),
+                onPressed: () {
+                  if (imInscribed) {
+                    showAlert(
+                        context, 'Error', 'Ya estas inscripto en este partido');
+                  } else {
+                    showAlertWithEvent(
+                      context,
+                      translations[localeName]!['match.join']!,
+                          () async {
+                        final response =
+                        await MatchRepository().joinMatch(widget.match.id);
+                        if (response['success']) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyMatchesScreen(),
+                            ),
+                          );
+                        } else {
+                          Navigator.pop(context);
+                          showAlert(
+                              context, 'Error', 'Oooops ocurrio un error');
+                        }
+                      },
+                    );
+                  }
+                },
+                backgroundColor: Colors.green[800]!,
               ),
               bottomNavigationBar: _buildBottomNavigationBar(),
             ),

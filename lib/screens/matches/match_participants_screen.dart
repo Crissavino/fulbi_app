@@ -127,7 +127,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                         return showAlert(
                           context,
                           'Error!',
-                          'Ocurrió un error cargar los jugadores!',
+                          'Ocurrió un error al cargar los jugadores!',
                         );
                       }
                     },

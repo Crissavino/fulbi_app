@@ -396,6 +396,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 alignment: Alignment.center,
                 decoration: verticalGradient,
                 height: double.infinity,
+                padding: EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
                 child: BlocBuilder<RegisterBloc, RegisterState>(
                   builder: (BuildContext context, state) {
 
@@ -409,37 +410,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       );
                     }
 
-                    return SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 40.0,
-                        vertical: 30.0,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          _buildPageTitle(),
-                          SizedBox(height: 30.0),
-                          Form(
-                            key: _formKey,
-                            child: Column(
-                              children: [
-                                _buildFullNameTF(),
-                                SizedBox(height: 10.0),
-                                _buildEmailTF(),
-                                SizedBox(height: 10.0),
-                                _buildPasswordTF(),
-                                SizedBox(height: 10.0),
-                                _buildConfirmPasswordTF(),
-                                SizedBox(height: 20.0),
-                                // _buildRememberMeCheckbox(),
-                                _buildRegisterBtn(),
-                                SizedBox(height: 10.0),
-                                _buildSignInBtn()
-                              ],
-                            ),
-                          )
-                        ],
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                      child: SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            _buildPageTitle(),
+                            SizedBox(height: 30.0),
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  _buildFullNameTF(),
+                                  SizedBox(height: 10.0),
+                                  _buildEmailTF(),
+                                  SizedBox(height: 10.0),
+                                  _buildPasswordTF(),
+                                  SizedBox(height: 10.0),
+                                  _buildConfirmPasswordTF(),
+                                  SizedBox(height: 20.0),
+                                  // _buildRememberMeCheckbox(),
+                                  _buildRegisterBtn(),
+                                  SizedBox(height: 10.0),
+                                  _buildSignInBtn()
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     );
                   },

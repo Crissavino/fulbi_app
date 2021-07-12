@@ -208,6 +208,7 @@ class PushNotificationService {
   static Future initializeApp() async {
     // push notif
     await Firebase.initializeApp();
+
     try{
       token = await FirebaseMessaging.instance.getToken();
       print('token $token');
@@ -215,12 +216,29 @@ class PushNotificationService {
       token = '';
       print('error $error');
     }
-    // grabar token en db
 
-    // handlers
-    FirebaseMessaging.onBackgroundMessage(_onBackgroundHandler);
-    FirebaseMessaging.onMessage.listen(_onMessageHandler);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedHandler);
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (
+    settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional
+    ) {
+      print('User granted permission');
+      // handlers
+      FirebaseMessaging.onBackgroundMessage(_onBackgroundHandler);
+      FirebaseMessaging.onMessage.listen(_onMessageHandler);
+      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedHandler);
+    } else {
+      print('User declined or has not accepted permission');
+    }
 
     // local notif
 

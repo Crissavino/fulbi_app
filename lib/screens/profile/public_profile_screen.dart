@@ -6,6 +6,7 @@ import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/show_my_created_matches.dart';
@@ -66,30 +67,45 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   top: false,
                   bottom: false,
                   child: Scaffold(
-                    // appBar: new PreferredSize(
-                    //   child: new Container(
-                    //     decoration: horizontalGradient,
-                    //     child: AppBar(
-                    //       backwardsCompatibility: false,
-                    //       systemOverlayStyle:
-                    //       SystemUiOverlayStyle(statusBarColor: Colors.white),
-                    //       backgroundColor: Colors.transparent,
-                    //       elevation: 0.0,
-                    //       title: Text(
-                    //         this._user!.name,
-                    //         style: TextStyle(
-                    //           color: Colors.white,
-                    //           fontWeight: FontWeight.bold,
-                    //         ),
-                    //         textAlign: TextAlign.center,
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   preferredSize: new Size(
-                    //     MediaQuery.of(context).size.width,
-                    //     70.0,
-                    //   ),
-                    // ),
+                    appBar: new PreferredSize(
+                      child: new Container(
+                        decoration: horizontalGradient,
+                        child: AppBar(
+                          backwardsCompatibility: false,
+                          systemOverlayStyle:
+                          SystemUiOverlayStyle(statusBarColor: Colors.white),
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                          leading: Container(
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation1, animation2) =>
+                                        PlayersScreen(),
+                                    transitionDuration: Duration(seconds: 0),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.arrow_back_ios),
+                            ),
+                          ),
+                          title: Text(
+                            this._user!.name,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      preferredSize: new Size(
+                        MediaQuery.of(context).size.width,
+                        70.0,
+                      ),
+                    ),
                     resizeToAvoidBottomInset: false,
                     body: AnnotatedRegion<SystemUiOverlayStyle>(
                       value: Platform.isIOS
@@ -108,39 +124,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                 fit: StackFit.expand,
                                 children: [
                                   Positioned(
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: Container(
-                                      decoration: horizontalGradient,
-                                      padding: EdgeInsets.only(left: 10.0, top: 0.0),
-                                      alignment: Alignment.center,
-                                      child: Container(
-                                        decoration: horizontalGradient,
-                                        child: AppBar(
-                                          backwardsCompatibility: false,
-                                          systemOverlayStyle:
-                                          SystemUiOverlayStyle(statusBarColor: Colors.white),
-                                          backgroundColor: Colors.transparent,
-                                          elevation: 0.0,
-                                          title: Text(
-                                            this._user!.name,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
                                     bottom: 0.0,
                                     left: 0.0,
                                     right: 0.0,
                                     child: Container(
-                                      height: innerHeight * 0.8,
+                                      height: innerHeight * 0.9,
                                       width: innerWidth,
                                       decoration: BoxDecoration(
                                         borderRadius: screenBorders,
@@ -172,7 +160,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     ),
                                   ),
                                   Positioned(
-                                    top: 80.0,
+                                    top: 0.0,
                                     left: 0.0,
                                     right: 0.0,
                                     child: Center(
@@ -189,7 +177,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                           : CircleAvatar(
                                         backgroundColor: Colors.white,
                                         radius: 60,
-                                        backgroundImage: AssetImage(
+                                        backgroundImage: NetworkImage(
                                           this.profileImagePath,
                                         ),
                                       ),
@@ -218,6 +206,12 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                           SystemUiOverlayStyle(statusBarColor: Colors.white),
                           backgroundColor: Colors.transparent,
                           elevation: 0.0,
+                          leading: Container(
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Icon(Icons.arrow_back_ios),
+                            ),
+                          ),
                         ),
                       ),
                       preferredSize: new Size(
@@ -290,9 +284,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                           color: Colors.green[700],
                                           size: 100.0,
                                         ),
-                                        // backgroundImage: AssetImage(
-                                        //     'assets/profile-default.png',
-                                        // ),
                                       ),
                                     ),
                                   ),

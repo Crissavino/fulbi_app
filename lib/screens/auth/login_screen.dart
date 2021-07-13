@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () => print('Forgot Password Button Pressed'),
+        onPressed: () => Navigator.pushReplacementNamed(context, 'forgot_password'),
         child: Container(
           padding: EdgeInsets.only(right: 0.0),
           child: Text(
@@ -268,8 +268,15 @@ class _LoginScreenState extends State<LoginScreen> {
               blurRadius: 6.0,
             ),
           ],
-          image: DecorationImage(
-            image: logo,
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: logo,
+              ),
+            ),
           ),
         ),
       ),

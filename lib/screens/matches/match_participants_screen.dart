@@ -28,10 +28,38 @@ class MatchParticipantsScreen extends StatefulWidget {
 
 class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   String localeName = Platform.localeName.split('_')[0];
+  bool imInscribed = true;
+  Future? _future;
+
+  Future getFutureData() async {
+    final response = await MatchRepository().getMatch(widget.match.id);
+
+    if (response['success']) {
+      List<User?> participants = response['match'].participants!;
+      User myUser = response['myUser'];
+
+      if (participants.isNotEmpty) {
+        User? me = participants.firstWhereOrNull(
+                (user) => user!.id == myUser.id);
+        setState(() {
+          this.imInscribed = me != null;
+        });
+      }
+
+    }
+
+    return response;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    this._future = this.getFutureData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    bool imInscribed = false;
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -79,7 +107,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   width: _width,
                   height: _height,
                   child: FutureBuilder(
-                    future: MatchRepository().getMatch(widget.match.id),
+                    future: this._future,
                     builder: (BuildContext context,
                         AsyncSnapshot<dynamic> snapshot) {
                       if (!snapshot.hasData) {
@@ -99,13 +127,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                       if (response['success']) {
                         Match match = snapshot.data['match'];
                         List<User?> participants = match.participants!;
-                        User myUser = snapshot.data['myUser'];
-
-                        if (participants.isNotEmpty) {
-                          User? me = participants.firstWhereOrNull(
-                              (user) => user!.id == myUser.id);
-                          imInscribed = me != null;
-                        }
 
                         if (participants.isEmpty) {
                           return Container(
@@ -134,22 +155,24 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   ),
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
+              floatingActionButton: this.imInscribed
+                  ? null
+                  : FloatingActionButton(
                 child: Icon(
                   Icons.add_circle_outline,
                   size: 40.0,
                 ),
                 onPressed: () {
-                  if (imInscribed) {
+                  if (this.imInscribed) {
                     showAlert(
                         context, 'Error', 'Ya estas inscripto en este partido');
                   } else {
                     showAlertWithEvent(
                       context,
                       translations[localeName]!['match.join']!,
-                      () async {
+                          () async {
                         final response =
-                            await MatchRepository().joinMatch(widget.match.id);
+                        await MatchRepository().joinMatch(widget.match.id);
                         if (response['success']) {
                           Navigator.pushReplacement(
                             context,

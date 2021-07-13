@@ -40,6 +40,7 @@ class MatchRepository {
         'genre': Genre(id: body['genre']['id'], name: translations[localeName]![body['genre']['name_key']]!),
         'type': Type(id: body['type']['id'], name: translations[localeName]![body['type']['name_key']]!),
         'currency': body['currency']['symbol'],
+        'playersEnrolled': body['players_enrolled']
       };
 
       return response;
@@ -172,6 +173,36 @@ class MatchRepository {
     };
 
     final res = await api.postData(data, '/matches/send-invitation-to-user');
+
+    Map body = json.decode(res.body);
+
+    return body;
+  }
+
+  Future joinMatchFromInvitationLinkNewUser(int ownerId, int userId, int matchId) async {
+
+    final data = {
+      "owner_id": ownerId,
+      "user_id": userId,
+      "match_id": matchId,
+    };
+
+    final res = await api.postData(data, '/matches/join-match-from-invitation-link-new-user');
+
+    Map body = json.decode(res.body);
+
+    return body;
+  }
+
+  Future joinMatchFromInvitationLinkExistingUser(int ownerId, int userId, int matchId) async {
+
+    final data = {
+      "owner_id": ownerId,
+      "user_id": userId,
+      "match_id": matchId,
+    };
+
+    final res = await api.postData(data, '/matches/join-match-from-invitation-link-existing-user');
 
     Map body = json.decode(res.body);
 

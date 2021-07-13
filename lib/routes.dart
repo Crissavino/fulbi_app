@@ -1,5 +1,6 @@
 
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
+import 'package:fulbito_app/screens/auth/forgot_password_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/auth/register_screen.dart';
 import 'package:fulbito_app/screens/intro/intro_screen.dart';
@@ -10,6 +11,7 @@ import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 final routes = {
   'login': (_) => LoginScreen(),
   'register': (_) => RegisterScreen(),
+  'forgot_password': (_) => ForgotPasswordScreen(),
   'complete_profile': (_) => CompleteRegisterScreen(),
   'matches': (_) => MatchesScreen(),
   'create_match': (_) => CreateMatchScreen(),

@@ -4,6 +4,8 @@ String? localeName = Platform.localeName.split('_')[0];
 
 const Map<String?, Map<String?, String?>> translations = {
   'en': {
+    'recoverPassword': 'Recover Password',
+    'recover': 'Recover',
     'signIn': 'Sign In',
     'email': 'Email',
     'enterEmail': 'Enter your email',
@@ -14,6 +16,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'signInWith': 'Sign in with',
     'dontAccount': 'Don\'t have an account? ',
     'loginFails': 'Login failed',
+    'recoverFails': 'Recover failed',
     'mandatoryPass': 'The password is required',
     'passWithMoreSix': 'Enter a password with more than 6 characters',
     'checkCredentials': 'Check yours credentials',
@@ -84,7 +87,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'general.invite': 'Invite',
     'general.areYouGoingToInvite': 'You are going to invite',
     'general.toYourMatch': 'to your match, do you want to continue?',
-    'match.wherePlay': 'Where is it played?',
+    'match.wherePlay': 'In which city is it played?',
     'match.whenPlay': 'When is it played?',
     'match.whichGenre': 'What genre plays?',
     'match.whichTypes': 'What type of match is it?',
@@ -94,6 +97,8 @@ const Map<String?, Map<String?, String?>> translations = {
     'general.edit': 'Edit',
   },
   'es': {
+    'recoverPassword': 'Recuperar constraseña',
+    'recover': 'Recuperar',
     'signIn': 'Iniciar sesión',
     'email': 'Email',
     'enterEmail': 'Ingresá tu correo',
@@ -104,6 +109,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'signInWith': 'Iniciar sesión con',
     'dontAccount': 'No tenes un usuario? ',
     'loginFails': 'Login incorrecto',
+    'recoverFails': 'Recuperación incorrecta',
     'mandatoryPass': 'La contraseña es obligatoria',
     'passWithMoreSix': 'Ingresá una contraseña con mas de 6 caracteres',
     'checkCredentials': 'Revise su credenciales',
@@ -174,7 +180,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'general.invite': 'Invitar',
     'general.areYouGoingToInvite': 'Vas a invitar a',
     'general.toYourMatch': 'a tu partido, deseas continuar?',
-    'match.wherePlay': 'Donde se juega?',
+    'match.wherePlay': 'En qué ciudad se juega?',
     'match.whenPlay': 'Cuando se juega?',
     'match.whichGenre': 'Que género juega?',
     'match.whichTypes': 'Que tipo de partido es?',

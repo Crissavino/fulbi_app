@@ -61,7 +61,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
         children: [
           Center(
             child: Container(
-              padding: EdgeInsets.only(top: 20.0),
+              padding: EdgeInsets.only(top: 50.0),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   return Container(
@@ -120,7 +120,26 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
               ),
             ),
           ),
-          ModalTopBar()
+          Positioned(
+            top: 15.0,
+            left: 0.0,
+            right: 0.0,
+            child: Center(
+              child: Container(
+                margin: EdgeInsets.only(top: 10.0),
+                child: Text(
+                  translations[localeName]![
+                  'general.myMatches']!,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+          ModalTopBar(),
         ],
       ),
     );

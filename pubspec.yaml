@@ -45,6 +45,8 @@ dependencies:
   firebase_messaging:
   firebase_core: ^1.3.0
   linkable:
+  flutter_share:
+  firebase_dynamic_links:
 
 dev_dependencies:
   flutter_test:

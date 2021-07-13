@@ -337,4 +337,24 @@ class UserRepository {
     return response;
   }
 
+  Future<dynamic> recoverPassword(String email) async {
+
+    final data = {
+      "email": email,
+    };
+
+    final response = await api.authData(data, '/user/send-recovery-password-email');
+
+    final body = json.decode(response.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      final user = body['user'];
+      body['user'] = User.fromJson(user);
+      await localStorage.setString('user', json.encode(body['user']));
+    }
+
+    return body;
+  }
+
 }

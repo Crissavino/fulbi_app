@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/type.dart';
@@ -12,6 +14,7 @@ import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/utils/create_dynamic_link.dart';
 import 'package:fulbito_app/utils/maps_util.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -31,10 +34,108 @@ class MatchInfoScreen extends StatefulWidget {
 
 class _MatchInfoScreenState extends State<MatchInfoScreen> {
   String localeName = Platform.localeName.split('_')[0];
+  bool _isCreatingLink = false;
+  String? _linkMessage;
+  bool imInscribed = true;
+  Future? _future;
+
+  Future<void> _createDynamicLinkToNewPlayer(bool short) async {
+    setState(() {
+      _isCreatingLink = true;
+    });
+
+    Uri url = await CreateDynamicLink.createLinkWithQuery(
+        'invite-new-player',
+        'userWhoInvite=${widget.match.ownerId}&matchId=${widget.match.id}',
+        short
+    );
+
+    setState(() {
+      _linkMessage = url.toString();
+      _isCreatingLink = false;
+    });
+  }
+
+  Future<void> _createDynamicLinkToExistingPlayer(bool short) async {
+    setState(() {
+      _isCreatingLink = true;
+    });
+
+    Uri url = await CreateDynamicLink.createLinkWithQuery(
+        'invite-existing-player',
+        'userWhoInvite=${widget.match.ownerId}&matchId=${widget.match.id}',
+        short
+    );
+
+    setState(() {
+      _linkMessage = url.toString();
+      _isCreatingLink = false;
+    });
+  }
+
+  Future<void> shareToNewPlayer() async {
+    Navigator.pop(context);
+    await _createDynamicLinkToNewPlayer(false);
+    await FlutterShare.share(
+        title: 'Invitar nuevo jugador con link',
+        // text: 'Example share text',
+        linkUrl: _linkMessage,
+        chooserTitle: 'Invitar nuevo jugador con link'
+    );
+  }
+
+  Future<void> shareToExistingPlayer() async {
+    Navigator.pop(context);
+    await _createDynamicLinkToExistingPlayer(false);
+    await FlutterShare.share(
+        title: 'Invitar jugador existente con link',
+        // text: 'Example share text',
+        linkUrl: _linkMessage,
+        chooserTitle: 'Invitar jugador existente con link'
+    );
+  }
+
+  Future<void> shareFile() async {
+    // TODO import https://pub.dev/packages/documents_picker to share files
+    // List<dynamic> docs = await DocumentsPicker.pickDocuments;
+    // if (docs == null || docs.isEmpty) return null;
+    //
+    // await FlutterShare.shareFile(
+    //   title: 'Example share',
+    //   text: 'Example share text',
+    //   filePath: docs[0] as String,
+    // );
+  }
+
+  Future getFutureData() async {
+    final response = await MatchRepository().getMatch(widget.match.id);
+
+    if (response['success']) {
+      List<User?> participants = response['match'].participants!;
+      User myUser = response['myUser'];
+
+      if (participants.isNotEmpty) {
+        User? me = participants.firstWhereOrNull(
+                (user) => user!.id == myUser.id);
+        setState(() {
+          this.imInscribed = me != null;
+        });
+      }
+
+    }
+
+    return response;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    this._future = this.getFutureData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    bool imInscribed = false;
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -82,29 +183,11 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                   ),
                                 ),
                                 child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     SizedBox(height: 10.0),
                                     GestureDetector(
-                                      onTap: () async {
-                                        await Clipboard.setData(
-                                          new ClipboardData(
-                                            text: 'Hola',
-                                          ),
-                                        );
-
-                                        Navigator.pop(context);
-
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Link copiado",
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                      onTap: shareToNewPlayer,
                                       child: Text(
                                         'Invitar nuevo jugador con link',
                                         style: TextStyle(
@@ -115,24 +198,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () async {
-                                        await Clipboard.setData(
-                                          new ClipboardData(
-                                            text: 'Hola 2',
-                                          ),
-                                        );
-
-                                        Navigator.pop(context);
-
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Link copiado 2",
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                      onTap: shareToExistingPlayer,
                                       child: Text(
                                         'Invitar jugador existente con link',
                                         style: TextStyle(
@@ -166,7 +232,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     : SystemUiOverlayStyle.dark,
                 child: Center(
                   child: FutureBuilder(
-                    future: MatchRepository().getMatch(widget.match.id),
+                    future: this._future,
                     builder: (BuildContext context,
                         AsyncSnapshot<dynamic> snapshot) {
                       if (!snapshot.hasData) {
@@ -186,18 +252,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                       Genre genre = snapshot.data['genre'];
                       Type type = snapshot.data['type'];
                       String currencySymbol = snapshot.data['currency'];
-                      int playersEnrolled = match.participants!.length;
+                      print(match.participants);
+                      int playersEnrolled = snapshot.data['playersEnrolled'];
                       String spotsAvailable =
                           (match.numPlayers - playersEnrolled).toString();
-
-                      List<User?> participants = match.participants!;
-                      User myUser = snapshot.data['myUser'];
-
-                      if (participants.isNotEmpty) {
-                        User? me = participants.firstWhereOrNull(
-                                (user) => user!.id == myUser.id);
-                        imInscribed = me != null;
-                      }
 
                       return Container(
                         child: LayoutBuilder(
@@ -225,7 +283,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                       _buildMatchSpots(spotsAvailable),
                                     ],
                                   ),
-                                )
+                                ),
                               ],
                             );
                           },
@@ -235,13 +293,15 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   ),
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
+              floatingActionButton: this.imInscribed
+                  ? null
+                  : FloatingActionButton(
                 child: Icon(
                   Icons.add_circle_outline,
                   size: 40.0,
                 ),
                 onPressed: () {
-                  if (imInscribed) {
+                  if (this.imInscribed) {
                     showAlert(
                         context, 'Error', 'Ya estas inscripto en este partido');
                   } else {

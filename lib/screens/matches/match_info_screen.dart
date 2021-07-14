@@ -467,14 +467,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
-        bool imIn = false;
-        if (match.participants!.isNotEmpty) {
-          imIn = (match.participants
-                  ?.firstWhereOrNull((user) => user.id == currentUser.id)) !=
-              null;
-        }
-
-        if (!imIn) {
+        if (!this.imInscribed) {
           return showAlertWithEvent(
             context,
             translations[localeName]!['match.chat.join']!,
@@ -503,7 +496,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MatchChatScreen(
-                  match: widget.match, currentUser: currentUser),
+                match: match,
+                currentUser: currentUser,
+              ),
             ),
           );
         }

@@ -36,6 +36,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     // TODO: implement initState
 
     super.initState();
+    this._searchedGender[1].checked = true;
     List<int?> genres = [1, 2];
     this._future = getUsersOffers(
       _searchedRange['distance']!.toInt(),
@@ -309,9 +310,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
     genreId,
     positionsIds,
   ) async {
+    Iterable<Genre> genders = this._searchedGender.where((Genre genre) {
+      bool? isChecked = genre.checked;
+      if (isChecked == null) {
+        return false;
+      }
+      return isChecked;
+    });
+
     final response = await UserRepository().getUserOffers(
       range,
-      genreId!,
+      genders.map((Genre genre) => genre.id).toList(),
       positionsIds,
     );
     if (response['success']) {

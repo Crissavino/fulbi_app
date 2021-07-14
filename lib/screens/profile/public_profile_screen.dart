@@ -535,10 +535,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
 
   _buildUserLocation(innerWidth) {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.0,),
       child: Text(
         translations[localeName]!['profile.usuallyPlay']! + ' ' + this._userLocation!.formattedAddress,
-        style: TextStyle(),
         overflow: TextOverflow.clip,
+        textAlign: TextAlign.center,
       ),
     );
   }

@@ -36,18 +36,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
     // TODO: implement initState
 
     super.initState();
+    List<int?> genres = [1, 2];
     this._future = getUsersOffers(
       _searchedRange['distance']!.toInt(),
-      _searchedGender.first.id,
+      genres,
       _searchedPlayerPositions.map((Position pos) => pos.id).toList(),
     );
   }
 
   Future getUsersOffers(
-      int range, int? genreId, List<int?> positionsIds) async {
+    int range,
+    List<int?> genres,
+    List<int?> positionsIds,
+  ) async {
     final response = await UserRepository().getUserOffers(
       range,
-      genreId!,
+      genres,
       positionsIds,
     );
     if (response['success']) {

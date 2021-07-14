@@ -96,7 +96,7 @@ class _YourSettingsState extends State<YourSettings> {
             width: _width,
             child: Container(
               child: TextFormField(
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.text,
                 textCapitalization: TextCapitalization.sentences,
                 style: TextStyle(
                   color: Colors.grey[700],

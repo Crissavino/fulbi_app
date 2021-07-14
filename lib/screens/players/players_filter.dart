@@ -184,12 +184,18 @@ class _PlayersFilterState extends State<PlayersFilter> {
                   onChanged: (value) {
                     widget.searchedGender[0].checked =
                     !widget.searchedGender[0].checked!;
-                    if (!widget.searchedGender[0].checked! && !value) {
-                      widget.searchedGender[1].checked = true;
-                    } else {
-                      widget.searchedGender[1].checked = false;
-                      widget.searchedGender[2].checked = false;
+                    if (!widget.searchedGender[0].checked! &&
+                        !widget.searchedGender[1].checked!)
+                    {
+                      widget.searchedGender[0].checked = true;
                     }
+                    widget.searchedGender[2].checked = false;
+                    // if (!widget.searchedGender[0].checked! && !value) {
+                    //   widget.searchedGender[1].checked = true;
+                    // } else {
+                    //   widget.searchedGender[1].checked = false;
+                    //   widget.searchedGender[2].checked = false;
+                    // }
                     setState(() {});
                   },
                 ),
@@ -225,12 +231,18 @@ class _PlayersFilterState extends State<PlayersFilter> {
                   onChanged: (value) {
                     widget.searchedGender[1].checked =
                     !widget.searchedGender[1].checked!;
-                    if (!widget.searchedGender[1].checked! && !value) {
-                      widget.searchedGender[0].checked = true;
-                    } else {
-                      widget.searchedGender[0].checked = false;
-                      widget.searchedGender[2].checked = false;
+                    if (!widget.searchedGender[0].checked! &&
+                        !widget.searchedGender[1].checked!)
+                    {
+                      widget.searchedGender[1].checked = true;
                     }
+                    widget.searchedGender[2].checked = false;
+                    // if (!widget.searchedGender[1].checked! && !value) {
+                    //   widget.searchedGender[0].checked = true;
+                    // } else {
+                    //   widget.searchedGender[0].checked = false;
+                    //   widget.searchedGender[2].checked = false;
+                    // }
                     setState(() {});
                   },
                 ),
@@ -325,7 +337,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
               );
             } else {
 
-              Genre? gender = widget.searchedGender.firstWhereOrNull((Genre genre) {
+              Iterable<Genre> genders = widget.searchedGender.where((Genre genre) {
                 bool? isChecked = genre.checked;
                 if (isChecked == null) {
                   return false;
@@ -343,7 +355,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
 
               dynamic filterResponse = await UserRepository().getUserOffers(
                 widget.searchedRange['distance']!.toInt(),
-                gender!.id,
+                genders.map((Genre genre) => genre.id).toList(),
                 positions.map((Position position) => position.id).toList(),
               );
 

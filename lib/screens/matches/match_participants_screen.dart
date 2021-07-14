@@ -44,6 +44,10 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         setState(() {
           this.imInscribed = me != null;
         });
+      } else {
+        setState(() {
+          this.imInscribed = false;
+        });
       }
 
     }

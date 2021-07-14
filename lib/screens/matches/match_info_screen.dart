@@ -120,6 +120,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         setState(() {
           this.imInscribed = me != null;
         });
+      } else {
+        setState(() {
+          this.imInscribed = false;
+        });
       }
 
     }

@@ -70,8 +70,8 @@ class SearchLocation extends SearchDelegate<Suggestion?> {
                   leading: Icon(Icons.my_location),
                   title: Text('Mi ubicacion'),
                   onTap: () async {
-                    BlocProvider.of<CompleteProfileBloc>(context)
-                        .add(ProfileCompleteLoadingUserLocationEvent());
+                    // BlocProvider.of<CompleteProfileBloc>(context)
+                    //     .add(ProfileCompleteLoadingUserLocationEvent());
                     final myLatLong =
                         await LocationRepository().determinePosition();
                     final location = await PlaceApiProvider(sessionToken)

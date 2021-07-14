@@ -251,14 +251,14 @@ class UserRepository {
 
   Future<dynamic> getUserOffers(
       int range,
-      int? genreId,
+      List<int?> genresIds,
       List positionsIds,
       ) async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
 
     final data = {
       "range": range,
-      "genre_id": genreId,
+      "genres_ids": genresIds,
       "positions_ids": positionsIds,
     };
 

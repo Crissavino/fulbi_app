@@ -25,12 +25,14 @@ import 'package:fulbito_app/utils/custom_snack_bar.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import 'screens/matches/matches_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PushNotificationService.initializeApp();
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   runApp(MyApp());
 }
 
@@ -172,6 +174,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    //FirebaseCrashlytics.instance.crash();
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('chatMessage')) {
         if (notificationData['inApp']) {

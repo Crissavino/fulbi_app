@@ -138,7 +138,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                               ),
                             ),
                             Positioned(
-                              top: 50.0,
+                              top: 80.0,
                               left: 0.0,
                               right: 0.0,
                               bottom: 0.0,

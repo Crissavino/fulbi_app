@@ -44,10 +44,10 @@ class _YourLocationState extends State<YourLocation> {
           final Suggestion? result =
           await showSearch<Suggestion?>(context: context, delegate: SearchLocation());
 
+          BlocProvider.of<ProfileBloc>(context).add(
+              ProfileUserLocationLoadedEvent()
+          );
           if (result != null) {
-            BlocProvider.of<ProfileBloc>(context).add(
-                ProfileUserLocationLoadedEvent()
-            );
             setState(() {
               userLocationDesc = result.description;
               userLocationDetails = result.details;

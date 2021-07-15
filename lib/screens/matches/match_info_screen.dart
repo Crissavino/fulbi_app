@@ -75,7 +75,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   Future<void> shareToNewPlayer() async {
     Navigator.pop(context);
-    await _createDynamicLinkToNewPlayer(false);
+    await _createDynamicLinkToNewPlayer(true);
     await FlutterShare.share(
         title: 'Invitar nuevo jugador con link',
         // text: 'Example share text',
@@ -86,7 +86,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   Future<void> shareToExistingPlayer() async {
     Navigator.pop(context);
-    await _createDynamicLinkToExistingPlayer(false);
+    await _createDynamicLinkToExistingPlayer(true);
     await FlutterShare.share(
         title: 'Invitar jugador existente con link',
         // text: 'Example share text',

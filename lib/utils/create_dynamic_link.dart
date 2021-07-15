@@ -15,7 +15,8 @@ class CreateDynamicLink {
       ),
       iosParameters: IosParameters(
         bundleId: 'com.crissavino.fulbito.fulbitoApp',
-        minimumVersion: '0',
+        minimumVersion: '1.0.1',
+        appStoreId: '1576482106',
       ),
     );
 
@@ -43,7 +44,8 @@ class CreateDynamicLink {
       ),
       iosParameters: IosParameters(
         bundleId: 'com.crissavino.fulbito.fulbitoApp',
-        minimumVersion: '0',
+        minimumVersion: '1.0.1',
+        appStoreId: '1576482106',
       ),
     );
 

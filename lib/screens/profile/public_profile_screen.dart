@@ -146,8 +146,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                         children: [
                                           SizedBox(height: 75.0),
                                           _buildUserNickname(innerWidth),
-                                          SizedBox(height: 15.0),
-                                          _buildUserReviews(innerWidth),
+                                          // SizedBox(height: 15.0),
+                                          // _buildUserReviews(innerWidth),
                                           SizedBox(height: 45.0),
                                           _buildUserLocation(innerWidth),
                                           SizedBox(height: 45.0),

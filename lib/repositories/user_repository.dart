@@ -92,6 +92,68 @@ class UserRepository {
     return body;
   }
 
+  Future<Map> loginWithGoogle(
+      String? token,
+      ) async {
+    final data = {
+      'id_token': token,
+    };
+
+    final res = await api.authData(data, '/login-with-google');
+
+    Map body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      await localStorage.setString('token', json.encode(body['token']));
+      await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
+      await localStorage.setString('user', json.encode(body['user']));
+      await localStorage.setString('userPositions', json.encode(body['user']!['player']!['positions']!));
+      if (body['user']['player']['location'] != null) {
+        await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      }
+      String? userStr = localStorage.getString("user");
+      body['user'] = User.fromJson(jsonDecode(userStr!));
+    }
+
+    return body;
+  }
+
+  Future<Map> loginWithApple(
+      String? code,
+      String? firstName,
+      String? lastName,
+      String? useBundleId,
+      String? state,
+      ) async {
+    final data = {
+      'code': code,
+      'first_name': firstName,
+      'last_name': lastName,
+      'use_bundle_id': useBundleId,
+      'state': state,
+    };
+
+    final res = await api.authData(data, '/login-with-apple');
+
+    Map body = json.decode(res.body);
+
+    if (body.containsKey('success') && body['success'] == true) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      await localStorage.setString('token', json.encode(body['token']));
+      await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
+      await localStorage.setString('user', json.encode(body['user']));
+      await localStorage.setString('userPositions', json.encode(body['user']!['player']!['positions']!));
+      if (body['user']['player']['location'] != null) {
+        await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      }
+      String? userStr = localStorage.getString("user");
+      body['user'] = User.fromJson(jsonDecode(userStr!));
+    }
+
+    return body;
+  }
+
   Future<Map> register(
     String email,
     String password,

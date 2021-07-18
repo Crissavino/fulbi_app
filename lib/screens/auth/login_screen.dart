@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fulbito_app/bloc/login/login_bloc.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/services/apple_singin_service.dart';
+import 'package:fulbito_app/services/google_signin_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -25,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // text field state
   String email = '';
   String password = '';
+
   // bool _rememberMe = false;
   bool cantSeePassword = true;
   String? localeName = Platform.localeName.split('_')[0];
@@ -138,7 +142,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () => Navigator.pushReplacementNamed(context, 'forgot_password'),
+        onPressed: () =>
+            Navigator.pushReplacementNamed(context, 'forgot_password'),
         child: Container(
           padding: EdgeInsets.only(right: 0.0),
           child: Text(
@@ -180,11 +185,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> postSignIn() async {
     if (email.isEmpty) {
-      showAlert(
-          context,
-          translations[localeName]!['loginFails']!,
-          translations[localeName]!['mandatoryEmail']!
-      );
+      showAlert(context, translations[localeName]!['loginFails']!,
+          translations[localeName]!['mandatoryEmail']!);
     } else if (password.isEmpty) {
       showAlert(
         context,
@@ -204,9 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    BlocProvider.of<LoginBloc>(context).add(
-        LoggingInEvent()
-    );
+    BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
 
     final Map res = await _userRepository.login(email, password);
 
@@ -217,20 +217,15 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Navigator.pushReplacementNamed(context, 'complete_profile');
       }
-      BlocProvider.of<LoginBloc>(context).add(
-          LoggedInEvent()
-      );
+      BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
     } else {
-      BlocProvider.of<LoginBloc>(context).add(
-          LogInErrorEvent()
-      );
+      BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
       showAlert(
         context,
         translations[localeName]!['loginFails']!,
         res['message'],
       );
     }
-
   }
 
   Widget _buildSignInWithText() {
@@ -290,23 +285,65 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           _buildSocialBtn(
-                () => print('Login with Apple'),
+          () async {
+              BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
+
+              final res = await AppleSignInService.signIn();
+
+              if (res!.containsKey('success') && res['success'] == true) {
+                User user = res['user'];
+                if (user.isFullySet) {
+                  Navigator.pushReplacementNamed(context, 'matches');
+                } else {
+                  Navigator.pushReplacementNamed(context, 'complete_profile');
+                }
+                BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
+                showAlert(
+                  context,
+                  translations[localeName]!['loginFails']!,
+                  res['message'],
+                );
+              }
+              },
             AssetImage(
               'assets/logos/apple.png',
             ),
           ),
           _buildSocialBtn(
-                () => print('Login with Google'),
+            () async {
+              BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
+
+              final res = await GoogleSignInService.singInWithGoogle();
+
+              if (res!.containsKey('success') && res['success'] == true) {
+                User user = res['user'];
+                if (user.isFullySet) {
+                  Navigator.pushReplacementNamed(context, 'matches');
+                } else {
+                  Navigator.pushReplacementNamed(context, 'complete_profile');
+                }
+                BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
+                showAlert(
+                  context,
+                  translations[localeName]!['loginFails']!,
+                  res['message'],
+                );
+              }
+            },
             AssetImage(
               'assets/logos/google.png',
             ),
           ),
-          _buildSocialBtn(
-                () => print('Login with Facebook'),
-            AssetImage(
-              'assets/logos/facebook.jpg',
-            ),
-          ),
+          // _buildSocialBtn(
+          //   () => print('Login with Facebook'),
+          //   AssetImage(
+          //     'assets/logos/facebook.jpg',
+          //   ),
+          // ),
         ],
       ),
     );
@@ -357,7 +394,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: Platform.isIOS ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        value: Platform.isIOS
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Stack(
@@ -369,19 +408,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
                 child: BlocBuilder<LoginBloc, LoginState>(
                   builder: (BuildContext context, state) {
-
                     if (state is LoggingInState) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          whiteCircularLoading
-                        ],
+                        children: [whiteCircularLoading],
                       );
                     }
 
                     return Padding(
-                      padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                      padding: EdgeInsets.only(
+                          bottom: (MediaQuery.of(context).viewInsets.bottom)),
                       child: SingleChildScrollView(
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Column(
@@ -401,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _buildForgotPasswordBtn(),
                                   // _buildRememberMeCheckbox(),
                                   _buildLoginBtn(),
-                                  // _buildSignInWithText(),
-                                  // _buildSocialBtnRow(),
+                                  _buildSignInWithText(),
+                                  _buildSocialBtnRow(),
                                   _buildSignUpBtn(),
                                 ],
                               ),

@@ -4,28 +4,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
 import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
-import 'package:fulbito_app/models/map_box_search_response.dart';
 import 'package:fulbito_app/models/type.dart';
-import 'package:fulbito_app/models/user_location.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
-import 'package:fulbito_app/screens/search/search_location.dart';
-import 'package:fulbito_app/screens/search/search_location_match.dart';
-import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
 import 'package:fulbito_app/widgets/map.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // ignore: must_be_immutable
 class CreateMatchScreen extends StatefulWidget {

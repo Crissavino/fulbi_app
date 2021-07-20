@@ -4,18 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/map_box_search_response.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
+import 'package:fulbito_app/screens/matches/edit_match_screen.dart';
 import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/services/map_box_service.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/manual_location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:fulbito_app/models/match.dart';
 
 // ignore: must_be_immutable
 class Map extends StatefulWidget {
   var currentPosition;
   bool calledFromCreate;
+  Match? match;
+  var editedValues;
 
-  Map({Key? key, required this.currentPosition, required this.calledFromCreate}) : super(key: key);
+  Map({
+    Key? key,
+    required this.currentPosition,
+    required this.calledFromCreate,
+    this.match,
+    this.editedValues,
+  }) : super(key: key);
 
   @override
   _MapState createState() => _MapState();
@@ -62,7 +72,6 @@ class _MapState extends State<Map> {
         },
         onCameraMove: (CameraPosition position) {
           this.centerPosition = position.target;
-          print(position.target);
         },
         zoomControlsEnabled: true,
         zoomGesturesEnabled: true,
@@ -73,7 +82,31 @@ class _MapState extends State<Map> {
       return Container(
         margin: EdgeInsets.only(top: 30.0, left: 10.0,),
         child: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (widget.match != null) {
+              Match editedMatch = widget.match!;
+              Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) =>
+                      EditMatchScreen(
+                        match: editedMatch,
+                        editedValues: widget.editedValues,
+                      ),
+                  transitionDuration: Duration(seconds: 0),
+                ),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) =>
+                      CreateMatchScreen(),
+                  transitionDuration: Duration(seconds: 0),
+                ),
+              );
+            }
+          },
           icon: Icon(Icons.arrow_back_ios),
         ),
       );
@@ -182,8 +215,6 @@ class _MapState extends State<Map> {
                     'is_by_lat_lng': true,
                   };
 
-                  print(this.userLocationDetails);
-
                   if (widget.calledFromCreate) {
                     Navigator.pushReplacement(
                       context,
@@ -197,6 +228,26 @@ class _MapState extends State<Map> {
                         transitionDuration: Duration(seconds: 0),
                       ),
                     );
+                  } else {
+
+                    if (widget.match != null) {
+                      Match editedMatch = widget.match!;
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              EditMatchScreen(
+                                match: editedMatch,
+                                editedValues: widget.editedValues,
+                                manualSelection: true,
+                                userLocationDesc: place.text,
+                                userLocationDetails: this.userLocationDetails,
+                              ),
+                          transitionDuration: Duration(seconds: 0),
+                        ),
+                      );
+                    }
+
                   }
                 }
 

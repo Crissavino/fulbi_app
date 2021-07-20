@@ -10,6 +10,7 @@ import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/user_location.dart';
+import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
@@ -23,12 +24,24 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:fulbito_app/widgets/map.dart';
 
 // ignore: must_be_immutable
 class EditMatchScreen extends StatefulWidget {
+  bool? manualSelection;
+  String? userLocationDesc;
+  var userLocationDetails;
   Match match;
+  var editedValues;
 
-  EditMatchScreen({Key? key, required this.match}) : super(key: key);
+  EditMatchScreen({
+    Key? key,
+    required this.match,
+    this.manualSelection,
+    this.userLocationDesc,
+    this.userLocationDetails,
+    this.editedValues,
+  }) : super(key: key);
 
   @override
   _EditMatchScreenState createState() => _EditMatchScreenState();
@@ -36,7 +49,8 @@ class EditMatchScreen extends StatefulWidget {
 
 class _EditMatchScreenState extends State<EditMatchScreen> {
   String userLocationDesc = '';
-  late UserLocation userLocationDetails;
+  var userLocationDetails;
+  UserLocation? userLocation;
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay(
     hour: DateTime.now().hour,
@@ -59,35 +73,40 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    this.matchType[0].checked = false;
-    this.matchType[1].checked = false;
-    this.matchType[2].checked = false;
-    this.matchType[3].checked = false;
 
-    this.matchGender[0].checked = false;
-    this.matchGender[1].checked = false;
-    this.matchGender[2].checked = false;
     this._future = getMatch();
-    this._myNumPlayersController.text = widget.match.numPlayers.toString();
-    this._myNumPlayersController.addListener(_printLatestPlayerForMatchValue);
+    if (widget.manualSelection == null) {
+      this.matchType[0].checked = false;
+      this.matchType[1].checked = false;
+      this.matchType[2].checked = false;
+      this.matchType[3].checked = false;
 
-    this._myMatchCostController.text = widget.match.cost.toString();
-    this._myMatchCostController.addListener(_printLatestMatchCostValue);
+      this.matchGender[0].checked = false;
+      this.matchGender[1].checked = false;
+      this.matchGender[2].checked = false;
+      this._myNumPlayersController.text = widget.match.numPlayers.toString();
+      this._myNumPlayersController.addListener(_printLatestPlayerForMatchValue);
+
+      this._myMatchCostController.text = widget.match.cost.toString();
+      this._myMatchCostController.addListener(_printLatestMatchCostValue);
+
+    }
   }
 
   @override
   void dispose() {
     _myNumPlayersController.dispose();
+    _myMatchCostController.dispose();
     super.dispose();
   }
 
   Future getMatch() async {
     final response = await MatchRepository().getMatch(widget.match.id);
-    if (response['success']) {
+    if (response['success'] && widget.manualSelection == null) {
       setState(() {
         Location location = response['location'];
         this.userLocationDesc = location.formattedAddress;
-        this.userLocationDetails = UserLocation(
+        this.userLocation = UserLocation(
           country: location.country,
           countryCode: location.countryCode,
           province: location.province,
@@ -115,6 +134,29 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         this.currencySelected = currencySymbol;
         this.matchCost = match.cost.toDouble();
       });
+    } else if (widget.manualSelection != null) {
+      this.userLocationDesc = widget.userLocationDesc!;
+      this.userLocationDetails = widget.userLocationDetails!;
+      this.userLocation = UserLocation(
+          country: this.userLocationDetails['country'],
+          countryCode: null,
+          province: this.userLocationDetails['province'],
+          provinceCode: null,
+          placeId: null,
+          formattedAddress: this.userLocationDetails['formatted_address'],
+          city: this.userLocationDetails['city'],
+          lat: this.userLocationDetails['lat'],
+          lng: this.userLocationDetails['lng'],
+          isByLatLng: true
+      );
+      this.whenPlay = widget.editedValues['whenPlay'];
+      this.matchGender = widget.editedValues['matchGender'];
+      this.matchType = widget.editedValues['matchType'];
+      this.matchCost = widget.editedValues['matchCost'];
+      this._myMatchCostController.text = this.matchCost.toString();
+      this.currencySelected = widget.editedValues['currencySelected'];
+      this.playersForMatch = int.parse(widget.editedValues['playersForMatch']);
+      this._myNumPlayersController.text = this.playersForMatch.toString();
     }
 
     return response;
@@ -221,25 +263,43 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     return GestureDetector(
       onTap: () async {
-        final Suggestion? result = await showSearch<Suggestion?>(
-            context: context, delegate: SearchLocation());
+        final myLatLong = {
+          "latitude": userLocation!.lat,
+          "longitude": userLocation!.lng
+        };
 
-        BlocProvider.of<CompleteProfileBloc>(context)
-            .add(ProfileCompleteUserLocationLoadedEvent());
+        final playerForMatch = this.playersForMatch.toString() == '0'
+            ? this._myNumPlayersController.text
+            : this.playersForMatch.toString();
 
-        if (result != null) {
-          setState(() {
-            this.userLocationDesc = result.description != null
-                ? result.description!
-                : '${result.details!.lat.toString()} ${result.details!.lng.toString()}';
-            this.userLocationDetails.isByLatLng = result.description != null
-                ? false
-                : true;
-            this.userLocationDetails = result.details!;
-            this.userLocationDetails.placeId = result.placeId;
-            this.userLocationDetails.formattedAddress = result.description;
-          });
-        }
+        final editedValues = {
+          'whenPlay': this.whenPlay,
+          'matchGender': this.matchGender,
+          'matchType': this.matchType,
+          'matchCost': this.matchCost,
+          'currencySelected': this.currencySelected,
+          'playersForMatch': playerForMatch,
+        };
+
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (
+              context,
+              animation1,
+              animation2,
+            ) =>
+                Map(
+              match: widget.match,
+              editedValues: editedValues,
+              currentPosition: myLatLong,
+              calledFromCreate: false,
+            ),
+            transitionDuration: Duration(
+              seconds: 0,
+            ),
+          ),
+        );
       },
       child: Container(
         alignment: Alignment.centerLeft,
@@ -730,22 +790,6 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               );
             }
 
-            final locationData = {
-              'lat': this.userLocationDetails.lat,
-              'lng': this.userLocationDetails.lng,
-              'formatted_address':
-                  this.userLocationDetails.formattedAddress == null
-                      ? this.userLocationDesc
-                      : this.userLocationDetails.formattedAddress,
-              'place_id': this.userLocationDetails.placeId,
-              'city': this.userLocationDetails.city,
-              'province': this.userLocationDetails.province,
-              'province_code': this.userLocationDetails.provinceCode,
-              'country': this.userLocationDetails.country,
-              'country_code': this.userLocationDetails.countryCode,
-              'is_by_lat_lng': this.userLocationDetails.isByLatLng,
-            };
-
             int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {
@@ -770,7 +814,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
             final response = await MatchRepository().edit(
               matchId,
-              locationData,
+              this.userLocationDetails,
               this.whenPlay,
               genreId!,
               typeId!,

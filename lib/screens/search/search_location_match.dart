@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
 import 'package:fulbito_app/models/map_box_search_response.dart';
-import 'package:fulbito_app/models/user_location.dart';
-import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/services/map_box_service.dart';
-import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
-import 'package:fulbito_app/widgets/create_map.dart';
-import 'package:fulbito_app/widgets/map.dart';
-import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
 import 'package:uuid/uuid.dart';
 

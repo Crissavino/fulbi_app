@@ -52,6 +52,7 @@ class SearchLocationMatch extends SearchDelegate<Feature?> {
   Widget _buildResultSuggestions(BuildContext context) {
 
     if (this.query.isEmpty) {
+      return Container();
       return ListTile(
         leading: Icon(Icons.location_on),
         title: Text('place.text'),

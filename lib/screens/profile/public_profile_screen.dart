@@ -208,7 +208,16 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                           elevation: 0.0,
                           leading: Container(
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation1, animation2) =>
+                                        PlayersScreen(),
+                                    transitionDuration: Duration(seconds: 0),
+                                  ),
+                                );
+                              },
                               icon: Icon(Icons.arrow_back_ios),
                             ),
                           ),

@@ -8,22 +8,32 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
 import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
+import 'package:fulbito_app/models/map_box_search_response.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/models/user_location.dart';
+import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/screens/search/search_location.dart';
+import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
+import 'package:fulbito_app/widgets/map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+// ignore: must_be_immutable
 class CreateMatchScreen extends StatefulWidget {
-  const CreateMatchScreen({Key? key}) : super(key: key);
+  bool? manualSelection;
+  String? userLocationDesc;
+  var userLocationDetails;
+
+  CreateMatchScreen({this.manualSelection, this.userLocationDesc, this.userLocationDetails});
 
   @override
   _CreateMatchScreenState createState() => _CreateMatchScreenState();
@@ -31,7 +41,7 @@ class CreateMatchScreen extends StatefulWidget {
 
 class _CreateMatchScreenState extends State<CreateMatchScreen> {
   String userLocationDesc = '';
-  UserLocation? userLocationDetails;
+  var userLocationDetails;
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay(
     hour: DateTime.now().hour,
@@ -53,6 +63,12 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
     this.matchType[2].checked = false;
     this.matchType[3].checked = false;
     this.currencySelected = currencies.first.code;
+
+    if (widget.manualSelection != null) {
+      this.userLocationDesc = widget.userLocationDesc!;
+      this.userLocationDetails = widget.userLocationDetails!;
+    }
+
   }
 
   @override
@@ -149,25 +165,25 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return GestureDetector(
       onTap: () async {
-        final Suggestion? result = await showSearch<Suggestion?>(
-            context: context, delegate: SearchLocation());
+        final currentPosition = await LocationRepository().determinePosition();
+        final myLatLong = {
+          "latitude": currentPosition.latitude,
+          "longitude": currentPosition.longitude
+        };
 
-        BlocProvider.of<CompleteProfileBloc>(context)
-            .add(ProfileCompleteUserLocationLoadedEvent());
-
-        if (result != null) {
-          setState(() {
-            this.userLocationDesc = result.description != null
-                ? result.description!
-                : '${result.details!.lat.toString()} ${result.details!.lng.toString()}';
-            this.userLocationDetails = result.details!;
-            this.userLocationDetails!.isByLatLng = result.description != null
-                ? false
-                : true;
-            this.userLocationDetails!.placeId = result.placeId;
-            this.userLocationDetails!.formattedAddress = result.description;
-          });
-        }
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1,
+                animation2) =>
+                Map(
+                  currentPosition: myLatLong,
+                  calledFromCreate: true,
+                ),
+            transitionDuration:
+            Duration(seconds: 0),
+          ),
+        );
       },
       child: Container(
         alignment: Alignment.centerLeft,
@@ -206,17 +222,17 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               ),
               userLocationDesc.isEmpty
                   ? Text(
-                      translations[localeName]!['match.wherePlay']!,
-                      style: TextStyle(fontSize: 16.0, color: Colors.grey),
-                      overflow: TextOverflow.ellipsis,
-                    )
+                translations[localeName]!['match.wherePlay']!,
+                style: TextStyle(fontSize: 16.0, color: Colors.grey),
+                overflow: TextOverflow.ellipsis,
+              )
                   : Expanded(
-                      child: Text(
-                        userLocationDesc,
-                        style: TextStyle(fontSize: 16.0),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                child: Text(
+                  userLocationDesc,
+                  style: TextStyle(fontSize: 16.0),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ),
@@ -648,21 +664,6 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               );
             }
 
-            final locationData = {
-              'lat': this.userLocationDetails!.lat,
-              'lng': this.userLocationDetails!.lng,
-              'formatted_address': this.userLocationDetails!.formattedAddress == null
-                  ? this.userLocationDesc
-                  : this.userLocationDetails!.formattedAddress,
-              'place_id': this.userLocationDetails!.placeId,
-              'city': this.userLocationDetails!.city,
-              'province': this.userLocationDetails!.province,
-              'province_code': this.userLocationDetails!.provinceCode,
-              'country': this.userLocationDetails!.country,
-              'country_code': this.userLocationDetails!.countryCode,
-              'is_by_lat_lng': this.userLocationDetails!.isByLatLng,
-            };
-
             int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
               if (isChecked == null) {
@@ -682,7 +683,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
             int? currencyId = this.currencies.firstWhereOrNull((Currency currency) => currency.code == this.currencySelected)!.id;
 
             final response = await MatchRepository().create(
-              locationData,
+              this.userLocationDetails,
               this.whenPlay,
               genreId!,
               typeId!,

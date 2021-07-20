@@ -278,14 +278,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildSocialBtnRow() {
+  Widget _buildSocialBtnRowForIos() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           _buildSocialBtn(
-          () async {
+                () async {
               BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
 
               final res = await AppleSignInService.signIn();
@@ -306,13 +306,57 @@ class _LoginScreenState extends State<LoginScreen> {
                   res['message'],
                 );
               }
-              },
+            },
             AssetImage(
               'assets/logos/apple.png',
             ),
           ),
           _buildSocialBtn(
-            () async {
+                () async {
+              BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
+
+              final res = await GoogleSignInService.singInWithGoogle();
+
+              if (res!.containsKey('success') && res['success'] == true) {
+                User user = res['user'];
+                if (user.isFullySet) {
+                  Navigator.pushReplacementNamed(context, 'matches');
+                } else {
+                  Navigator.pushReplacementNamed(context, 'complete_profile');
+                }
+                BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
+                showAlert(
+                  context,
+                  translations[localeName]!['loginFails']!,
+                  res['message'],
+                );
+              }
+            },
+            AssetImage(
+              'assets/logos/google.png',
+            ),
+          ),
+          // _buildSocialBtn(
+          //   () => print('Login with Facebook'),
+          //   AssetImage(
+          //     'assets/logos/facebook.jpg',
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialBtnRowForAndroid() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildSocialBtn(
+                () async {
               BlocProvider.of<LoginBloc>(context).add(LoggingInEvent());
 
               final res = await GoogleSignInService.singInWithGoogle();
@@ -439,7 +483,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   // _buildRememberMeCheckbox(),
                                   _buildLoginBtn(),
                                   _buildSignInWithText(),
-                                  _buildSocialBtnRow(),
+                                  Platform.isIOS
+                                      ? _buildSocialBtnRowForIos()
+                                      : _buildSocialBtnRowForAndroid(),
                                   _buildSignUpBtn(),
                                 ],
                               ),

@@ -403,30 +403,41 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
+  _buildPlaysInText(location) {
+    String text;
+    if (location.city != null && location.province != null) {
+      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.city + ', ' + location.province;
+    } else if (location.city != null && location.province == null) {
+      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.city;
+    } else {
+      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.province;
+    }
+    return Text(
+        text,
+        style: TextStyle(),
+        overflow: TextOverflow.clip
+    );
+  }
+
   Row _buildPlaysIn(Location location, double _width) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          child: Text(
-            translations[localeName]!['match.itPlayedIn']! +
-                ' ' +
-                location.formattedAddress,
-            style: TextStyle(),
-            overflow: TextOverflow.clip,
-          ),
+          child: _buildPlaysInText(location),
           width: _width / 1.5,
         ),
         Container(
           child: GestureDetector(
             onTap: () async {
-              if (location.isByLatLng!) {
-                await MapsUtil.openMapWithAddress(location.formattedAddress);
-                // await MapsUtil.openMap(location.lat, location.lng);
-              } else {
-                await MapsUtil.openMapWithAddress(location.formattedAddress);
-              }
+              await MapsUtil.openMap(location.lat, location.lng);
+              // if (location.isByLatLng!) {
+              //   await MapsUtil.openMapWithAddress(location.formattedAddress);
+              //   await MapsUtil.openMap(location.lat, location.lng);
+              // } else {
+              //   await MapsUtil.openMapWithAddress(location.formattedAddress);
+              // }
             },
             child: Column(
               children: [

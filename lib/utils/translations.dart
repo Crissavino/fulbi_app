@@ -4,6 +4,10 @@ String? localeName = Platform.localeName.split('_')[0];
 
 const Map<String?, Map<String?, String?>> translations = {
   'en': {
+    'general.select': 'Select',
+    'search': 'Search',
+    'myLocation': 'My location',
+    'manualSelection': 'Manual selection',
     'recoverPassword': 'Recover Password',
     'recover': 'Recover',
     'signIn': 'Sign In',
@@ -92,11 +96,15 @@ const Map<String?, Map<String?, String?>> translations = {
     'match.whichGenre': 'What genre plays?',
     'match.whichTypes': 'What type of match is it?',
     'match.create.aproxCost': 'Approximate cost',
-    'match.create.playerForMatch': 'Players for match',
+    'match.create.playerForMatch': 'Players missing for the match',
     'general.create': 'Create',
     'general.edit': 'Edit',
   },
   'es': {
+    'general.select': 'Elegir',
+    'search': 'Buscar',
+    'myLocation': 'Mi ubicación',
+    'manualSelection': 'Selección manual',
     'recoverPassword': 'Recuperar constraseña',
     'recover': 'Recuperar',
     'signIn': 'Iniciar sesión',
@@ -185,7 +193,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'match.whichGenre': 'Que género juega?',
     'match.whichTypes': 'Que tipo de partido es?',
     'match.create.aproxCost': 'Costo aproximado',
-    'match.create.playerForMatch': 'Jugadores para el partido',
+    'match.create.playerForMatch': 'Jugadores faltantes para el partido',
     'general.create': 'Crear',
     'general.edit': 'Editar',
   }

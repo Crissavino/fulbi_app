@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 import 'package:async/async.dart';
 
 class Api {
-  final String _url = Environment.apiUrl;
+  final String _url = EnvironmentConstants.apiUrl;
   //if you are using android studio emulator, change localhost to 10.0.2.2
   var token;
   String? fcmToken;

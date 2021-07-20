@@ -30,7 +30,7 @@ class PlaceApiProvider {
 
   static final String androidKey = 'YOUR_API_KEY_HERE';
   static final String iosKey = 'YOUR_API_KEY_HERE';
-  final apiKey = Environment.googlePlaceApiKey;
+  final apiKey = EnvironmentConstants.googlePlaceApiKey;
 
   Future<List<Suggestion>> fetchSuggestions2(String input) async {
     final lang = Platform.localeName;

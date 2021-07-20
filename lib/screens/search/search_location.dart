@@ -6,6 +6,9 @@ import 'package:fulbito_app/models/user_location.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/create_map.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:uuid/uuid.dart';
 
 class SearchLocation extends SearchDelegate<Suggestion?> {
@@ -14,7 +17,7 @@ class SearchLocation extends SearchDelegate<Suggestion?> {
   @override
   final String searchFieldLabel;
 
-  SearchLocation() : this.searchFieldLabel = 'Buscar...';
+  SearchLocation() : this.searchFieldLabel = translations[localeName!]!['search']! + '...';
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -68,7 +71,7 @@ class SearchLocation extends SearchDelegate<Suggestion?> {
                 padding: EdgeInsets.all(16.0),
                 child: ListTile(
                   leading: Icon(Icons.my_location),
-                  title: Text('Mi ubicacion'),
+                  title: Text(translations[localeName!]!['myLocation']!),
                   onTap: () async {
                     // BlocProvider.of<CompleteProfileBloc>(context)
                     //     .add(ProfileCompleteLoadingUserLocationEvent());

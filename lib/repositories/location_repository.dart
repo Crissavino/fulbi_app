@@ -4,7 +4,6 @@ class LocationRepository {
   // final String _accessToken = 'pk.eyJ1IjoiY3Jpc3NhdmlubyIsImEiOiJja2R4OXk4YmQyemUwMnl0YXBtb2psc2tiIn0.P857CLf3OM5PRBPL7IPHbw';
   // String _searchLatLongUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
-
   Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;

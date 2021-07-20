@@ -51,8 +51,8 @@ dependencies:
   firebase_crashlytics:
   google_sign_in:
   sign_in_with_apple:
-  crypto:
-  firebase_auth:
+  google_maps_flutter:
+  animate_do:
 
 dev_dependencies:
   flutter_test:

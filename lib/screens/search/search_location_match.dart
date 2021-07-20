@@ -4,11 +4,8 @@ import 'package:fulbito_app/services/map_box_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
-import 'package:uuid/uuid.dart';
 
 class SearchLocationMatch extends SearchDelegate<Feature?> {
-  final sessionToken = Uuid().v4();
-
   @override
   final String searchFieldLabel;
   bool calledFromCreate;
@@ -116,87 +113,5 @@ class SearchLocationMatch extends SearchDelegate<Feature?> {
 
       },
     );
-
-
-
-
-
-    // return FutureBuilder(
-    //   // We will put the api call here
-    //   future: this._mapBoxService.searchPlaceByQuery(this.query.trim(), this.myCurrentLocation),
-    //   builder: (context, AsyncSnapshot<MapBoxSearchResponse?> snapshot) => query ==
-    //       ''
-    //       ? BlocBuilder<CompleteProfileBloc, CompleteProfileState>(
-    //       builder: (BuildContext context, state) {
-    //         if (state is ProfileCompleteLoadingUserLocationState) {
-    //           return Container(
-    //             width: MediaQuery.of(context).size.width,
-    //             height: MediaQuery.of(context).size.height,
-    //             child: Column(
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               crossAxisAlignment: CrossAxisAlignment.center,
-    //               children: [circularLoading],
-    //             ),
-    //           );
-    //         }
-    //         return Container();
-    //       })
-    //       : snapshot.hasData
-    //       ? BlocBuilder<CompleteProfileBloc, CompleteProfileState>(
-    //     builder: (BuildContext context, state) {
-    //       if (state is ProfileCompleteLoadingUserLocationState) {
-    //         return Container(
-    //           width: MediaQuery.of(context).size.width,
-    //           height: MediaQuery.of(context).size.height,
-    //           child: Column(
-    //             mainAxisAlignment: MainAxisAlignment.center,
-    //             crossAxisAlignment: CrossAxisAlignment.center,
-    //             children: [circularLoading],
-    //           ),
-    //         );
-    //       }
-    //
-    //       return ListView.builder(
-    //         itemCount: snapshot.data!.length,
-    //         itemBuilder: (context, index) {
-    //           return ListTile(
-    //             // we will display the data returned from our future here
-    //             title: Text(
-    //                 snapshot.data![index].description != null
-    //                     ? snapshot.data![index].description!
-    //                     : '${snapshot.data![0].details!.lat.toString()} ${snapshot.data![0].details!.lng.toString()}'
-    //             ),
-    //             onTap: () async {
-    //               final UserLocation locationDetails =
-    //               await PlaceApiProvider(sessionToken)
-    //                   .getPlaceDetailFromId(
-    //                   snapshot.data![index].placeId!);
-    //               locationDetails.lng =
-    //                   snapshot.data![index].details!.lng;
-    //               locationDetails.lat =
-    //                   snapshot.data![index].details!.lat;
-    //               final Suggestion myLocationSuggestion = Suggestion(
-    //                 snapshot.data![index].placeId,
-    //                 snapshot.data![index].description,
-    //                 locationDetails,
-    //               );
-    //
-    //               close(context, myLocationSuggestion);
-    //             },
-    //           );
-    //         },
-    //       );
-    //     },
-    //   )
-    //       : Container(
-    //     width: MediaQuery.of(context).size.width,
-    //     height: MediaQuery.of(context).size.height,
-    //     child: Column(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       crossAxisAlignment: CrossAxisAlignment.center,
-    //       children: [circularLoading],
-    //     ),
-    //   ),
-    // );
   }
 }

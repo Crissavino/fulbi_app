@@ -80,7 +80,7 @@ class _MapState extends State<Map> {
 
     Container _buildBackArrow(BuildContext context) {
       return Container(
-        margin: EdgeInsets.only(top: 30.0, left: 10.0,),
+        margin: EdgeInsets.only(top: 50.0, left: 10.0,),
         child: IconButton(
           onPressed: () {
             if (widget.match != null) {
@@ -115,7 +115,7 @@ class _MapState extends State<Map> {
     GestureDetector _buildSearchInput(context) {
       return GestureDetector(
         child: Container(
-          margin: EdgeInsets.only(top: 30.0, left: 60.0, right: 20.0),
+          margin: EdgeInsets.only(top: 50.0, left: 60.0, right: 20.0),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           width: double.infinity,
           child: Text(translations[localeName!]!['search']! + '...', style: TextStyle( color: Colors.black87 )),
@@ -154,7 +154,7 @@ class _MapState extends State<Map> {
 
     Positioned _buildSelectButton() {
       return Positioned(
-        bottom: 20,
+        bottom: 50,
         left: 100,
         right: 100,
         child: Container(

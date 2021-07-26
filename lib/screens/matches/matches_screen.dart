@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:fulbito_app/screens/matches/matches_filter.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
+import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -30,17 +32,29 @@ class _MatchesState extends State<MatchesScreen> {
   List<Match?> matches = [];
   Future? _future;
   bool areNotifications = false;
+  StreamController notificationStreamController = new StreamController();
 
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
     this._future = getMatchesOffers(
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
       _searchedMatchType.map((Type type) => type.id).toList(),
     );
+
+    PushNotificationService.messageStream.listen((notificationData) {
+      if (notificationData.containsKey('silentUpdateChat')) {
+          notificationStreamController.sink.add(true);
+      }
+    });
+
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    notificationStreamController.close();
   }
 
   Future getMatchesOffers(int range, Genre genre, List<int?> types) async {
@@ -69,27 +83,43 @@ class _MatchesState extends State<MatchesScreen> {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
-    Positioned _buildNotification() {
-      return Positioned(
-        top: 6.0,
-        right: 5.0,
-        child: Container(
-          width: 15.0,
-          height: 15.0,
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.all(
-              Radius.circular(50.0),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10.0,
-                offset: Offset(0, 6),
+    StreamBuilder<dynamic> buildNotificationStreamBuilder() {
+      return StreamBuilder(
+        initialData: this.areNotifications,
+        stream: notificationStreamController.stream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (!snapshot.hasData) {
+            return Container();
+          }
+
+          bool areNotis = snapshot.data;
+
+          if (!areNotis) {
+            return Container();
+          }
+
+          return Positioned(
+            top: 6.0,
+            right: 5.0,
+            child: Container(
+              width: 15.0,
+              height: 15.0,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(50.0),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10.0,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
     }
 
@@ -127,7 +157,7 @@ class _MatchesState extends State<MatchesScreen> {
                   },
                 ),
               ),
-              this.areNotifications ? _buildNotification() : Container(),
+              buildNotificationStreamBuilder(),
             ],
           ),
           Container(

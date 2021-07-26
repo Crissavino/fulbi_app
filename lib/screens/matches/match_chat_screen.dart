@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -8,6 +9,7 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/chat_repository.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
+import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -34,6 +36,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   List _messages = [];
   bool isLoading = false;
   bool noMoreMessages = false;
+  StreamController messagesStreamController = new StreamController();
 
   _getLatestValue() {
     setState(() {
@@ -47,6 +50,43 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     super.initState();
     _loadHistory();
     _textController.addListener(_getLatestValue);
+
+    PushNotificationService.messageStream.listen((notificationData) {
+      if (notificationData.containsKey('silentUpdateChat')) {
+        AnimationController _animationController = AnimationController(
+          vsync: this,
+          duration: Duration(
+            milliseconds: 0,
+          ),
+        )..forward();
+
+        final Message message = notificationData['newMessage'];
+
+        if (message.type == Message.TYPES['text']) {
+          final messageToInsert = ChatMessage(
+            text: message.text,
+            sender: message.owner,
+            currentUser: widget.currentUser,
+            time: message.createdAt.toString(),
+            animationController: _animationController,
+          );
+
+          this._messages.insert(0, messageToInsert);
+          messagesStreamController.sink.add(this._messages);
+          messageToInsert.animationController.forward();
+
+        } else if(message.type == Message.TYPES['header']) {
+          final messageToInsert = HeaderMessage(
+              text: message.text,
+              time: message.createdAt.toString(),
+              animationController: _animationController
+          );
+
+          this._messages.insert(0, messageToInsert);
+          messagesStreamController.sink.add(this._messages);
+        }
+      }
+    });
   }
 
   @override
@@ -54,6 +94,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     // TODO: implement dispose
     super.dispose();
     _textController.dispose();
+    messagesStreamController.close();
   }
 
   @override
@@ -139,23 +180,44 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                 children: [circularLoading],
               ),
             )
-          : NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (!isLoading && scrollInfo.metrics.pixels ==
-              scrollInfo.metrics.maxScrollExtent && this.noMoreMessages == false) {
-            final lastMessage = this._messages.last;
-            print(lastMessage.time);
-            _loadMoreMessages(lastMessage.time!);
-          }
-          return true;
-        },
-        child: ListView.builder(
-            reverse: true,
-            padding: EdgeInsets.only(top: 15.0),
-            itemCount: _messages.length,
-            itemBuilder: (BuildContext context, int index) =>
-            _messages[index]),
-      ),
+                : StreamBuilder(
+                  stream: messagesStreamController.stream,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    
+                    if (!snapshot.hasData) {
+                      return Container(
+                        width: _width,
+                        height: _height,
+                        child: Column(
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.center,
+                          children: [circularLoading],
+                        ),
+                      );
+                    }
+
+                    final messages = snapshot.data;
+
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification scrollInfo) {
+                        if (!isLoading && scrollInfo.metrics.pixels ==
+                            scrollInfo.metrics.maxScrollExtent &&
+                            this.noMoreMessages == false) {
+                          final lastMessage = this._messages.last;
+                          _loadMoreMessages(lastMessage.time!);
+                        }
+                        return true;
+                      },
+                      child: ListView.builder(
+                          reverse: true,
+                          padding: EdgeInsets.only(top: 15.0),
+                          itemCount: messages.length,
+                          itemBuilder: (BuildContext context, int index) => messages[index]),
+                    );
+                },
+          ),
     );
   }
 
@@ -188,10 +250,11 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               animationController: _animationController
           );
         }
-      });
+      }).toList();
 
-      this.isLoading = false;
+      messagesStreamController.sink.add(history);
       setState(() {
+        this.isLoading = false;
         _messages.insertAll(0, history);
         // _messages.insert(3, HeaderMessage(text: 'Pepito se unio al partido', animationController: _animationController));
       });
@@ -311,6 +374,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       ),
     );
     this._messages.insert(0, newMessage);
+    messagesStreamController.sink.add(this._messages);
     // desp de insertar el mensaje disparo la animacion
     newMessage.animationController.forward();
 

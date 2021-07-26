@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fulbito_app/models/match.dart';
+import 'package:fulbito_app/models/message.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 
 // B2:AA:58:CA:75:9C:1C:D8:76:C8:61:15:34:FC:9E:8B:48:FE:A1:1C
@@ -74,6 +75,21 @@ class PushNotificationService {
         'inApp': false,
       });
     }
+
+    // silence
+    if (message.data['notification_type'] == 'silence_match_edited') {
+      _messageStreamController.sink.add({
+        'silentUpdateMatch': true,
+      });
+    }
+
+    if (message.data['notification_type'] == 'silence_new_chat_message') {
+      final Message newMessage = Message.fromJson(message.data['message']);
+      _messageStreamController.sink.add({
+        'silentUpdateChat': true,
+        'newMessage': newMessage,
+      });
+    }
   }
 
   static Future<void> _onMessageOpenedHandler(RemoteMessage message) async {
@@ -132,6 +148,21 @@ class PushNotificationService {
       _messageStreamController.sink.add({
         'goToMatchesScreen': true,
         'inApp': false,
+      });
+    }
+
+    // silence
+    if (message.data['notification_type'] == 'silence_match_edited') {
+      _messageStreamController.sink.add({
+        'silentUpdateMatch': true,
+      });
+    }
+
+    if (message.data['notification_type'] == 'silence_new_chat_message') {
+      final Message newMessage = Message.fromJson(message.data['message']);
+      _messageStreamController.sink.add({
+        'silentUpdateChat': true,
+        'newMessage': newMessage,
       });
     }
   }
@@ -203,6 +234,21 @@ class PushNotificationService {
       });
     }
 
+    // silence
+    if (message.data['notification_type'] == 'silence_match_edited') {
+      _messageStreamController.sink.add({
+        'silentUpdateMatch': true,
+      });
+    }
+
+    if (message.data['notification_type'] == 'silence_new_chat_message') {
+      final messageData = json.decode(message.data['message']);
+      final Message newMessage = Message.fromJson(messageData);
+      _messageStreamController.sink.add({
+        'silentUpdateChat': true,
+        'newMessage': newMessage,
+      });
+    }
   }
 
   static Future initializeApp() async {

@@ -13,6 +13,7 @@ import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
+import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/create_dynamic_link.dart';
 import 'package:fulbito_app/utils/maps_util.dart';
@@ -135,6 +136,13 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    PushNotificationService.messageStream.listen((notificationData) {
+      if (notificationData.containsKey('silentUpdateMatch')) {
+        setState(() {
+          this._future = this.getFutureData();
+        });
+      }
+    });
     this._future = this.getFutureData();
   }
 

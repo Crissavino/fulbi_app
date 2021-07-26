@@ -178,17 +178,17 @@ class _MyAppState extends State<MyApp> {
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('chatMessage')) {
         if (notificationData['inApp']) {
-          messengerKey.currentState
-              ?.showSnackBar(customSnackBar(notificationData['title'], () {
-            navigatorKey.currentState?.push(
-              MaterialPageRoute(
-                builder: (context) => MatchChatScreen(
-                  match: notificationData['match'],
-                  currentUser: notificationData['currentUser'],
-                ),
-              ),
-            );
-          }));
+          // messengerKey.currentState
+          //     ?.showSnackBar(customSnackBar(notificationData['title'], () {
+          //   navigatorKey.currentState?.push(
+          //     MaterialPageRoute(
+          //       builder: (context) => MatchChatScreen(
+          //         match: notificationData['match'],
+          //         currentUser: notificationData['currentUser'],
+          //       ),
+          //     ),
+          //   );
+          // }));
         } else {
           navigatorKey.currentState?.push(
             MaterialPageRoute(

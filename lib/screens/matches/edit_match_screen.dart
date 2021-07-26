@@ -106,6 +106,19 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       setState(() {
         Location location = response['location'];
         this.userLocationDesc = location.formattedAddress;
+        this.userLocationDetails = {
+          'lat': location.lat,
+          'lng': location.lng,
+          'formatted_address': location.formattedAddress,
+          'place_name': location.formattedAddress,
+          'place_id': null,
+          'city': location.city,
+          'province': location.province,
+          'province_code': null,
+          'country': location.country,
+          'country_code': null,
+          'is_by_lat_lng': true,
+        };
         this.userLocation = UserLocation(
           country: location.country,
           countryCode: location.countryCode,
@@ -822,6 +835,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               this.matchCost,
               int.parse(this._myNumPlayersController.text),
             );
+
+            // Navigator.replace(context, oldRoute: oldRoute, newRoute: newRoute)
 
             if (response['success']) {
               Navigator.pushReplacement(

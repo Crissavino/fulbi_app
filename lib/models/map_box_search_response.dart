@@ -54,7 +54,7 @@ class Feature {
   String id;
   String type;
   List<String> placeType;
-  int relevance;
+  double relevance;
   Properties properties;
   String text;
   String placeName;
@@ -67,7 +67,7 @@ class Feature {
     id: json["id"],
     type: json["type"],
     placeType: List<String>.from(json["place_type"].map((x) => x)),
-    relevance: json["relevance"],
+    relevance: double.parse(json["relevance"].toString()),
     properties: Properties.fromJson(json["properties"]),
     text: json["text"],
     placeName: json["place_name"],

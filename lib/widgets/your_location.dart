@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/profile/profile_bloc.dart';
 import 'package:fulbito_app/models/location.dart';
-import 'package:fulbito_app/models/user_location.dart';
+import 'package:fulbito_app/models/map_box_search_response.dart';
+import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
-import 'package:fulbito_app/screens/search/search_location.dart';
-import 'package:fulbito_app/services/place_service.dart';
-import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class YourLocation extends StatefulWidget {
@@ -24,7 +22,7 @@ class YourLocation extends StatefulWidget {
 
 class _YourLocationState extends State<YourLocation> {
   String? userLocationDesc;
-  UserLocation? userLocationDetails;
+  var userLocationDetails;
 
   @override
   void initState() {
@@ -41,19 +39,53 @@ class _YourLocationState extends State<YourLocation> {
     Widget _buildSearchLocationBar() {
       return GestureDetector(
         onTap: () async {
-          final Suggestion? result =
-          await showSearch<Suggestion?>(context: context, delegate: SearchLocation());
+          final currentPosition = await LocationRepository().determinePosition();
 
-          BlocProvider.of<ProfileBloc>(context).add(
-              ProfileUserLocationLoadedEvent()
+          final Feature? result = await showSearch<Feature?>(
+            context: context,
+            delegate: SearchLocationMatch(
+                calledFromCreate: true,
+                myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
+            ),
           );
+
           if (result != null) {
-            setState(() {
-              userLocationDesc = result.description;
-              userLocationDetails = result.details;
-              userLocationDetails!.placeId = result.placeId;
-              userLocationDetails!.formattedAddress = result.description;
+
+            final Feature place = result;
+            final double latitude = result.center[1].toDouble();
+            final double longitude = result.center[0].toDouble();
+            var cityContext = place.context.firstWhereOrNull((Context con) {
+              if (con.id.contains('place')) {
+                return true;
+              } else if (con.id.contains('district')) {
+                return true;
+              } else {
+                return false;
+              }
             });
+            var city = place.placeName.split(',')[0];
+            if (cityContext != null) {
+              city = cityContext.text;
+            }
+            final province = place.context.firstWhere((Context con) => con.id.contains('region')).text;
+            final country = place.context.firstWhere((Context con) => con.id.contains('country')).text;
+
+            this.userLocationDetails = {
+              'lat': latitude,
+              'lng': longitude,
+              'formatted_address': place.placeName,
+              'place_name': place.placeName,
+              'place_id': null,
+              'city': city,
+              'province': province,
+              'province_code': null,
+              'country': country,
+              'country_code': null,
+              'is_by_lat_lng': true,
+            };
+
+            userLocationDesc = place.placeName;
+            setState(() {});
           }
         },
         child: Container(
@@ -112,135 +144,108 @@ class _YourLocationState extends State<YourLocation> {
             left: 20.0,
             right: 20.0,
           ),
-          child: BlocBuilder<ProfileBloc, ProfileState>(
-            builder: (BuildContext context, state) {
-
-              if (state is ProfileLoadingState) {
-                return Container(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      circularLoading
-                    ],
+          child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // SizedBox(height: 30.0,),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.0,
                   ),
-                );
-              }
-
-              return Stack(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  margin: EdgeInsets.only(
+                    top: 40.0,
+                  ),
+                  width: double.infinity,
+                  child: Center(
+                    child: Text(
+                      userLocationDesc!,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.clip,
+                      maxLines: 2,
+                    ),
+                  ),
+                ),
+                // SizedBox(height: 50.0,),
+                _buildSearchLocationBar(),
+                Container(
+                  height: 250.0,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // SizedBox(height: 30.0,),
                       Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20.0,
-                        ),
-                        margin: EdgeInsets.only(
-                          top: 40.0,
-                        ),
-                        width: double.infinity,
-                        child: Center(
-                          child: Text(
-                            userLocationDesc!,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.green[600]!,
+                              Colors.green[500]!,
+                              Colors.green[500]!,
+                              Colors.green[600]!,
+                            ],
+                            stops: [0.1, 0.4, 0.7, 0.9],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green[100]!,
+                              blurRadius: 10.0,
+                              offset: Offset(0, 5),
                             ),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.clip,
-                            maxLines: 2,
+                          ],
+                          color: Colors.green[400],
+                          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        ),
+                        width: _width * .40,
+                        height: 50.0,
+                        child: Center(
+                          child: TextButton(
+                            onPressed: () async {
+                              if (userLocationDetails == null) {
+                                return Navigator.pop(context);
+                              }
+
+                              final editUserLocationResponse =
+                                  await UserRepository().editUserLocation(
+                                userLocationDetails,
+                              );
+
+                              if (editUserLocationResponse['success'] == true) {
+                                Navigator.pop(context, true);
+                              } else {
+                                return showAlert(
+                                  context,
+                                  'Error!',
+                                  'Ocurrió un error al guardar tu ubicacion!',
+                                );
+                              }
+                            },
+                            child: Text(
+                              translations[localeName]!['general.save']!
+                                  .toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'OpenSans',
+                                fontSize: 16.0,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      // SizedBox(height: 50.0,),
-                      _buildSearchLocationBar(),
-                      Container(
-                        height: 250.0,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.green[600]!,
-                                    Colors.green[500]!,
-                                    Colors.green[500]!,
-                                    Colors.green[600]!,
-                                  ],
-                                  stops: [0.1, 0.4, 0.7, 0.9],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green[100]!,
-                                    blurRadius: 10.0,
-                                    offset: Offset(0, 5),
-                                  ),
-                                ],
-                                color: Colors.green[400],
-                                borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                              ),
-                              width: _width * .40,
-                              height: 50.0,
-                              child: Center(
-                                child: TextButton(
-                                  onPressed: () async {
-
-                                    if (userLocationDetails == null) {
-                                      return Navigator.pop(context);
-                                    }
-
-                                    BlocProvider.of<ProfileBloc>(context).add(
-                                        ProfileLoadingEvent()
-                                    );
-                                    final editUserLocationResponse =
-                                    await UserRepository().editUserLocation(
-                                      userLocationDetails,
-                                    );
-
-                                    if (editUserLocationResponse['success'] == true) {
-                                      Navigator.pop(context, true);
-
-                                      BlocProvider.of<ProfileBloc>(context).add(
-                                          ProfileCompleteEvent()
-                                      );
-                                    } else {
-                                      BlocProvider.of<ProfileBloc>(context).add(
-                                          ProfileErrorEvent()
-                                      );
-                                      return showAlert(
-                                        context,
-                                        'Error!',
-                                        'Ocurrió un error al guardar tu ubicacion!',
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    translations[localeName]!['general.save']!.toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'OpenSans',
-                                      fontSize: 16.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
                     ],
                   ),
-                  ModalTopBar()
-                ],
-              );
-            },
-          ),
+                )
+              ],
+            ),
+            ModalTopBar()
+          ],
         ),
+      ),
     );
   }
 }

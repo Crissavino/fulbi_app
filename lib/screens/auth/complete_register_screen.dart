@@ -2,18 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
-import 'package:fulbito_app/models/user_location.dart';
+import 'package:fulbito_app/models/map_box_search_response.dart';
+import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
-import 'package:fulbito_app/screens/search/search_location.dart';
-import 'package:fulbito_app/services/place_service.dart';
+import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:collection/collection.dart';
 
 class CompleteRegisterScreen extends StatefulWidget {
   const CompleteRegisterScreen({Key? key}) : super(key: key);
@@ -28,7 +27,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
   bool _male = false;
   bool _female = false;
   String userLocationDesc = '';
-  late UserLocation userLocationDetails;
+  var userLocationDetails;
   UserRepository _userRepository = UserRepository();
 
   @override
@@ -38,55 +37,73 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
     Widget _buildSearchLocationBar() {
       return GestureDetector(
         onTap: () async {
-          final Suggestion? result =
-          await showSearch<Suggestion?>(context: context, delegate: SearchLocation());
+          final currentPosition = await LocationRepository().determinePosition();
 
-          BlocProvider.of<CompleteProfileBloc>(context).add(
-              ProfileCompleteUserLocationLoadedEvent()
+          final Feature? result = await showSearch<Feature?>(
+            context: context,
+            delegate: SearchLocationMatch(
+                calledFromCreate: true,
+                myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
+            ),
           );
 
           if (result != null) {
-            setState(() {
-              userLocationDesc = result.description!;
-              userLocationDetails = result.details!;
-              userLocationDetails.placeId = result.placeId;
-              userLocationDetails.formattedAddress = result.description;
+            final Feature place = result;
+            final double latitude = result.center[1].toDouble();
+            final double longitude = result.center[0].toDouble();
+            var cityContext = place.context.firstWhereOrNull((Context con) {
+              if (con.id.contains('place')) {
+                return true;
+              } else if (con.id.contains('district')) {
+                return true;
+              } else {
+                return false;
+              }
             });
-          }
-
-        },
-        child: BlocBuilder<CompleteProfileBloc, CompleteProfileState>(
-          builder: (BuildContext context, state) {
-
-            if (state is ProfileCompleteLoadingUserLocationState) {
-              return Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    circularLoading
-                  ],
-                ),
-              );
+            var city = place.placeName.split(',')[0];
+            if (cityContext != null) {
+              city = cityContext.text;
             }
+            final province = place.context
+                .firstWhere((Context con) => con.id.contains('region'))
+                .text;
+            final country = place.context
+                .firstWhere((Context con) => con.id.contains('country'))
+                .text;
 
-            return Container(
-              alignment: Alignment.centerLeft,
-              decoration: kBoxDecorationStyle,
-              height: 50.0,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 13.0,
-                ),
-                width: double.infinity,
-                child: Text(
-                  userLocationDesc.isEmpty ? '${translations[localeName]!['general.location']!}...' : userLocationDesc,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            );
-          },
+            this.userLocationDetails = {
+              'lat': latitude,
+              'lng': longitude,
+              'formatted_address': place.placeName,
+              'place_name': place.placeName,
+              'place_id': null,
+              'city': city,
+              'province': province,
+              'province_code': null,
+              'country': country,
+              'country_code': null,
+              'is_by_lat_lng': true,
+            };
+
+            userLocationDesc = place.placeName;
+            setState(() {});
+          }
+        },
+        child: Container(
+          alignment: Alignment.centerLeft,
+          decoration: kBoxDecorationStyle,
+          height: 50.0,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 13.0,
+            ),
+            width: double.infinity,
+            child: Text(
+              userLocationDesc.isEmpty ? '${translations[localeName]!['general.location']!}...' : userLocationDesc,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ),
       );
     }
@@ -319,23 +336,13 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                           child: TextButton(
                             onPressed: () async {
 
-                              BlocProvider.of<CompleteProfileBloc>(context).add(
-                                  ProfileCompleteLoadingEvent()
-                              );
-
                               if (userLocationDesc.isEmpty){
-                                BlocProvider.of<CompleteProfileBloc>(context).add(
-                                    ProfileCompleteErrorEvent()
-                                );
                                 return showAlert(
                                   context,
                                   'Atencion!',
                                   'Debes seleccionar algun lugar en el que usualmente juegas',
                                 );
                               } else if (!_male && !_female){
-                                BlocProvider.of<CompleteProfileBloc>(context).add(
-                                    ProfileCompleteErrorEvent()
-                                );
                                 return showAlert(
                                   context,
                                   'Atencion!',
@@ -358,14 +365,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
 
                               if (completeUserProfileResponse['success'] == true) {
                                 Navigator.pushReplacementNamed(context, 'intro');
-
-                                BlocProvider.of<CompleteProfileBloc>(context).add(
-                                    ProfileCompletedEvent()
-                                );
                               } else {
-                                BlocProvider.of<CompleteProfileBloc>(context).add(
-                                    ProfileCompleteErrorEvent()
-                                );
                                 return showAlert(
                                   context,
                                   'Error!',

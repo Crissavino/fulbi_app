@@ -11,6 +11,7 @@ import 'package:fulbito_app/widgets/create_map.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:uuid/uuid.dart';
 
+@deprecated
 class SearchLocation extends SearchDelegate<Suggestion?> {
   final sessionToken = Uuid().v4();
 

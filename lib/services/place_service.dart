@@ -6,6 +6,7 @@ import 'package:fulbito_app/utils/environment.dart';
 import 'package:http/http.dart';
 
 // For storing our result
+@deprecated
 class Suggestion {
   final String? placeId;
   final String? description;

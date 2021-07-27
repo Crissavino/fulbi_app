@@ -516,7 +516,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           ],
         ),
         child: ListTile(
-          title: Text('Posiciones'),
+          title: Text(translations[localeName]!['general.positions']!),
           trailing: Icon(
             Icons.keyboard_arrow_up_outlined,
             size: 40.0,
@@ -559,7 +559,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           ],
         ),
         child: ListTile(
-          title: Text('Lugar donde jugas'),
+          title: Text(translations[localeName]!['profile.wherePlay']!),
           trailing: Icon(
             Icons.keyboard_arrow_up_outlined,
             size: 40.0,

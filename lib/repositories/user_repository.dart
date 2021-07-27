@@ -209,7 +209,7 @@ class UserRepository {
 
     final data = {
       "user_id": user.id,
-      "userLocationDetails": userLocationDetails.toJson(),
+      "userLocationDetails": userLocationDetails,
       "genre_id": genreId
     };
 
@@ -295,7 +295,7 @@ class UserRepository {
   Future<dynamic> editUserLocation(dynamic userLocationDetails) async {
 
     final data = {
-      "userLocationDetails": userLocationDetails.toJson(),
+      "userLocationDetails": userLocationDetails,
     };
 
     final res = await api.postData(data, '/edit-user-location');

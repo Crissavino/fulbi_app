@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -12,6 +12,7 @@ import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
+import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
@@ -26,8 +27,13 @@ import 'package:collection/collection.dart';
 // ignore: must_be_immutable
 class MatchInfoScreen extends StatefulWidget {
   Match match;
+  bool calledFromMyMatches;
 
-  MatchInfoScreen({Key? key, required this.match}) : super(key: key);
+  MatchInfoScreen({
+    Key? key,
+    required this.match,
+    required this.calledFromMyMatches,
+  }) : super(key: key);
 
   @override
   _MatchInfoScreenState createState() => _MatchInfoScreenState();
@@ -39,6 +45,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   String? _linkMessage;
   bool imInscribed = true;
   Future? _future;
+  StreamController notificationStreamController = StreamController.broadcast();
+  StreamController matchStreamController = StreamController.broadcast();
 
   Future<void> _createDynamicLinkToNewPlayer(bool short) async {
     setState(() {
@@ -114,6 +122,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     if (response['success']) {
       List<User?> participants = response['match'].participants!;
       User myUser = response['myUser'];
+      if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
+          response['match'].haveNotifications
+      );
 
       if (participants.isNotEmpty) {
         User? me = participants.firstWhereOrNull(
@@ -127,6 +138,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         });
       }
 
+      if (!matchStreamController.isClosed) matchStreamController.sink.add(
+          response
+      );
+
     }
 
     return response;
@@ -136,14 +151,30 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    silentNotificationListener();
+    this._future = this.getFutureData();
+  }
+
+  void silentNotificationListener() {
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('silentUpdateMatch')) {
-        setState(() {
-          this._future = this.getFutureData();
-        });
+        if (!matchStreamController.isClosed) matchStreamController.sink.add(
+            notificationData['response'],
+        );
+      }
+      if (notificationData.containsKey('silentUpdateChat')) {
+        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
+            true,
+        );
       }
     });
-    this._future = this.getFutureData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    notificationStreamController.close();
+    matchStreamController.close();
   }
 
   @override
@@ -168,6 +199,25 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
+                    leading: IconButton(
+                      onPressed: () {
+                        if (widget.calledFromMyMatches) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MyMatchesScreen(),
+                            ),
+                          ).then((_) => setState(() {}));
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MatchesScreen(),
+                            ),
+                          ).then((_) => setState(() {}));
+                        }
+                      },
+                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
+                      splashColor: Colors.transparent,
+                    ),
                     title: Text(
                       translations[localeName]!['match.info']!,
                       style: TextStyle(
@@ -243,66 +293,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     ? SystemUiOverlayStyle.light
                     : SystemUiOverlayStyle.dark,
                 child: Center(
-                  child: FutureBuilder(
-                    future: this._future,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<dynamic> snapshot) {
-                      if (!snapshot.hasData) {
-                        return Container(
-                          width: _width,
-                          height: _height,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [circularLoading],
-                          ),
-                        );
-                      }
-
-                      Match match = snapshot.data['match'];
-                      Location location = snapshot.data['location'];
-                      Genre genre = snapshot.data['genre'];
-                      Type type = snapshot.data['type'];
-                      String currencySymbol = snapshot.data['currency'];
-                      print(match.participants);
-                      int playersEnrolled = snapshot.data['playersEnrolled'];
-                      String spotsAvailable =
-                          (match.numPlayers - playersEnrolled).toString();
-
-                      return Container(
-                        child: LayoutBuilder(
-                          builder: (BuildContext context,
-                              BoxConstraints constraints) {
-                            return Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(
-                                    left: 20.0,
-                                    right: 20.0,
-                                    top: 40.0,
-                                    bottom: 20.0,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildPlaysIn(location, _width),
-                                      _buildPlaysOn(match),
-                                      _buildMatchType(type),
-                                      _buildMatchGenre(genre),
-                                      _buildMatchCost(currencySymbol, match),
-                                      _buildMatchSpots(spotsAvailable),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  child: buildMatchStreamBuilder(),
                 ),
               ),
               floatingActionButton: this.imInscribed
@@ -440,12 +431,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
           child: GestureDetector(
             onTap: () async {
               await MapsUtil.openMap(location.lat, location.lng);
-              // if (location.isByLatLng!) {
-              //   await MapsUtil.openMapWithAddress(location.formattedAddress);
-              //   await MapsUtil.openMap(location.lat, location.lng);
-              // } else {
-              //   await MapsUtil.openMapWithAddress(location.formattedAddress);
-              // }
             },
             child: Column(
               children: [
@@ -470,7 +455,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   void _navigateToSection(index) async {
-    // TODO usar sockets para esto
     final resp = await MatchRepository().getMatch(widget.match.id);
     Match match = resp['match'];
     switch (index) {
@@ -480,6 +464,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
           MaterialPageRoute(
             builder: (context) => MatchParticipantsScreen(
               match: match,
+              calledFromMyMatches: widget.calledFromMyMatches,
             ),
           ),
         );
@@ -501,7 +486,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => MatchChatScreen(
-                        match: widget.match, currentUser: currentUser),
+                        match: widget.match,
+                      currentUser: currentUser,
+                      calledFromMyMatches: widget.calledFromMyMatches,
+                    ),
                   ),
                 );
               } else {
@@ -517,6 +505,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
               builder: (context) => MatchChatScreen(
                 match: match,
                 currentUser: currentUser,
+                calledFromMyMatches: widget.calledFromMyMatches,
               ),
             ),
           );
@@ -559,16 +548,117 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
           title: Text('Chat'),
-          icon: widget.match.haveNotifications
-              ? Stack(
-                  children: [
-                    Icon(Icons.chat_bubble_outline),
-                    _buildNotification(),
-                  ],
-                )
-              : Icon(Icons.chat_bubble_outline),
+          icon: buildNotificationStreamBuilder(),
         ),
       ],
+    );
+  }
+
+  buildMatchStreamBuilder() {
+    return StreamBuilder(
+      stream: matchStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+
+        final _width = MediaQuery.of(context).size.width;
+        final _height = MediaQuery.of(context).size.height;
+
+        if (!snapshot.hasData) {
+          return Container(
+            width: _width,
+            height: _height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [circularLoading],
+            ),
+          );
+        }
+
+        Match match = snapshot.data['match'];
+        Location location = snapshot.data['location'];
+        Genre genre = snapshot.data['genre'];
+        Type type = snapshot.data['type'];
+        String currencySymbol = snapshot.data['currency'];
+        print(match.participants);
+        int playersEnrolled = snapshot.data['playersEnrolled'];
+        String spotsAvailable =
+        (match.numPlayers - playersEnrolled).toString();
+
+        return Container(
+          child: LayoutBuilder(
+            builder: (BuildContext context,
+                BoxConstraints constraints) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(
+                      left: 20.0,
+                      right: 20.0,
+                      top: 40.0,
+                      bottom: 20.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                      children: [
+                        _buildPlaysIn(location, _width),
+                        _buildPlaysOn(match),
+                        _buildMatchType(type),
+                        _buildMatchGenre(genre),
+                        _buildMatchCost(currencySymbol, match),
+                        _buildMatchSpots(spotsAvailable),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  StreamBuilder<dynamic> buildNotificationStreamBuilder() {
+    return StreamBuilder(
+      initialData: widget.match.haveNotifications,
+      stream: notificationStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+
+        if (!this.imInscribed) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        bool areNotis = snapshot.data;
+
+        if (!areNotis) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        return Stack(
+          children: [
+            Icon(Icons.chat_bubble_outline),
+            _buildNotification(),
+          ],
+        );
+      },
     );
   }
 

@@ -78,17 +78,45 @@ class PushNotificationService {
 
     // silence
     if (message.data['notification_type'] == 'silence_match_edited') {
-      _messageStreamController.sink.add({
-        'silentUpdateMatch': true,
-      });
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateMatch': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
+    }
+
+    if (message.data['notification_type'] == 'silence_join_match' ||
+        message.data['notification_type'] == 'silence_leave_match') {
+      final getMatchResponse =
+          await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']) {
+        _messageStreamController.sink.add({
+          'silentUpdateParticipants': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
     }
 
     if (message.data['notification_type'] == 'silence_new_chat_message') {
-      final Message newMessage = Message.fromJson(message.data['message']);
-      _messageStreamController.sink.add({
-        'silentUpdateChat': true,
-        'newMessage': newMessage,
-      });
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      final messageData = json.decode(message.data['message']);
+      final Message newMessage = Message.fromJson(messageData);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateChat': true,
+          'match': getMatchResponse['match'],
+          'newMessage': newMessage,
+        });
+      }
+      // final Message newMessage = Message.fromJson(message.data['message']);
+      // _messageStreamController.sink.add({
+      //   'silentUpdateChat': true,
+      //   'newMessage': newMessage,
+      // });
     }
   }
 
@@ -153,36 +181,64 @@ class PushNotificationService {
 
     // silence
     if (message.data['notification_type'] == 'silence_match_edited') {
-      _messageStreamController.sink.add({
-        'silentUpdateMatch': true,
-      });
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateMatch': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
+    }
+
+    if (message.data['notification_type'] == 'silence_join_match' ||
+        message.data['notification_type'] == 'silence_leave_match') {
+      final getMatchResponse =
+          await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']) {
+        _messageStreamController.sink.add({
+          'silentUpdateParticipants': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
     }
 
     if (message.data['notification_type'] == 'silence_new_chat_message') {
-      final Message newMessage = Message.fromJson(message.data['message']);
-      _messageStreamController.sink.add({
-        'silentUpdateChat': true,
-        'newMessage': newMessage,
-      });
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      final messageData = json.decode(message.data['message']);
+      final Message newMessage = Message.fromJson(messageData);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateChat': true,
+          'match': getMatchResponse['match'],
+          'newMessage': newMessage,
+        });
+      }
+      // final Message newMessage = Message.fromJson(message.data['message']);
+      // _messageStreamController.sink.add({
+      //   'silentUpdateChat': true,
+      //   'newMessage': newMessage,
+      // });
     }
   }
 
   static Future<void> _onMessageHandler(RemoteMessage message) async {
 
     // cuando estas en la app
-    if (message.data['notification_type'] == 'new_chat_message') {
-      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
-      if (getMatchResponse['success']){
-        _messageStreamController.sink.add({
-          'chatMessage': true,
-          'inApp': true,
-          'title': message.notification?.title ?? '',
-          'body': message.notification?.body ?? '',
-          'match': getMatchResponse['match'],
-          'currentUser': getMatchResponse['myUser'],
-        });
-      }
-    }
+    // if (message.data['notification_type'] == 'new_chat_message') {
+    //   final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+    //   if (getMatchResponse['success']){
+    //     _messageStreamController.sink.add({
+    //       'chatMessage': true,
+    //       'inApp': true,
+    //       'title': message.notification?.title ?? '',
+    //       'body': message.notification?.body ?? '',
+    //       'match': getMatchResponse['match'],
+    //       'currentUser': getMatchResponse['myUser'],
+    //     });
+    //   }
+    // }
     if (message.data['notification_type'] == 'match_invitation') {
       _messageStreamController.sink.add({
         'goToMyMatches': true,
@@ -236,18 +292,40 @@ class PushNotificationService {
 
     // silence
     if (message.data['notification_type'] == 'silence_match_edited') {
-      _messageStreamController.sink.add({
-        'silentUpdateMatch': true,
-      });
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateMatch': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
+    }
+
+    if (message.data['notification_type'] == 'silence_join_match' ||
+        message.data['notification_type'] == 'silence_leave_match') {
+      final getMatchResponse =
+          await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']) {
+        _messageStreamController.sink.add({
+          'silentUpdateParticipants': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
     }
 
     if (message.data['notification_type'] == 'silence_new_chat_message') {
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
       final messageData = json.decode(message.data['message']);
       final Message newMessage = Message.fromJson(messageData);
-      _messageStreamController.sink.add({
-        'silentUpdateChat': true,
-        'newMessage': newMessage,
-      });
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentUpdateChat': true,
+          'match': getMatchResponse['match'],
+          'newMessage': newMessage,
+        });
+      }
     }
   }
 

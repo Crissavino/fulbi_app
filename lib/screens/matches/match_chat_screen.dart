@@ -9,6 +9,8 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/chat_repository.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
+import 'package:fulbito_app/screens/matches/matches_screen.dart';
+import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -20,8 +22,13 @@ import 'package:fulbito_app/widgets/header_message.dart';
 class MatchChatScreen extends StatefulWidget {
   Match match;
   User currentUser;
+  bool calledFromMyMatches;
 
-  MatchChatScreen({required this.match, required this.currentUser});
+  MatchChatScreen({
+    required this.match,
+    required this.currentUser,
+    required this.calledFromMyMatches,
+  });
 
   @override
   _MatchChatScreenState createState() => _MatchChatScreenState();
@@ -36,7 +43,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   List _messages = [];
   bool isLoading = false;
   bool noMoreMessages = false;
-  StreamController messagesStreamController = new StreamController();
+  StreamController messagesStreamController = StreamController.broadcast();
 
   _getLatestValue() {
     setState(() {
@@ -51,6 +58,10 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     _loadHistory();
     _textController.addListener(_getLatestValue);
 
+    silentNotificationListener();
+  }
+
+  void silentNotificationListener() {
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('silentUpdateChat')) {
         AnimationController _animationController = AnimationController(
@@ -72,7 +83,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           );
 
           this._messages.insert(0, messageToInsert);
-          messagesStreamController.sink.add(this._messages);
+          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
           messageToInsert.animationController.forward();
 
         } else if(message.type == Message.TYPES['header']) {
@@ -83,7 +94,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           );
 
           this._messages.insert(0, messageToInsert);
-          messagesStreamController.sink.add(this._messages);
+          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
         }
       }
     });
@@ -93,6 +104,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    ChatRepository().readMessages(widget.match.id);
     _textController.dispose();
     messagesStreamController.close();
   }
@@ -116,6 +128,25 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                         SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
+                    leading: IconButton(
+                      onPressed: () {
+                        if (widget.calledFromMyMatches) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MyMatchesScreen(),
+                            ),
+                          ).then((_) => setState(() {}));
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MatchesScreen(),
+                            ),
+                          ).then((_) => setState(() {}));
+                        }
+                      },
+                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
+                      splashColor: Colors.transparent,
+                    ),
                     title: Text(
                       'Chat',
                       style: TextStyle(
@@ -181,6 +212,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               ),
             )
                 : StreamBuilder(
+                  initialData: this._messages,
                   stream: messagesStreamController.stream,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     
@@ -374,7 +406,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       ),
     );
     this._messages.insert(0, newMessage);
-    messagesStreamController.sink.add(this._messages);
+    if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
     // desp de insertar el mensaje disparo la animacion
     newMessage.animationController.forward();
 
@@ -397,6 +429,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: widget.match,
+              calledFromMyMatches: widget.calledFromMyMatches,
             ),
           ),
         );
@@ -407,6 +440,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           MaterialPageRoute(
             builder: (context) => MatchParticipantsScreen(
               match: widget.match,
+              calledFromMyMatches: widget.calledFromMyMatches,
             ),
           ),
         );

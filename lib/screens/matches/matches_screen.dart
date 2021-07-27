@@ -32,29 +32,43 @@ class _MatchesState extends State<MatchesScreen> {
   List<Match?> matches = [];
   Future? _future;
   bool areNotifications = false;
-  StreamController notificationStreamController = new StreamController();
+  StreamController notificationStreamController = StreamController.broadcast();
+  StreamController matchesStreamController = StreamController.broadcast();
 
   @override
   void initState() {
     super.initState();
-    this._future = getMatchesOffers(
+    getMatchesOffers(
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
       _searchedMatchType.map((Type type) => type.id).toList(),
     );
 
+    silentNotificationListener();
+
+  }
+
+  void silentNotificationListener() {
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('silentUpdateChat')) {
-          notificationStreamController.sink.add(true);
+        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
+      }
+      if (notificationData.containsKey('silentUpdateMatch')) {
+        final Match? editedMatch = notificationData['match'];
+        final Match? editedMatchToReplace = this.matches.firstWhere((match) => match!.id == editedMatch!.id);
+        var index = this.matches.indexOf(editedMatchToReplace);
+        this.matches.replaceRange(index, index + 1, [editedMatch]);
+        if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
       }
     });
-
   }
 
   @override
   void dispose() {
     super.dispose();
     notificationStreamController.close();
+    matchesStreamController.close();
   }
 
   Future getMatchesOffers(int range, Genre genre, List<int?> types) async {
@@ -69,10 +83,20 @@ class _MatchesState extends State<MatchesScreen> {
       setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
         this.areNotifications = myMatches
-                .firstWhereOrNull((match) => match.haveNotifications == true) !=
+            .firstWhereOrNull((match) => match.haveNotifications == true) !=
             null;
         this.matches = response['matches'];
       });
+
+      if (!notificationStreamController.isClosed)
+        notificationStreamController.sink.add(
+          this.areNotifications,
+        );
+      if (!matchesStreamController.isClosed)
+        matchesStreamController.sink.add(
+          this.matches,
+        );
+      return this.matches;
     }
 
     return response;
@@ -80,8 +104,30 @@ class _MatchesState extends State<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.width;
-    final _height = MediaQuery.of(context).size.height;
+
+    Positioned _buildNotification() {
+      return Positioned(
+        top: 6.0,
+        right: 5.0,
+        child: Container(
+          width: 15.0,
+          height: 15.0,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.all(
+              Radius.circular(50.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10.0,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     StreamBuilder<dynamic> buildNotificationStreamBuilder() {
       return StreamBuilder(
@@ -98,27 +144,7 @@ class _MatchesState extends State<MatchesScreen> {
             return Container();
           }
 
-          return Positioned(
-            top: 6.0,
-            right: 5.0,
-            child: Container(
-              width: 15.0,
-              height: 15.0,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(50.0),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 6),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildNotification();
         },
       );
     }
@@ -213,6 +239,7 @@ class _MatchesState extends State<MatchesScreen> {
                           (BuildContext context, BoxConstraints constraints) {
                         return Stack(
                           children: [
+                            buildMatchesStreamBuilder(),
                             Positioned(
                               top: 0,
                               left: 0,
@@ -222,101 +249,6 @@ class _MatchesState extends State<MatchesScreen> {
                                 padding: EdgeInsets.only(left: 10.0, top: 40.0),
                                 alignment: Alignment.center,
                                 child: _buildMatchesMenu(),
-                              ),
-                            ),
-                            Positioned(
-                              top: 80.0,
-                              left: 0.0,
-                              right: 0.0,
-                              bottom: -20.0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 6.0,
-                                      offset: Offset(0, -2),
-                                    ),
-                                  ],
-                                  color: Colors.white,
-                                  borderRadius: screenBorders,
-                                ),
-                                padding: EdgeInsets.only(
-                                    bottom: 20.0, left: 20.0, right: 20.0),
-                                margin: EdgeInsets.only(top: 20.0),
-                                width: _width,
-                                child: FutureBuilder(
-                                  future: this._future,
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<dynamic> snapshot) {
-                                    dynamic response = snapshot.data;
-
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        !snapshot.hasData) {
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Center(
-                                            child: Text(
-                                                translations[localeName]![
-                                                    'general.noMatches']!)),
-                                      );
-                                    }
-
-                                    if (!snapshot.hasData) {
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [circularLoading],
-                                        ),
-                                      );
-                                    }
-
-                                    if (!response['success']) {
-                                      return showAlert(context, 'Error',
-                                          'Oops, ocurrió un error');
-                                    }
-
-                                    if (this.matches.isEmpty) {
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Center(
-                                            child: Text(
-                                                translations[localeName]![
-                                                    'general.noMatches']!)),
-                                      );
-                                    }
-                                    return RefreshIndicator(
-                                      onRefresh: () => this.getRefreshData(
-                                        this
-                                            ._searchedRange['distance']!
-                                            .toInt(),
-                                        this._searchedGender.first,
-                                        this
-                                            ._searchedMatchType
-                                            .map((Type type) => type.id)
-                                            .toList(),
-                                      ),
-                                      child: ListView.builder(
-                                        itemBuilder: (
-                                          BuildContext context,
-                                          int index,
-                                        ) {
-                                          return _buildMatchRow(
-                                              this.matches[index]);
-                                        },
-                                        itemCount: this.matches.length,
-                                      ),
-                                    );
-                                  },
-                                ),
                               ),
                             ),
                           ],
@@ -334,11 +266,173 @@ class _MatchesState extends State<MatchesScreen> {
     );
   }
 
+  buildMatchesStreamBuilder() {
+    return StreamBuilder(
+      stream: matchesStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        final _width = MediaQuery.of(context).size.width;
+        final _height = MediaQuery.of(context).size.height;
+
+        if (snapshot.connectionState !=
+            ConnectionState.done &&
+            !snapshot.hasData) {
+          return Positioned(
+            top: 80.0,
+            left: 0.0,
+            right: 0.0,
+            bottom: -20.0,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6.0,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+                color: Colors.white,
+                borderRadius: screenBorders,
+              ),
+              padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+              margin: EdgeInsets.only(top: 20.0),
+              width: _width,
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.center,
+                  children: [circularLoading],
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState ==
+            ConnectionState.done &&
+            !snapshot.hasData) {
+          return Positioned(
+            top: 80.0,
+            left: 0.0,
+            right: 0.0,
+            bottom: -20.0,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6.0,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+                color: Colors.white,
+                borderRadius: screenBorders,
+              ),
+              padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+              margin: EdgeInsets.only(top: 20.0),
+              width: _width,
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Center(
+                    child:
+                    Text(translations[localeName]!['general.noMatches']!)),
+              ),
+            ),
+          );
+        }
+
+        List matches = snapshot.data;
+
+        if (matches.isEmpty) {
+          return Positioned(
+            top: 80.0,
+            left: 0.0,
+            right: 0.0,
+            bottom: -20.0,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6.0,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+                color: Colors.white,
+                borderRadius: screenBorders,
+              ),
+              padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+              margin: EdgeInsets.only(top: 20.0),
+              width: _width,
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Center(
+                    child:
+                        Text(translations[localeName]!['general.noMatches']!)),
+              ),
+            ),
+          );
+        }
+
+        return Positioned(
+          top: 80.0,
+          left: 0.0,
+          right: 0.0,
+          bottom: -20.0,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6.0,
+                  offset: Offset(0, -2),
+                ),
+              ],
+              color: Colors.white,
+              borderRadius: screenBorders,
+            ),
+            padding: EdgeInsets.only(
+                bottom: 20.0, left: 20.0, right: 20.0),
+            margin: EdgeInsets.only(top: 20.0),
+            width: _width,
+            child: RefreshIndicator(
+              onRefresh: () => this.getRefreshData(
+                this
+                    ._searchedRange['distance']!
+                    .toInt(),
+                this._searchedGender.first,
+                this
+                    ._searchedMatchType
+                    .map((Type type) => type.id)
+                    .toList(),
+              ),
+              child: ListView.builder(
+                itemBuilder: (
+                    BuildContext context,
+                    int index,
+                    ) {
+                  return _buildMatchRow(
+                      matches[index]);
+                },
+                itemCount: matches.length,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> getRefreshData(
-    range,
-    genre,
-    types,
-  ) async {
+      range,
+      genre,
+      types,
+      ) async {
     final response = await MatchRepository().getMatchesOffers(
       range,
       genre,
@@ -350,10 +444,18 @@ class _MatchesState extends State<MatchesScreen> {
       setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
         this.areNotifications = myMatches
-                .firstWhereOrNull((match) => match.haveNotifications == true) !=
+            .firstWhereOrNull((match) => match.haveNotifications == true) !=
             null;
         this.matches = response['matches'];
       });
+      if (!notificationStreamController.isClosed)
+        notificationStreamController.sink.add(
+          this.areNotifications,
+        );
+      if (!matchesStreamController.isClosed)
+        matchesStreamController.sink.add(
+          this.matches,
+        );
     }
   }
 
@@ -365,6 +467,7 @@ class _MatchesState extends State<MatchesScreen> {
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: match,
+              calledFromMyMatches: false,
             ),
           ),
         );

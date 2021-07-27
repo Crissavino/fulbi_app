@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/edit_match_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
+import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -26,14 +28,33 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   Future? _future;
   List<Match?> matches = [];
   User? myUser;
+  StreamController matchesStreamController = StreamController.broadcast();
 
   @override
   void initState() {
     // TODO: implement initState
-
     super.initState();
     this._future = getMyMatches();
     this.getMyUser();
+    silentNotificationListener();
+  }
+
+  void silentNotificationListener() {
+    PushNotificationService.messageStream.listen((notificationData) {
+      if (notificationData.containsKey('silentUpdateChat') || notificationData.containsKey('silentUpdateMatch')) {
+        final Match? editedMatch = notificationData['match'];
+        final Match? editedMatchToReplace = this.matches.firstWhere((match) => match!.id == editedMatch!.id);
+        var index = this.matches.indexOf(editedMatchToReplace);
+        this.matches.replaceRange(index, index + 1, [editedMatch]);
+        if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    matchesStreamController.close();
   }
 
   Future getMyMatches() async {
@@ -42,6 +63,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
       setState(() {
         this.matches = response['matches'];
       });
+      if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+
+      return this.matches;
     }
 
     return response;
@@ -53,6 +77,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
       setState(() {
         this.matches = response['matches'];
       });
+      if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
     }
   }
 
@@ -67,7 +92,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
-    final args = ModalRoute.of(context)?.settings.arguments ?? 'No data';
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -92,6 +116,82 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
 
                         return Stack(
                           children: [
+                            buildMatchesStreamBuilder(innerHeight),
+                            // Positioned(
+                            //   top: 0.0,
+                            //   left: 0.0,
+                            //   right: 0.0,
+                            //   bottom: 0.0,
+                            //   child: Padding(
+                            //     padding: EdgeInsets.only(
+                            //         bottom: (MediaQuery.of(context)
+                            //             .viewInsets
+                            //             .bottom)),
+                            //     child: SingleChildScrollView(
+                            //       physics: AlwaysScrollableScrollPhysics(),
+                            //       child: Container(
+                            //         padding: EdgeInsets.only(
+                            //             bottom: 70.0, left: 20.0, right: 20.0),
+                            //         margin: EdgeInsets.only(top: 70.0),
+                            //         width: _width,
+                            //         height: innerHeight - 0,
+                            //         child: FutureBuilder(
+                            //           future: this._future,
+                            //           builder: (BuildContext context,
+                            //               AsyncSnapshot<dynamic> snapshot) {
+                            //
+                            //             if (!snapshot.hasData) {
+                            //               return Container(
+                            //                 width: _width,
+                            //                 height: _height,
+                            //                 child: Column(
+                            //                   mainAxisAlignment:
+                            //                   MainAxisAlignment.center,
+                            //                   crossAxisAlignment:
+                            //                   CrossAxisAlignment.center,
+                            //                   children: [circularLoading],
+                            //                 ),
+                            //               );
+                            //             }
+                            //
+                            //             dynamic response = snapshot.data;
+                            //
+                            //             if (!response['success']) {
+                            //               return showAlert(context, 'Error',
+                            //                   'Oops, ocurrió un error');
+                            //             }
+                            //
+                            //             if (this.matches.isEmpty) {
+                            //               return Container(
+                            //                 width: _width,
+                            //                 height: _height,
+                            //                 child: Center(
+                            //                     child: Text(
+                            //                         translations[localeName]![
+                            //                         'general.noMatches']!)),
+                            //               );
+                            //             }
+                            //
+                            //             return RefreshIndicator(
+                            //               onRefresh: () =>
+                            //                   this.getRefreshData(),
+                            //               child: ListView.builder(
+                            //                 itemBuilder: (
+                            //                     BuildContext context,
+                            //                     int index,
+                            //                     ) {
+                            //                   return _buildMatchRow(
+                            //                       this.matches[index]!);
+                            //                 },
+                            //                 itemCount: this.matches.length,
+                            //               ),
+                            //             );
+                            //           },
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                             Positioned(
                               top: 0,
                               left: 0,
@@ -110,18 +210,13 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                     elevation: 0.0,
                                     leading: IconButton(
                                       onPressed: () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          PageRouteBuilder(
-                                            pageBuilder: (context, animation1,
-                                                    animation2) =>
-                                                MatchesScreen(),
-                                            transitionDuration:
-                                                Duration(seconds: 0),
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => MatchesScreen(),
                                           ),
-                                        );
+                                        ).then((_) => setState(() {}));
                                       },
-                                      icon: Icon(Icons.arrow_back_ios),
+                                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
                                       splashColor: Colors.transparent,
                                     ),
                                     title: Text(
@@ -132,80 +227,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                       textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 80.0,
-                              left: 0.0,
-                              right: 0.0,
-                              bottom: 0.0,
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: (MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom)),
-                                child: SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: Container(
-                                    padding: EdgeInsets.only(
-                                        bottom: 20.0, left: 20.0, right: 20.0),
-                                    margin: EdgeInsets.only(top: 20.0),
-                                    width: _width,
-                                    height: innerHeight - 50,
-                                    child: FutureBuilder(
-                                      future: this._future,
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot<dynamic> snapshot) {
-                                        dynamic response = snapshot.data;
-
-                                        if (!snapshot.hasData) {
-                                          return Container(
-                                            width: _width,
-                                            height: _height,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [circularLoading],
-                                            ),
-                                          );
-                                        }
-
-                                        if (!response['success']) {
-                                          return showAlert(context, 'Error',
-                                              'Oops, ocurrió un error');
-                                        }
-
-                                        if (this.matches.isEmpty) {
-                                          return Container(
-                                            width: _width,
-                                            height: _height,
-                                            child: Center(
-                                                child: Text(
-                                                    translations[localeName]![
-                                                        'general.noMatches']!)),
-                                          );
-                                        }
-
-                                        return RefreshIndicator(
-                                          onRefresh: () =>
-                                              this.getRefreshData(),
-                                          child: ListView.builder(
-                                            itemBuilder: (
-                                              BuildContext context,
-                                              int index,
-                                            ) {
-                                              return _buildMatchRow(
-                                                  this.matches[index]!);
-                                            },
-                                            itemCount: this.matches.length,
-                                          ),
-                                        );
-                                      },
                                     ),
                                   ),
                                 ),
@@ -222,6 +243,125 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           )
         ],
       ),
+    );
+  }
+
+  buildMatchesStreamBuilder(innerHeight) {
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
+
+    return StreamBuilder(
+        stream: matchesStreamController.stream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+
+          if (!snapshot.hasData) {
+            return Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    bottom: (MediaQuery.of(context)
+                        .viewInsets
+                        .bottom)),
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    padding: EdgeInsets.only(
+                        bottom: 70.0, left: 20.0, right: 20.0),
+                    margin: EdgeInsets.only(top: 70.0),
+                    width: _width,
+                    height: innerHeight - 0,
+                    child: Container(
+                      width: _width,
+                      height: _height,
+                      child: Column(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        crossAxisAlignment:
+                        CrossAxisAlignment.center,
+                        children: [circularLoading],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          List matches = snapshot.data;
+
+          if (matches.isEmpty) {
+            return Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    bottom: (MediaQuery.of(context)
+                        .viewInsets
+                        .bottom)),
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    padding: EdgeInsets.only(
+                        bottom: 70.0, left: 20.0, right: 20.0),
+                    margin: EdgeInsets.only(top: 70.0),
+                    width: _width,
+                    height: innerHeight - 0,
+                    child: Container(
+                      width: _width,
+                      height: _height,
+                      child: Center(
+                          child: Text(
+                              translations[localeName]![
+                              'general.noMatches']!)),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: Padding(
+              padding: EdgeInsets.only(
+                  bottom: (MediaQuery.of(context)
+                      .viewInsets
+                      .bottom)),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  padding: EdgeInsets.only(
+                      bottom: 70.0, left: 20.0, right: 20.0),
+                  margin: EdgeInsets.only(top: 70.0),
+                  width: _width,
+                  height: innerHeight,
+                  child: RefreshIndicator(
+                    onRefresh: () =>
+                        this.getRefreshData(),
+                    child: ListView.builder(
+                      itemBuilder: (
+                          BuildContext context,
+                          int index,
+                          ) {
+                        return _buildMatchRow(
+                            this.matches[index]!);
+                      },
+                      itemCount: this.matches.length,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
     );
   }
 
@@ -253,6 +393,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                   MaterialPageRoute(
                     builder: (context) => MatchInfoScreen(
                       match: match,
+                      calledFromMyMatches: true,
                     ),
                   ),
                 );
@@ -345,6 +486,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 MaterialPageRoute(
                   builder: (context) => MatchInfoScreen(
                     match: match,
+                    calledFromMyMatches: true,
                   ),
                 ),
               );

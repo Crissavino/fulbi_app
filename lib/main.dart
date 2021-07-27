@@ -195,6 +195,7 @@ class _MyAppState extends State<MyApp> {
               builder: (context) => MatchChatScreen(
                 match: notificationData['match'],
                 currentUser: notificationData['currentUser'],
+                calledFromMyMatches: false,
               ),
             ),
           );
@@ -226,6 +227,7 @@ class _MyAppState extends State<MyApp> {
               MaterialPageRoute(
                 builder: (context) => MatchInfoScreen(
                   match: notificationData['match'],
+                  calledFromMyMatches: false,
                 ),
               ),
             );
@@ -235,6 +237,7 @@ class _MyAppState extends State<MyApp> {
             MaterialPageRoute(
               builder: (context) => MatchInfoScreen(
                 match: notificationData['match'],
+                calledFromMyMatches: false,
               ),
             ),
           );

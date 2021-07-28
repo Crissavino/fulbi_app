@@ -288,7 +288,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       setState(() {
         this.isLoading = false;
         _messages.insertAll(0, history);
-        // _messages.insert(3, HeaderMessage(text: 'Pepito se unio al partido', animationController: _animationController));
       });
     } else {
       setState(() {
@@ -407,7 +406,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     );
     this._messages.insert(0, newMessage);
     if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-    // desp de insertar el mensaje disparo la animacion
     newMessage.animationController.forward();
 
     ChatRepository().sendMessage(

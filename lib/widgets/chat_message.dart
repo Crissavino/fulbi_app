@@ -40,7 +40,7 @@ class ChatMessage extends StatelessWidget {
   }
 
   Widget _myMessage(BuildContext context, User currentUser) {
-    final DateTime? parsedTime = DateTime.tryParse(this.time!);
+    final DateTime? parsedTime = DateTime.tryParse(this.time!)!.toLocal();
     final messageHour = parsedTime!.hour;
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
     final messageTime = '$messageHour:$messageMinute';
@@ -103,7 +103,7 @@ class ChatMessage extends StatelessWidget {
 
   Widget _notMyMessage(BuildContext context, dynamic senderUser) {
     final userFullName = senderUser is User ? senderUser.name : senderUser['fullName'];
-    final DateTime? parsedTime = DateTime.tryParse(this.time!);
+    final DateTime? parsedTime = DateTime.tryParse(this.time!)!.toLocal();
     final messageHour = parsedTime!.hour;
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
     final messageTime = '$messageHour:$messageMinute';

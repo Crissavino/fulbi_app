@@ -44,9 +44,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   bool _isCreatingLink = false;
   String? _linkMessage;
   bool imInscribed = true;
-  Future? _future;
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
+  bool isLoading = false;
 
   Future<void> _createDynamicLinkToNewPlayer(bool short) async {
     setState(() {
@@ -86,10 +86,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     Navigator.pop(context);
     await _createDynamicLinkToNewPlayer(true);
     await FlutterShare.share(
-        title: 'Invitar nuevo jugador con link',
+        title: translations[localeName]!['match.info.inviteNewPlayer']!,
         // text: 'Example share text',
         linkUrl: _linkMessage,
-        chooserTitle: 'Invitar nuevo jugador con link'
+        chooserTitle: translations[localeName]!['match.info.inviteNewPlayer']!
     );
   }
 
@@ -97,10 +97,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     Navigator.pop(context);
     await _createDynamicLinkToExistingPlayer(true);
     await FlutterShare.share(
-        title: 'Invitar jugador existente con link',
+        title: translations[localeName]!['match.info.inviteExistPlayer']!,
         // text: 'Example share text',
         linkUrl: _linkMessage,
-        chooserTitle: 'Invitar jugador existente con link'
+        chooserTitle: translations[localeName]!['match.info.inviteExistPlayer']!
     );
   }
 
@@ -152,7 +152,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     // TODO: implement initState
     super.initState();
     silentNotificationListener();
-    this._future = this.getFutureData();
+    this.getFutureData();
   }
 
   void silentNotificationListener() {
@@ -251,7 +251,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                     GestureDetector(
                                       onTap: shareToNewPlayer,
                                       child: Text(
-                                        'Invitar nuevo jugador con link',
+                                        translations[localeName]!['match.info.inviteNewPlayer']!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20.0,
@@ -262,7 +262,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                     GestureDetector(
                                       onTap: shareToExistingPlayer,
                                       child: Text(
-                                        'Invitar jugador existente con link',
+                                        translations[localeName]!['match.info.inviteExistPlayer']!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20.0,
@@ -455,6 +455,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   void _navigateToSection(index) async {
+    if (this.isLoading) {
+      return;
+    }
+    this.isLoading = true;
     final resp = await MatchRepository().getMatch(widget.match.id);
     Match match = resp['match'];
     switch (index) {
@@ -563,6 +567,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         final _height = MediaQuery.of(context).size.height;
 
         if (!snapshot.hasData) {
+
+          this.isLoading = true;
+
           return Container(
             width: _width,
             height: _height,
@@ -583,6 +590,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         int playersEnrolled = snapshot.data['playersEnrolled'];
         String spotsAvailable =
         (match.numPlayers - playersEnrolled).toString();
+
+        this.isLoading = false;
 
         return Container(
           child: LayoutBuilder(

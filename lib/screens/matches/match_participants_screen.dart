@@ -37,9 +37,9 @@ class MatchParticipantsScreen extends StatefulWidget {
 class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   String localeName = Platform.localeName.split('_')[0];
   bool imInscribed = true;
-  Future? _future;
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
+  bool isLoading = false;
 
   Future getFutureData() async {
     final response = await MatchRepository().getMatch(widget.match.id);
@@ -78,7 +78,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
     // TODO: implement initState
     super.initState();
     silentNotificationListener();
-    this._future = this.getFutureData();
+    this.getFutureData();
   }
 
   void silentNotificationListener() {
@@ -221,6 +221,10 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   }
 
   void _navigateToSection(index) async {
+    if (this.isLoading) {
+      return;
+    }
+    this.isLoading = true;
     final resp = await MatchRepository().getMatch(widget.match.id);
     Match match = resp['match'];
     switch (index) {
@@ -276,7 +280,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             ),
           );
         }
-
         break;
       default:
         return;
@@ -330,6 +333,9 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         final _height = MediaQuery.of(context).size.height;
 
         if (!snapshot.hasData) {
+
+          this.isLoading = true;
+
           return Container(
             width: _width,
             height: _height,
@@ -343,6 +349,8 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
 
         Match match = snapshot.data['match'];
         List<User?> participants = match.participants!;
+
+        this.isLoading = false;
 
         if (participants.isEmpty) {
           return Container(
@@ -441,6 +449,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             builder: (context) => PublicProfileScreen(
               userId: user.id,
               calledFromMatch: true,
+              match: widget.match,
             ),
           ),
         );

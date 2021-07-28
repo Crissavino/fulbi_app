@@ -215,8 +215,11 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   initialData: this._messages,
                   stream: messagesStreamController.stream,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    
+
                     if (!snapshot.hasData) {
+
+                      this.isLoading = true;
+
                       return Container(
                         width: _width,
                         height: _height,
@@ -231,6 +234,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                     }
 
                     final messages = snapshot.data;
+
+                    this.isLoading = false;
 
                     return NotificationListener<ScrollNotification>(
                       onNotification: (ScrollNotification scrollInfo) {
@@ -420,6 +425,10 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   void _navigateToSection(index) {
+    if (this.isLoading) {
+      return;
+    }
+    this.isLoading = true;
     switch (index) {
       case 0:
         Navigator.pushReplacement(

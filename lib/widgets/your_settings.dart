@@ -20,6 +20,8 @@ class _YourSettingsState extends State<YourSettings> {
   String? newNickname;
   String newPassword = '';
   String confirmNewPassword = '';
+  bool isChangeNameLoading = false;
+  bool isChangePassLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -152,8 +154,8 @@ class _YourSettingsState extends State<YourSettings> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: () async {
-            if (this.newNickname == '') {
+          onPressed: this.isChangeNameLoading ? null : () async {
+            if (this.newNickname == '' || this.newNickname == null) {
               return showAlert(
                 context,
                 'Atencion!',
@@ -161,18 +163,20 @@ class _YourSettingsState extends State<YourSettings> {
               );
             }
 
+            setState(() {
+              this.isChangeNameLoading = true;
+            });
+
             final response = await UserRepository().changeNickname(
               this.newNickname
             );
 
             if (response['success']) {
-              await showAlert(
-                context,
-                'Nickname changed',
-                'Nickname changed successfully',
-              );
               Navigator.pop(context, response['user']);
             } else {
+              setState(() {
+                this.isChangeNameLoading = false;
+              });
               return showAlert(
                 context,
                 'Error',
@@ -180,7 +184,7 @@ class _YourSettingsState extends State<YourSettings> {
               );
             }
           },
-          child: Text(
+          child: this.isChangeNameLoading ? whiteCircularLoading : Text(
             translations[localeName]!['general.save']!.toUpperCase(),
             style: TextStyle(
               color: Colors.white,
@@ -356,7 +360,7 @@ class _YourSettingsState extends State<YourSettings> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: () async {
+          onPressed: this.isChangePassLoading ? null : () async {
             if (this.newPassword == '' || this.confirmNewPassword == '') {
               return showAlert(
                 context,
@@ -377,6 +381,10 @@ class _YourSettingsState extends State<YourSettings> {
               );
             }
 
+            setState(() {
+              this.isChangePassLoading = true;
+            });
+
             final response = await UserRepository().changePassword(
               this.newPassword
             );
@@ -389,6 +397,9 @@ class _YourSettingsState extends State<YourSettings> {
               );
               Navigator.pop(context, response['user']);
             } else {
+              setState(() {
+                this.isChangePassLoading = false;
+              });
               return showAlert(
                 context,
                 'Error',
@@ -396,7 +407,7 @@ class _YourSettingsState extends State<YourSettings> {
               );
             }
           },
-          child: Text(
+          child: this.isChangePassLoading ? whiteCircularLoading : Text(
             translations[localeName]!['general.save']!.toUpperCase(),
             style: TextStyle(
               color: Colors.white,

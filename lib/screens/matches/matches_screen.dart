@@ -30,10 +30,10 @@ class _MatchesState extends State<MatchesScreen> {
   List<Type> _searchedMatchType = Type().matchTypes;
   Map<String, double> _searchedRange = {'distance': 20.0};
   List<Match?> matches = [];
-  Future? _future;
   bool areNotifications = false;
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchesStreamController = StreamController.broadcast();
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -45,7 +45,6 @@ class _MatchesState extends State<MatchesScreen> {
     );
 
     silentNotificationListener();
-
   }
 
   void silentNotificationListener() {
@@ -276,6 +275,9 @@ class _MatchesState extends State<MatchesScreen> {
         if (snapshot.connectionState !=
             ConnectionState.done &&
             !snapshot.hasData) {
+
+          this.isLoading = true;
+
           return Positioned(
             top: 80.0,
             left: 0.0,
@@ -310,6 +312,8 @@ class _MatchesState extends State<MatchesScreen> {
             ),
           );
         }
+
+        this.isLoading = false;
 
         if (snapshot.connectionState ==
             ConnectionState.done &&
@@ -531,6 +535,9 @@ class _MatchesState extends State<MatchesScreen> {
   }
 
   void _navigateToSection(index) {
+    if (this.isLoading) {
+      return;
+    }
     switch (index) {
       case 0:
         Navigator.pushReplacement(
@@ -552,6 +559,9 @@ class _MatchesState extends State<MatchesScreen> {
         );
         break;
       default:
+        setState(() {
+          this.isLoading = false;
+        });
         return;
     }
   }
@@ -569,6 +579,7 @@ class _MatchesState extends State<MatchesScreen> {
       currentIndex: 1,
       onTap: (index) {
         if (index != 1) {
+          print(this.isLoading);
           _navigateToSection(index);
         }
       },

@@ -46,6 +46,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
   int playersForMatch = 0;
   List<Currency> currencies = Currency().currencies;
   String? currencySelected;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -623,7 +624,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: () async {
+          onPressed: this.isLoading ? null : () async {
             if (this.userLocationDesc == '') {
               return showAlert(
                 context,
@@ -655,6 +656,10 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                 'Debes indicar al menos un jugador para el partido',
               );
             }
+
+            setState(() {
+              this.isLoading = true;
+            });
 
             int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
@@ -692,6 +697,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                 ),
               );
             } else {
+              setState(() {
+                this.isLoading = false;
+              });
               return showAlert(
                 context,
                 'Error',
@@ -699,7 +707,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               );
             }
           },
-          child: Text(
+          child: this.isLoading ? whiteCircularLoading :  Text(
             translations[localeName]!['general.create']!.toUpperCase(),
             style: TextStyle(
               color: Colors.white,

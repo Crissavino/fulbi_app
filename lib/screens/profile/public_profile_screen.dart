@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/location.dart';
+import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -16,10 +18,12 @@ import 'package:fulbito_app/widgets/show_user_positions.dart';
 class PublicProfileScreen extends StatefulWidget {
   int userId;
   bool calledFromMatch;
+  Match? match;
 
   PublicProfileScreen({
     required this.userId,
     this.calledFromMatch = false,
+    this.match,
   });
 
   @override
@@ -79,14 +83,26 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                           leading: Container(
                             child: IconButton(
                               onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (context, animation1, animation2) =>
-                                        PlayersScreen(),
-                                    transitionDuration: Duration(seconds: 0),
-                                  ),
-                                );
+                                if (widget.calledFromMatch) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation1, animation2) =>
+                                          MatchParticipantsScreen(match: widget.match!, calledFromMyMatches: true),
+                                      transitionDuration: Duration(seconds: 0),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation1, animation2) =>
+                                          PlayersScreen(),
+                                      transitionDuration: Duration(seconds: 0),
+                                    ),
+                                  );
+                                }
+
                               },
                               icon: Icon(Icons.arrow_back_ios),
                             ),

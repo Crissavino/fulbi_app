@@ -30,6 +30,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   Map<String, double> _searchedRange = {'distance': 20.0};
   List<User?> players = [];
   Future? _future;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -222,20 +223,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                       AsyncSnapshot<dynamic> snapshot) {
                                     dynamic response = snapshot.data;
 
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        !snapshot.hasData) {
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Center(
-                                            child: Text(
-                                                translations[localeName]![
-                                                    'general.noPlayers']!)),
-                                      );
-                                    }
-
                                     if (!snapshot.hasData) {
+
+                                      this.isLoading = true;
+
                                       return Container(
                                         width: _width,
                                         height: _height,
@@ -246,6 +237,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                               CrossAxisAlignment.center,
                                           children: [circularLoading],
                                         ),
+                                      );
+                                    }
+
+                                    this.isLoading = false;
+
+                                    if (snapshot.connectionState ==
+                                            ConnectionState.done &&
+                                        !snapshot.hasData) {
+
+                                      return Container(
+                                        width: _width,
+                                        height: _height,
+                                        child: Center(
+                                            child: Text(
+                                                translations[localeName]![
+                                                    'general.noPlayers']!)),
                                       );
                                     }
 
@@ -408,6 +415,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   void _navigateToSection(index) {
+    if (this.isLoading) {
+      return;
+    }
     switch (index) {
       case 1:
         Navigator.pushReplacement(

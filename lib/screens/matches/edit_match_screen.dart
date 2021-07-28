@@ -3,20 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/complete_profile/complete_profile_bloc.dart';
 import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/user_location.dart';
-import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
-import 'package:fulbito_app/screens/search/search_location.dart';
-import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
@@ -64,6 +58,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   List<Currency> currencies = Currency().currencies;
   String? currencySelected;
   Future? _future;
+  bool isLoading = false;
 
   // controllers
   final _myNumPlayersController = TextEditingController();
@@ -770,7 +765,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: () async {
+          onPressed: this.isLoading ? null : () async {
+            print('click');
             if (this.userLocationDesc == '') {
               return showAlert(
                 context,
@@ -802,6 +798,10 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                 'Debes indicar al menos un jugador para el partido',
               );
             }
+
+            setState(() {
+              this.isLoading = true;
+            });
 
             int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
               bool? isChecked = genre.checked;
@@ -846,6 +846,9 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                 ),
               );
             } else {
+              setState(() {
+                this.isLoading = false;
+              });
               return showAlert(
                 context,
                 'Error',
@@ -853,7 +856,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               );
             }
           },
-          child: Text(
+          child: this.isLoading ? whiteCircularLoading : Text(
             translations[localeName]!['general.edit']!.toUpperCase(),
             style: TextStyle(
               color: Colors.white,

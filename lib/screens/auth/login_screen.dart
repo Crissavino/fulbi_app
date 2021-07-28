@@ -22,7 +22,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String error = '';
-  bool loading = false;
+  bool isLoading = false;
   UserRepository _userRepository = UserRepository();
 
   // text field state
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(30.0),
         ),
         color: Colors.white,
-        child: Text(
+        child: this.isLoading ? circularLoading : Text(
           translations[localeName]!['signIn']!.toUpperCase(),
           style: TextStyle(
             color: Color(0xFF527DAA),
@@ -200,6 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
         translations[localeName]!['passWithMoreSix']!,
       );
     } else {
+      setState(() {
+        this.isLoading = true;
+      });
       FocusScope.of(context).unfocus();
       await _login();
     }
@@ -220,6 +223,9 @@ class _LoginScreenState extends State<LoginScreen> {
       BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
     } else {
       BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
+      setState(() {
+        this.isLoading = false;
+      });
       showAlert(
         context,
         translations[localeName]!['loginFails']!,

@@ -4,6 +4,7 @@ import 'package:fulbito_app/models/map_box_search_response.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/search/search_location_match.dart';
+import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
@@ -23,11 +24,11 @@ class YourLocation extends StatefulWidget {
 class _YourLocationState extends State<YourLocation> {
   String? userLocationDesc;
   var userLocationDetails;
+  bool isLoading = false;
 
   @override
   void initState() {
     this.userLocationDesc = widget.userLocation!.formattedAddress;
-    // TODO: implement initState
     super.initState();
   }
 
@@ -116,7 +117,7 @@ class _YourLocationState extends State<YourLocation> {
           height: 50.0,
           child: Center(
             child: Text(
-              'Cambiar ubicacion',
+              translations[localeName]!['profile.location.change']!,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -204,10 +205,14 @@ class _YourLocationState extends State<YourLocation> {
                         height: 50.0,
                         child: Center(
                           child: TextButton(
-                            onPressed: () async {
+                            onPressed: this.isLoading ? null : () async {
                               if (userLocationDetails == null) {
                                 return Navigator.pop(context);
                               }
+
+                              setState(() {
+                                this.isLoading = true;
+                              });
 
                               final editUserLocationResponse =
                                   await UserRepository().editUserLocation(
@@ -217,6 +222,9 @@ class _YourLocationState extends State<YourLocation> {
                               if (editUserLocationResponse['success'] == true) {
                                 Navigator.pop(context, true);
                               } else {
+                                setState(() {
+                                  this.isLoading = false;
+                                });
                                 return showAlert(
                                   context,
                                   'Error!',
@@ -224,7 +232,7 @@ class _YourLocationState extends State<YourLocation> {
                                 );
                               }
                             },
-                            child: Text(
+                            child: this.isLoading ? whiteCircularLoading : Text(
                               translations[localeName]!['general.save']!
                                   .toUpperCase(),
                               style: TextStyle(

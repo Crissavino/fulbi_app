@@ -127,7 +127,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                       left: 0.0,
                                       right: 0.0,
                                       child: Container(
-                                        height: innerHeight * 0.87,
+                                        height: innerHeight * 0.89,
                                         width: innerWidth,
                                         decoration: BoxDecoration(
                                           borderRadius: screenBorders,
@@ -207,92 +207,90 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                             double innerHeight = constraints.maxHeight;
                             double innerWidth = constraints.maxWidth;
 
-                            return SafeArea(
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Positioned(
-                                    bottom: 0.0,
-                                    left: 0.0,
-                                    right: 0.0,
-                                    child: Container(
-                                      height: innerHeight * 0.87,
-                                      width: innerWidth,
-                                      decoration: BoxDecoration(
-                                        borderRadius: screenBorders,
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 6.0,
-                                            offset: Offset(0, -2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          SizedBox(height: 55.0),
-                                          _buildUserName(),
-                                          SizedBox(height: 5.0),
-                                          // _buildUserReviews(innerWidth),
-                                          // SizedBox(height: 5.0),
-                                          _buildUserPositions(innerWidth, context),
-                                          // SizedBox(height: 5.0),
-                                          // _buildUserSettings(innerWidth),
-                                          SizedBox(height: 5.0),
-                                          _buildUserLocation(innerWidth, context),
-                                          SizedBox(height: 5.0),
-                                          _buildUserSettings(innerWidth, context),
-                                          SizedBox(height: 10.0),
-                                          _buildLogOutButton(context),
-                                          SizedBox(height: 10.0),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0.0,
-                                    left: 0.0,
-                                    right: 0.0,
-                                    child: Center(
-                                      child: this.profileImagePath == ''
-                                          ? CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        radius: 60,
-                                        child: Icon(
-                                          Icons.person,
-                                          color: Colors.green[700],
-                                          size: 100.0,
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Positioned(
+                                  bottom: 0.0,
+                                  left: 0.0,
+                                  right: 0.0,
+                                  child: Container(
+                                    height: innerHeight * 0.89,
+                                    width: innerWidth,
+                                    decoration: BoxDecoration(
+                                      borderRadius: screenBorders,
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 6.0,
+                                          offset: Offset(0, -2),
                                         ),
-                                      )
-                                          : CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        radius: 60,
-                                        backgroundImage: NetworkImage(this.profileImagePath!),
-                                      ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        SizedBox(height: 55.0),
+                                        _buildUserName(),
+                                        SizedBox(height: 5.0),
+                                        // _buildUserReviews(innerWidth),
+                                        // SizedBox(height: 5.0),
+                                        _buildUserPositions(innerWidth, context),
+                                        // SizedBox(height: 5.0),
+                                        // _buildUserSettings(innerWidth),
+                                        SizedBox(height: 5.0),
+                                        _buildUserLocation(innerWidth, context),
+                                        SizedBox(height: 5.0),
+                                        _buildUserSettings(innerWidth, context),
+                                        SizedBox(height: 10.0),
+                                        _buildLogOutButton(context),
+                                        SizedBox(height: 10.0),
+                                      ],
                                     ),
                                   ),
-                                  Positioned(
-                                    top: 80.0,
-                                    left: 80.0,
-                                    right: 0.0,
-                                    child: Center(
-                                      child: CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: Colors.white,
-                                        child: Container(
-                                          child: IconButton(
-                                            icon: Icon(Icons.edit, color: Colors.blue,),
-                                            onPressed: updateProfileImage,
-                                          ),
+                                ),
+                                Positioned(
+                                  top: 15.0,
+                                  left: 0.0,
+                                  right: 0.0,
+                                  child: Center(
+                                    child: this.profileImagePath == ''
+                                        ? CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      radius: 60,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.green[700],
+                                        size: 100.0,
+                                      ),
+                                    )
+                                        : CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      radius: 60,
+                                      backgroundImage: NetworkImage(this.profileImagePath!),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 90.0,
+                                  left: 80.0,
+                                  right: 0.0,
+                                  child: Center(
+                                    child: CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: Colors.white,
+                                      child: Container(
+                                        child: IconButton(
+                                          icon: Icon(Icons.edit, color: Colors.blue,),
+                                          onPressed: updateProfileImage,
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             );
                           },
                         ),

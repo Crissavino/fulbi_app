@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/match_type_filter.dart';
+import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
@@ -29,6 +29,7 @@ class MatchesFilter extends StatefulWidget {
 }
 
 class _MatchesFilterState extends State<MatchesFilter> {
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -81,7 +82,10 @@ class _MatchesFilterState extends State<MatchesFilter> {
         ),
         Text(
           translations[localeName]!['general.distance']!,
-          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,),
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(
           height: 5.0,
@@ -135,7 +139,10 @@ class _MatchesFilterState extends State<MatchesFilter> {
       children: [
         Text(
           translations[localeName]!['general.genre']!,
-          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,),
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(
           height: 10.0,
@@ -322,77 +329,89 @@ class _MatchesFilterState extends State<MatchesFilter> {
   }
 
   _buildFilterButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 20.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.green[600]!,
-            Colors.green[500]!,
-            Colors.green[500]!,
-            Colors.green[600]!,
-          ],
-          stops: [0.1, 0.4, 0.7, 0.9],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green[100]!,
-            blurRadius: 10.0,
-            offset: Offset(0, 5),
-          ),
-        ],
-        color: Colors.green[400],
-        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      ),
-      width: MediaQuery.of(context).size.width * .40,
-      height: 50.0,
-      child: Center(
-        child: TextButton(
-          onPressed: () async {
-            Genre? gender = widget.searchedGender.firstWhereOrNull((Genre genre) {
-              bool? isChecked = genre.checked;
-              if (isChecked == null) {
-                return false;
-              }
-              return isChecked;
-            });
+    return GestureDetector(
+      onTap: this.isLoading
+          ? null
+          : () async {
+              setState(() {
+                this.isLoading = true;
+              });
+              Genre? gender =
+                  widget.searchedGender.firstWhereOrNull((Genre genre) {
+                bool? isChecked = genre.checked;
+                if (isChecked == null) {
+                  return false;
+                }
+                return isChecked;
+              });
 
-            Iterable<Type> types = widget.searchedMatchType.where((Type type) {
-              bool? isChecked = type.checked;
-              if (isChecked == null) {
-                return false;
-              }
-              return isChecked;
-            });
+              Iterable<Type> types =
+                  widget.searchedMatchType.where((Type type) {
+                bool? isChecked = type.checked;
+                if (isChecked == null) {
+                  return false;
+                }
+                return isChecked;
+              });
 
-            dynamic filterResponse = await MatchRepository().getMatchesOffers(
-              widget.searchedRange!['distance']!.toInt(),
-              gender!,
-              types.map((Type type) => type.id).toList(),
-            );
-
-            if (filterResponse['success']) {
-              List<Match?> matches = filterResponse['matches'];
-              Navigator.pop(context, matches);
-            } else {
-              return showAlert(
-                context,
-                'Error!',
-                'Ocurrió un error cargar los jugadores!',
+              dynamic filterResponse = await MatchRepository().getMatchesOffers(
+                widget.searchedRange!['distance']!.toInt(),
+                gender!,
+                types.map((Type type) => type.id).toList(),
               );
-            }
-          },
-          child: Text(
-            translations[localeName]!['general.filter']!.toUpperCase(),
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenSans',
-              fontSize: 16.0,
-            ),
+
+              if (filterResponse['success']) {
+                List<Match?> matches = filterResponse['matches'];
+                Navigator.pop(context, matches);
+              } else {
+                setState(() {
+                  this.isLoading = false;
+                });
+                return showAlert(
+                  context,
+                  'Error!',
+                  'Ocurrió un error cargar los jugadores!',
+                );
+              }
+            },
+      child: Container(
+        margin: EdgeInsets.only(top: 20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.green[600]!,
+              Colors.green[500]!,
+              Colors.green[500]!,
+              Colors.green[600]!,
+            ],
+            stops: [0.1, 0.4, 0.7, 0.9],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green[100]!,
+              blurRadius: 10.0,
+              offset: Offset(0, 5),
+            ),
+          ],
+          color: Colors.green[400],
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+        ),
+        width: MediaQuery.of(context).size.width * .40,
+        height: 50.0,
+        child: Center(
+          child: this.isLoading
+              ? whiteCircularLoading
+              : Text(
+                  translations[localeName]!['general.filter']!.toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSans',
+                    fontSize: 16.0,
+                  ),
+                ),
         ),
       ),
     );

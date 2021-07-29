@@ -6,6 +6,7 @@ import 'package:fulbito_app/models/position.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/players/players_filter_positions.dart';
+import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
@@ -32,6 +33,7 @@ class PlayersFilter extends StatefulWidget {
 class _PlayersFilterState extends State<PlayersFilter> {
   // text field state
   String localeName = Platform.localeName.split('_')[0];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -130,7 +132,7 @@ class _PlayersFilterState extends State<PlayersFilter> {
             label: widget.searchedRange['distance'].toString(),
             onChanged: (value) {
               setState(
-                    () {
+                () {
                   widget.searchedRange['distance'] = value;
                 },
               );
@@ -146,7 +148,10 @@ class _PlayersFilterState extends State<PlayersFilter> {
       children: [
         Text(
           translations[localeName]!['general.genre']!,
-          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,),
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(
           height: 20.0,
@@ -183,10 +188,9 @@ class _PlayersFilterState extends State<PlayersFilter> {
                   ),
                   onChanged: (value) {
                     widget.searchedGender[0].checked =
-                    !widget.searchedGender[0].checked!;
+                        !widget.searchedGender[0].checked!;
                     if (!widget.searchedGender[0].checked! &&
-                        !widget.searchedGender[1].checked!)
-                    {
+                        !widget.searchedGender[1].checked!) {
                       widget.searchedGender[0].checked = true;
                     }
                     widget.searchedGender[2].checked = false;
@@ -230,10 +234,9 @@ class _PlayersFilterState extends State<PlayersFilter> {
                   ),
                   onChanged: (value) {
                     widget.searchedGender[1].checked =
-                    !widget.searchedGender[1].checked!;
+                        !widget.searchedGender[1].checked!;
                     if (!widget.searchedGender[0].checked! &&
-                        !widget.searchedGender[1].checked!)
-                    {
+                        !widget.searchedGender[1].checked!) {
                       widget.searchedGender[1].checked = true;
                     }
                     widget.searchedGender[2].checked = false;
@@ -294,137 +297,149 @@ class _PlayersFilterState extends State<PlayersFilter> {
   }
 
   _buildFilterButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 20.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.green[600]!,
-            Colors.green[500]!,
-            Colors.green[500]!,
-            Colors.green[600]!,
-          ],
-          stops: [0.1, 0.4, 0.7, 0.9],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green[100]!,
-            blurRadius: 10.0,
-            offset: Offset(0, 5),
-          ),
-        ],
-        color: Colors.green[400],
-        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      ),
-      width: MediaQuery.of(context).size.width * .40,
-      height: 50.0,
-      child: Center(
-        child: TextButton(
-          onPressed: () async {
-            bool noPositionSelected =
-            (!widget.searchedPositions[0].checked! &&
-                !widget.searchedPositions[1].checked! &&
-                !widget.searchedPositions[2].checked! &&
-                !widget.searchedPositions[3].checked!);
+    return GestureDetector(
+      onTap: this.isLoading
+          ? null
+          : () async {
+              bool noPositionSelected =
+                  (!widget.searchedPositions[0].checked! &&
+                      !widget.searchedPositions[1].checked! &&
+                      !widget.searchedPositions[2].checked! &&
+                      !widget.searchedPositions[3].checked!);
 
-            if (noPositionSelected) {
-              return showAlert(
-                context,
-                'Atencion!',
-                'Debes seleccionar alguna posicion en la que usualmente juegas',
-              );
-            } else {
-
-              Iterable<Genre> genders = widget.searchedGender.where((Genre genre) {
-                bool? isChecked = genre.checked;
-                if (isChecked == null) {
-                  return false;
-                }
-                return isChecked;
-              });
-
-              Iterable<Position> positions = widget.searchedPositions.where((Position position) {
-                bool? isChecked = position.checked;
-                if (isChecked == null) {
-                  return false;
-                }
-                return isChecked;
-              });
-
-              dynamic filterResponse = await UserRepository().getUserOffers(
-                widget.searchedRange['distance']!.toInt(),
-                genders.map((Genre genre) => genre.id).toList(),
-                positions.map((Position position) => position.id).toList(),
-              );
-
-              if (filterResponse['success']) {
-                List<User?> players = filterResponse['players'];
-                Navigator.pop(context, players);
-              } else {
+              if (noPositionSelected) {
                 return showAlert(
                   context,
-                  'Error!',
-                  'Ocurrió un error cargar los jugadores!',
+                  'Atencion!',
+                  'Debes seleccionar alguna posicion en la que usualmente juegas',
                 );
+              } else {
+                setState(() {
+                  this.isLoading = true;
+                });
+
+                Iterable<Genre> genders =
+                    widget.searchedGender.where((Genre genre) {
+                  bool? isChecked = genre.checked;
+                  if (isChecked == null) {
+                    return false;
+                  }
+                  return isChecked;
+                });
+
+                Iterable<Position> positions =
+                    widget.searchedPositions.where((Position position) {
+                  bool? isChecked = position.checked;
+                  if (isChecked == null) {
+                    return false;
+                  }
+                  return isChecked;
+                });
+
+                dynamic filterResponse = await UserRepository().getUserOffers(
+                  widget.searchedRange['distance']!.toInt(),
+                  genders.map((Genre genre) => genre.id).toList(),
+                  positions.map((Position position) => position.id).toList(),
+                );
+
+                if (filterResponse['success']) {
+                  List<User?> players = filterResponse['players'];
+                  Navigator.pop(context, players);
+                } else {
+                  setState(() {
+                    this.isLoading = false;
+                  });
+                  return showAlert(
+                    context,
+                    'Error!',
+                    'Ocurrió un error cargar los jugadores!',
+                  );
+                }
               }
-            }
-          },
-          child: Text(
-            translations[localeName]!['general.filter']!.toUpperCase(),
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenSans',
-              fontSize: 16.0,
-            ),
+            },
+      child: Container(
+        margin: EdgeInsets.only(top: 20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.green[600]!,
+              Colors.green[500]!,
+              Colors.green[500]!,
+              Colors.green[600]!,
+            ],
+            stops: [0.1, 0.4, 0.7, 0.9],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green[100]!,
+              blurRadius: 10.0,
+              offset: Offset(0, 5),
+            ),
+          ],
+          color: Colors.green[400],
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+        ),
+        width: MediaQuery.of(context).size.width * .40,
+        height: 50.0,
+        child: Center(
+          child: this.isLoading
+              ? whiteCircularLoading
+              : Text(
+                  translations[localeName]!['general.filter']!.toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSans',
+                    fontSize: 16.0,
+                  ),
+                ),
         ),
       ),
     );
   }
 
-  // _buildFilterDaysAvailable() {
-  //   return GestureDetector(
-  //     child: Container(
-  //       width: MediaQuery.of(context).size.width * .95,
-  //       decoration: BoxDecoration(
-  //         borderRadius: BorderRadius.circular(10.0),
-  //         color: Colors.white,
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: Colors.black12,
-  //             blurRadius: 6.0,
-  //             offset: Offset(0, 2),
-  //           ),
-  //         ],
-  //       ),
-  //       child: ListTile(
-  //         title: Text('Disponibilidad'),
-  //         trailing: Icon(
-  //           Icons.keyboard_arrow_up_outlined,
-  //           size: 40.0,
-  //         ),
-  //       ),
-  //     ),
-  //     onTap: () async {
-  //       final filterDays = await showModalBottomSheet(
-  //         backgroundColor: Colors.transparent,
-  //         context: context,
-  //         enableDrag: true,
-  //         isScrollControlled: true,
-  //         builder: (BuildContext context) {
-  //           return FilterUsersAvailability(
-  //             userDaysAvailable: widget.searchedDaysAvailable,
-  //           );
-  //         },
-  //       );
-  //
-  //       if (filterDays != null) {
-  //         widget.searchedDaysAvailable = filterDays;
-  //       }
-  //     },
-  //   );
-  // }
+// _buildFilterDaysAvailable() {
+//   return GestureDetector(
+//     child: Container(
+//       width: MediaQuery.of(context).size.width * .95,
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(10.0),
+//         color: Colors.white,
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black12,
+//             blurRadius: 6.0,
+//             offset: Offset(0, 2),
+//           ),
+//         ],
+//       ),
+//       child: ListTile(
+//         title: Text('Disponibilidad'),
+//         trailing: Icon(
+//           Icons.keyboard_arrow_up_outlined,
+//           size: 40.0,
+//         ),
+//       ),
+//     ),
+//     onTap: () async {
+//       final filterDays = await showModalBottomSheet(
+//         backgroundColor: Colors.transparent,
+//         context: context,
+//         enableDrag: true,
+//         isScrollControlled: true,
+//         builder: (BuildContext context) {
+//           return FilterUsersAvailability(
+//             userDaysAvailable: widget.searchedDaysAvailable,
+//           );
+//         },
+//       );
+//
+//       if (filterDays != null) {
+//         widget.searchedDaysAvailable = filterDays;
+//       }
+//     },
+//   );
+// }
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/map_box_search_response.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
@@ -42,17 +44,12 @@ class _MapState extends State<Map> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    this.target = LatLng(
-        widget.currentPosition['latitude'],
-        widget.currentPosition['longitude']
-    );
+    this.target = LatLng(widget.currentPosition['latitude'],
+        widget.currentPosition['longitude']);
   }
 
   @override
   Widget build(BuildContext context) {
-    final _height = MediaQuery.of(context).size.height;
-    final _width = MediaQuery.of(context).size.width;
-
     Future<void> moveCamera(newLatLng) async {
       final GoogleMapController controller = await _controller.future;
       final cameraUpdate = CameraUpdate.newLatLng(newLatLng);
@@ -61,12 +58,7 @@ class _MapState extends State<Map> {
 
     GoogleMap _buildGoogleMap() {
       return GoogleMap(
-        initialCameraPosition: CameraPosition(
-            target: this.target,
-            zoom: 15.0
-        ),
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+        initialCameraPosition: CameraPosition(target: this.target, zoom: 15.0),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
@@ -80,7 +72,10 @@ class _MapState extends State<Map> {
 
     Container _buildBackArrow(BuildContext context) {
       return Container(
-        margin: EdgeInsets.only(top: 50.0, left: 10.0,),
+        margin: EdgeInsets.only(
+          top: 50.0,
+          left: 10.0,
+        ),
         child: IconButton(
           onPressed: () {
             if (widget.match != null) {
@@ -90,9 +85,9 @@ class _MapState extends State<Map> {
                 PageRouteBuilder(
                   pageBuilder: (context, animation1, animation2) =>
                       EditMatchScreen(
-                        match: editedMatch,
-                        editedValues: widget.editedValues,
-                      ),
+                    match: editedMatch,
+                    editedValues: widget.editedValues,
+                  ),
                   transitionDuration: Duration(seconds: 0),
                 ),
               );
@@ -118,14 +113,15 @@ class _MapState extends State<Map> {
           margin: EdgeInsets.only(top: 50.0, left: 60.0, right: 20.0),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           width: double.infinity,
-          child: Text(translations[localeName!]!['search']! + '...', style: TextStyle( color: Colors.black87 )),
+          child: Text(translations[localeName!]!['search']! + '...',
+              style: TextStyle(color: Colors.black87)),
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(100),
               boxShadow: <BoxShadow>[
-                BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 5))
-              ]
-          ),
+                BoxShadow(
+                    color: Colors.black12, blurRadius: 5, offset: Offset(0, 5))
+              ]),
         ),
         onTap: () async {
           final myLatLong = await LocationRepository().determinePosition();
@@ -134,8 +130,8 @@ class _MapState extends State<Map> {
             context: context,
             delegate: SearchLocationMatch(
                 calledFromCreate: true,
-                myCurrentLocation: LatLng(myLatLong.latitude, myLatLong.longitude)
-            ),
+                myCurrentLocation:
+                    LatLng(myLatLong.latitude, myLatLong.longitude)),
           );
 
           if (result != null) {
@@ -183,13 +179,11 @@ class _MapState extends State<Map> {
           child: Center(
             child: TextButton(
               onPressed: () async {
-
-                final MapBoxSearchResponse result = await MapBoxService().searchPlaceByQuery(
+                final MapBoxSearchResponse result =
+                    await MapBoxService().searchPlaceByQuery(
                   '${this.centerPosition?.longitude.toString()}, ${this.centerPosition?.latitude.toString()}',
-                  LatLng(
-                      widget.currentPosition['latitude'],
-                      widget.currentPosition['longitude']
-                  ),
+                  LatLng(widget.currentPosition['latitude'],
+                      widget.currentPosition['longitude']),
                 );
 
                 if (result != null) {
@@ -197,9 +191,15 @@ class _MapState extends State<Map> {
                   final double latitude = place.center[1].toDouble();
                   final double longitude = place.center[0].toDouble();
 
-                  final city = place.context.firstWhere((Context con) => con.id.contains('place')).text;
-                  final province = place.context.firstWhere((Context con) => con.id.contains('region')).text;
-                  final country = place.context.firstWhere((Context con) => con.id.contains('country')).text;
+                  final city = place.context
+                      .firstWhere((Context con) => con.id.contains('place'))
+                      .text;
+                  final province = place.context
+                      .firstWhere((Context con) => con.id.contains('region'))
+                      .text;
+                  final country = place.context
+                      .firstWhere((Context con) => con.id.contains('country'))
+                      .text;
 
                   this.userLocationDetails = {
                     'lat': latitude,
@@ -221,15 +221,14 @@ class _MapState extends State<Map> {
                       PageRouteBuilder(
                         pageBuilder: (context, animation1, animation2) =>
                             CreateMatchScreen(
-                              manualSelection: true,
-                              userLocationDesc: place.text,
-                              userLocationDetails: this.userLocationDetails,
-                            ),
+                          manualSelection: true,
+                          userLocationDesc: place.text,
+                          userLocationDetails: this.userLocationDetails,
+                        ),
                         transitionDuration: Duration(seconds: 0),
                       ),
                     );
                   } else {
-
                     if (widget.match != null) {
                       Match editedMatch = widget.match!;
                       Navigator.pushReplacement(
@@ -237,20 +236,18 @@ class _MapState extends State<Map> {
                         PageRouteBuilder(
                           pageBuilder: (context, animation1, animation2) =>
                               EditMatchScreen(
-                                match: editedMatch,
-                                editedValues: widget.editedValues,
-                                manualSelection: true,
-                                userLocationDesc: place.text,
-                                userLocationDetails: this.userLocationDetails,
-                              ),
+                            match: editedMatch,
+                            editedValues: widget.editedValues,
+                            manualSelection: true,
+                            userLocationDesc: place.text,
+                            userLocationDetails: this.userLocationDetails,
+                          ),
                           transitionDuration: Duration(seconds: 0),
                         ),
                       );
                     }
-
                   }
                 }
-
               },
               child: Text(
                 translations[localeName]!['general.select']!.toUpperCase(),
@@ -268,18 +265,22 @@ class _MapState extends State<Map> {
     }
 
     return Scaffold(
-      body: Container(
-        child: Stack(
-          children: [
-            _buildGoogleMap(),
-            ManualLocation(),
-            _buildBackArrow(context),
-            _buildSearchInput(context),
-            _buildSelectButton(),
-          ],
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            children: [
+              _buildGoogleMap(),
+              ManualLocation(),
+              _buildBackArrow(context),
+              _buildSearchInput(context),
+              _buildSelectButton(),
+            ],
+          ),
         ),
       ),
     );
   }
-
 }

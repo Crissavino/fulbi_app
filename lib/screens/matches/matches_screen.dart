@@ -6,7 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
+import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
+import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_filter.dart';
@@ -42,6 +44,7 @@ class _MatchesState extends State<MatchesScreen> {
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
       _searchedMatchType.map((Type type) => type.id).toList(),
+      calledFromInitState: true,
     );
 
     silentNotificationListener();
@@ -70,7 +73,14 @@ class _MatchesState extends State<MatchesScreen> {
     matchesStreamController.close();
   }
 
-  Future getMatchesOffers(int range, Genre genre, List<int?> types) async {
+  Future getMatchesOffers(int range, Genre genre, List<int?> types, {calledFromInitState = false}) async {
+    if (calledFromInitState) {
+      User user = await UserRepository.getCurrentUser();
+      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      if (userGenre != null) {
+        genre = userGenre;
+      }
+    }
     final response = await MatchRepository().getMatchesOffers(
       range,
       genre,
@@ -206,9 +216,11 @@ class _MatchesState extends State<MatchesScreen> {
                 );
 
                 if (matches != null) {
-                  setState(() {
-                    this.matches = matches;
-                  });
+                  this.matches = matches;
+                  if (!matchesStreamController.isClosed)
+                    matchesStreamController.sink.add(
+                      this.matches,
+                    );
                 }
               },
             ),

@@ -353,10 +353,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
-  Container _buildMatchCost(String currencySymbol, Match match) {
+  Container _buildMatchCost(String? currencySymbol, Match match) {
     return Container(
       padding: EdgeInsets.only(top: 40.0),
-      child: this.isFreeMatch
+      child: (this.isFreeMatch)
           ? Text(
               translations[localeName]!['match.isFree']!,
               overflow: TextOverflow.clip,
@@ -364,7 +364,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
           : Text(
               translations[localeName]!['match.aproxCost']! +
                   ' ' +
-                  currencySymbol +
+                  currencySymbol! +
                   match.cost.toString(),
               overflow: TextOverflow.clip,
             ),
@@ -590,7 +590,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         Genre genre = snapshot.data['genre'];
         Type type = snapshot.data['type'];
         String currencySymbol = snapshot.data['currency'];
-        print(match.participants);
         int playersEnrolled = snapshot.data['playersEnrolled'];
         String spotsAvailable =
         (match.numPlayers - playersEnrolled).toString();

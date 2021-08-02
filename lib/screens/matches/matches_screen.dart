@@ -17,7 +17,6 @@ import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
-import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';

@@ -90,16 +90,16 @@ class Feature {
 
 class Context {
   Context({
-    required this.id,
-    required this.wikidata,
-    required this.shortCode,
-    required this.text,
+    this.id,
+    this.wikidata,
+    this.shortCode,
+    this.text,
   });
 
-  String id;
-  String wikidata;
-  String shortCode;
-  String text;
+  String? id;
+  String? wikidata;
+  String? shortCode;
+  String? text;
 
   factory Context.fromJson(Map<String, dynamic> json) => Context(
     id: json["id"] == null ? null : json["id"],
@@ -127,7 +127,7 @@ class Geometry {
 
   factory Geometry.fromJson(Map<String, dynamic> json) => Geometry(
     type: json["type"] == null ? null : json["type"],
-    coordinates: json["coordinates"] == [] ? List<double>.from(json["coordinates"].map((x) => x.toDouble())),
+    coordinates: json["coordinates"] == null ? [] : List<double>.from(json["coordinates"].map((x) => x.toDouble())),
   );
 
   Map<String, dynamic> toJson() => {
@@ -138,18 +138,18 @@ class Geometry {
 
 class Properties {
   Properties({
-    required this.wikidata,
-    required this.foursquare,
-    required this.landmark,
-    required this.address,
-    required this.category,
+    this.wikidata,
+    this.foursquare,
+    this.landmark,
+    this.address,
+    this.category,
   });
 
-  String wikidata;
-  String foursquare;
-  bool landmark;
-  String address;
-  String category;
+  String? wikidata;
+  String? foursquare;
+  bool? landmark;
+  String? address;
+  String? category;
 
   factory Properties.fromJson(Map<String, dynamic> json) => Properties(
     wikidata: json["wikidata"] == null ? null : json["wikidata"],

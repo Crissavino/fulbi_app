@@ -37,8 +37,6 @@ class MatchRepository {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       final localeName = Platform.localeName.split('_')[0];
 
-      FirebaseCrashlytics.instance.log(body['location']);
-
       final response = {
         'success': true,
         'myUser': User.fromJson(jsonDecode(localStorage.getString('user')!)),
@@ -46,7 +44,7 @@ class MatchRepository {
         'location': Location.fromJson(body['location']),
         'genre': Genre(id: body['genre']['id'], name: translations[localeName]![body['genre']['name_key']]!),
         'type': Type(id: body['type']['id'], name: translations[localeName]![body['type']['name_key']]!),
-        'currency': body['currency']['symbol'],
+        'currency': body['currency'] == null ? null : body['currency']['symbol'],
         'playersEnrolled': body['players_enrolled']
       };
 
@@ -224,6 +222,7 @@ class MatchRepository {
     int currencyId,
     double cost,
     int playersForMatch,
+    bool isFreeMatch
   ) async {
     final data = {
       "locationData": locationData,
@@ -233,6 +232,7 @@ class MatchRepository {
       "currency_id": currencyId,
       "cost": cost,
       "num_players": playersForMatch,
+      "is_free_match": isFreeMatch,
     };
 
     final res = await api.postData(data, '/match/create');
@@ -251,6 +251,7 @@ class MatchRepository {
       int currencyId,
       double cost,
       int playersForMatch,
+      bool isFreeMatch,
       ) async {
     final data = {
       "match_id": matchId,
@@ -261,9 +262,8 @@ class MatchRepository {
       "currency_id": currencyId,
       "cost": cost,
       "num_players": playersForMatch,
+      "is_free_match": isFreeMatch,
     };
-    print('Edit data');
-    print(data);
 
     final res = await api.postData(data, '/match/edit');
 

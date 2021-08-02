@@ -7,8 +7,7 @@ import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/services/place_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
-import 'package:fulbito_app/widgets/create_map.dart';
-import 'package:fulbito_app/widgets/modal_top_bar.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:uuid/uuid.dart';
 
 @deprecated

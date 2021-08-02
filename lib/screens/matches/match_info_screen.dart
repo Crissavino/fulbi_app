@@ -47,6 +47,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
   bool isLoading = false;
+  bool isFreeMatch = false;
 
   Future<void> _createDynamicLinkToNewPlayer(bool short) async {
     setState(() {
@@ -179,7 +180,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(
@@ -356,14 +356,18 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   Container _buildMatchCost(String currencySymbol, Match match) {
     return Container(
       padding: EdgeInsets.only(top: 40.0),
-      child: Text(
-        translations[localeName]!['match.aproxCost']! +
-            ' ' +
-            currencySymbol +
-            match.cost.toString(),
-        style: TextStyle(),
-        overflow: TextOverflow.clip,
-      ),
+      child: this.isFreeMatch
+          ? Text(
+              translations[localeName]!['match.isFree']!,
+              overflow: TextOverflow.clip,
+            )
+          : Text(
+              translations[localeName]!['match.aproxCost']! +
+                  ' ' +
+                  currencySymbol +
+                  match.cost.toString(),
+              overflow: TextOverflow.clip,
+            ),
     );
   }
 
@@ -590,6 +594,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         int playersEnrolled = snapshot.data['playersEnrolled'];
         String spotsAvailable =
         (match.numPlayers - playersEnrolled).toString();
+        this.isFreeMatch = match.isFreeMatch;
 
         this.isLoading = false;
 

@@ -18,6 +18,7 @@ class Match {
     required this.genreId,
     required this.typeId,
     required this.numPlayers,
+    required this.isFreeMatch,
     required this.cost,
     required this.chatId,
     required this.ownerId,
@@ -36,6 +37,7 @@ class Match {
   int genreId;
   int typeId;
   int numPlayers;
+  bool isFreeMatch;
   double cost;
   int chatId;
   int ownerId;
@@ -44,7 +46,7 @@ class Match {
   dynamic deletedAt;
   DateTime createdAt;
   DateTime updatedAt;
-  int currencyId;
+  int? currencyId;
   List<User>? participants;
 
   factory Match.fromJson(Map<String, dynamic> json) => Match(
@@ -54,6 +56,7 @@ class Match {
     genreId: json["genre_id"],
     typeId: json["type_id"],
     numPlayers: json["num_players"],
+    isFreeMatch: ((json["is_free_match"] == 1) || json["is_free_match"] == true) ? true : false,
     cost: double.tryParse(json["cost"].toString())!,
     chatId: json["chat_id"],
     ownerId: json["owner_id"],
@@ -73,6 +76,7 @@ class Match {
     "genre_id": genreId,
     "type_id": typeId,
     "num_players": numPlayers,
+    "is_free_match": isFreeMatch,
     "cost": cost,
     "chat_id": chatId,
     "owner_id": ownerId,

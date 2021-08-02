@@ -56,9 +56,9 @@ class _YourLocationState extends State<YourLocation> {
             final double latitude = result.center[1].toDouble();
             final double longitude = result.center[0].toDouble();
             var cityContext = place.context.firstWhereOrNull((Context con) {
-              if (con.id.contains('place')) {
+              if (con.id!.contains('place')) {
                 return true;
-              } else if (con.id.contains('district')) {
+              } else if (con.id!.contains('district')) {
                 return true;
               } else {
                 return false;
@@ -66,10 +66,10 @@ class _YourLocationState extends State<YourLocation> {
             });
             var city = place.placeName.split(',')[0];
             if (cityContext != null) {
-              city = cityContext.text;
+              city = cityContext.text!;
             }
-            final province = place.context.firstWhere((Context con) => con.id.contains('region')).text;
-            final country = place.context.firstWhere((Context con) => con.id.contains('country')).text;
+            final province = place.context.firstWhere((Context con) => con.id!.contains('region')).text;
+            final country = place.context.firstWhere((Context con) => con.id!.contains('country')).text;
 
             this.userLocationDetails = {
               'lat': latitude,

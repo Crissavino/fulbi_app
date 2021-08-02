@@ -53,9 +53,9 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
             final double latitude = result.center[1].toDouble();
             final double longitude = result.center[0].toDouble();
             var cityContext = place.context.firstWhereOrNull((Context con) {
-              if (con.id.contains('place')) {
+              if (con.id!.contains('place')) {
                 return true;
-              } else if (con.id.contains('district')) {
+              } else if (con.id!.contains('district')) {
                 return true;
               } else {
                 return false;
@@ -63,13 +63,13 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
             });
             var city = place.placeName.split(',')[0];
             if (cityContext != null) {
-              city = cityContext.text;
+              city = cityContext.text!;
             }
             final province = place.context
-                .firstWhere((Context con) => con.id.contains('region'))
+                .firstWhere((Context con) => con.id!.contains('region'))
                 .text;
             final country = place.context
-                .firstWhere((Context con) => con.id.contains('country'))
+                .firstWhere((Context con) => con.id!.contains('country'))
                 .text;
 
             this.userLocationDetails = {

@@ -12,7 +12,6 @@ import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class PlayersFilter extends StatefulWidget {

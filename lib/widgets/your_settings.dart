@@ -25,7 +25,6 @@ class _YourSettingsState extends State<YourSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(

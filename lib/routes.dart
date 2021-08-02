@@ -7,7 +7,6 @@ import 'package:fulbito_app/screens/intro/intro_screen.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
-import 'package:fulbito_app/widgets/create_map.dart';
 
 final routes = {
   'login': (_) => LoginScreen(),

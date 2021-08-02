@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';

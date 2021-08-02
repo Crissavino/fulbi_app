@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -192,13 +191,13 @@ class _MapState extends State<Map> {
                   final double longitude = place.center[0].toDouble();
 
                   final city = place.context
-                      .firstWhere((Context con) => con.id.contains('place'))
+                      .firstWhere((Context con) => con.id!.contains('place'))
                       .text;
                   final province = place.context
-                      .firstWhere((Context con) => con.id.contains('region'))
+                      .firstWhere((Context con) => con.id!.contains('region'))
                       .text;
                   final country = place.context
-                      .firstWhere((Context con) => con.id.contains('country'))
+                      .firstWhere((Context con) => con.id!.contains('country'))
                       .text;
 
                   this.userLocationDetails = {

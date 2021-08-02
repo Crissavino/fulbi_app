@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/message.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 

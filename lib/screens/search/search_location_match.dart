@@ -53,17 +53,6 @@ class SearchLocationMatch extends SearchDelegate<Feature?> {
 
     if (this.query.isEmpty) {
       return Container();
-      return ListTile(
-        leading: Icon(Icons.location_on),
-        title: Text('place.text'),
-        subtitle: Text('place.placeName'),
-        onTap: () async {
-
-          print('place');
-
-          // close(context, myLocationSuggestion);
-        },
-      );
     }
 
     this._mapBoxService.getSuggestionsByQuery(

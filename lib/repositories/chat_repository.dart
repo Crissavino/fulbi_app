@@ -58,17 +58,7 @@ class ChatRepository {
       "match_id": matchId,
     };
 
-    final res = await api.postData(data, '/chat/read-messages');
-
-    // Map body = json.decode(res.body);
-
-    // if (body.containsKey('success') && body['success'] == true) {
-    //
-    //   List messages = body['messages'];
-    //   if (messages.length == 0) return body;
-    //   body['messages'] = messages.map((message) => Message.fromJson(message)).toList();
-    //
-    // }
+    await api.postData(data, '/chat/read-messages');
 
   }
 

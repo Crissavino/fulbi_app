@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/manual_location.dart';
-import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -26,8 +24,6 @@ class _CreateMapState extends State<CreateMap> {
 
   @override
   Widget build(BuildContext context) {
-    final _height = MediaQuery.of(context).size.height;
-    final _width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Container(

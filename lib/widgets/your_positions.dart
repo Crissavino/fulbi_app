@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fulbito_app/bloc/profile/profile_bloc.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/utils/constants.dart';

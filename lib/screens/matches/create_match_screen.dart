@@ -1,8 +1,8 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
@@ -18,6 +18,8 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
 import 'package:fulbito_app/widgets/map.dart';
+import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
+import 'package:getwidget/types/gf_checkbox_type.dart';
 
 // ignore: must_be_immutable
 class CreateMatchScreen extends StatefulWidget {
@@ -25,7 +27,8 @@ class CreateMatchScreen extends StatefulWidget {
   String? userLocationDesc;
   var userLocationDetails;
 
-  CreateMatchScreen({this.manualSelection, this.userLocationDesc, this.userLocationDetails});
+  CreateMatchScreen(
+      {this.manualSelection, this.userLocationDesc, this.userLocationDetails});
 
   @override
   _CreateMatchScreenState createState() => _CreateMatchScreenState();
@@ -47,6 +50,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
   List<Currency> currencies = Currency().currencies;
   String? currencySelected;
   bool isLoading = false;
+  bool isFreeMatch = false;
 
   @override
   void initState() {
@@ -61,7 +65,6 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       this.userLocationDesc = widget.userLocationDesc!;
       this.userLocationDetails = widget.userLocationDetails!;
     }
-
   }
 
   @override
@@ -98,7 +101,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     ),
                     backwardsCompatibility: false,
                     systemOverlayStyle:
-                    SystemUiOverlayStyle(statusBarColor: Colors.white),
+                        SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
                     title: Text(
@@ -126,7 +129,11 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     width: _width,
                     height: _height,
                     child: Padding(
-                      padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                      padding: EdgeInsets.only(
+                        bottom: (MediaQuery.of(context).viewInsets.bottom),
+                        left: 15.0,
+                        right: 15.0,
+                      ),
                       child: SingleChildScrollView(
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Column(
@@ -135,9 +142,17 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                             _buildWhenPlay(),
                             _buildMatchSex(),
                             _buildMatchType(),
-                            _buildMatchCost(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildMatchCost(),
+                                _buildIsFreeMatch()
+                              ],
+                            ),
                             _buildPlayerForMatch(),
-                            SizedBox(height: 30.0,),
+                            SizedBox(
+                              height: 30.0,
+                            ),
                             _buildCreateMatchButton()
                           ],
                         ),
@@ -167,20 +182,17 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation1,
-                animation2) =>
-                Map(
-                  currentPosition: myLatLong,
-                  calledFromCreate: true,
-                ),
-            transitionDuration:
-            Duration(seconds: 0),
+            pageBuilder: (context, animation1, animation2) => Map(
+              currentPosition: myLatLong,
+              calledFromCreate: true,
+            ),
+            transitionDuration: Duration(seconds: 0),
           ),
         );
       },
       child: Container(
         alignment: Alignment.centerLeft,
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -215,17 +227,17 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
               ),
               userLocationDesc.isEmpty
                   ? Text(
-                translations[localeName]!['match.wherePlay']!,
-                style: TextStyle(fontSize: 16.0, color: Colors.grey),
-                overflow: TextOverflow.ellipsis,
-              )
+                      translations[localeName]!['match.wherePlay']!,
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey),
+                      overflow: TextOverflow.ellipsis,
+                    )
                   : Expanded(
-                child: Text(
-                  userLocationDesc,
-                  style: TextStyle(fontSize: 16.0),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+                      child: Text(
+                        userLocationDesc,
+                        style: TextStyle(fontSize: 16.0),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
             ],
           ),
         ),
@@ -297,7 +309,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       },
       child: Container(
         alignment: Alignment.centerLeft,
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -354,7 +366,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return GestureDetector(
       child: Container(
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -404,7 +416,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return GestureDetector(
       child: Container(
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -454,7 +466,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return Container(
       alignment: Alignment.centerLeft,
-      width: _width * .95,
+      width: _width * .5,
       margin: EdgeInsets.only(top: 20.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
@@ -469,10 +481,13 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       ),
       height: 60.0,
       child: Container(
-        margin: EdgeInsets.only(left: 25.0,),
+        margin: EdgeInsets.only(
+          left: 25.0,
+        ),
         width: _width,
         child: Container(
           child: TextFormField(
+            enabled: this.isFreeMatch ? false : true,
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -486,7 +501,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                 margin: EdgeInsets.only(left: 10.0, right: 10.0),
                 child: currencySelect(),
               ),
-              hintText: translations[localeName]!['match.create.aproxCost']!,
+              hintText: translations[localeName]!['match.create.cost']!,
               hintStyle: kHintTextStyle,
             ),
             onChanged: (val) {
@@ -510,10 +525,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       value: currencySelected,
       iconSize: 20,
       elevation: 16,
-      style: TextStyle(
-          color: Colors.green[400],
-        fontSize: 30.0
-      ),
+      style: TextStyle(color: Colors.green[400], fontSize: 30.0),
       underline: Container(
         height: 0,
         color: Colors.transparent,
@@ -523,13 +535,54 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
           currencySelected = newValue!;
         });
       },
-      items: this.currencies
-          .map<DropdownMenuItem<String>>((Currency currency) {
-          return DropdownMenuItem<String>(
-            value: currency.code,
-            child: Text(currency.code!),
-          );
+      items: this.currencies.map<DropdownMenuItem<String>>((Currency currency) {
+        return DropdownMenuItem<String>(
+          value: currency.code,
+          child: Text(currency.code!),
+        );
       }).toList(),
+    );
+  }
+
+  Widget _buildIsFreeMatch() {
+    final _width = MediaQuery.of(context).size.width;
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      width: _width * .35,
+      margin: EdgeInsets.only(top: 20.0, right: 10.0),
+      height: 60.0,
+      child: GFCheckboxListTile(
+        title: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Text(
+              translations[localeName]!['general.free']!,
+              style: TextStyle(
+                fontSize: 16.0,
+              ),
+            ),
+          ),
+        ),
+        size: 35,
+        activeBgColor: Colors.green[400]!,
+        inactiveBorderColor: Colors.green[700]!,
+        activeBorderColor: Colors.green[700]!,
+        type: GFCheckboxType.circle,
+        padding: EdgeInsets.all(0),
+        activeIcon: Icon(
+          Icons.sports_soccer,
+          size: 25,
+          color: Colors.white,
+        ),
+        onChanged: (value) {
+          setState(() {
+            this.isFreeMatch = !this.isFreeMatch;
+          });
+        },
+        value: this.isFreeMatch,
+        inactiveIcon: null,
+      ),
     );
   }
 
@@ -538,7 +591,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return Container(
       alignment: Alignment.centerLeft,
-      width: _width * .95,
+      width: _width,
       margin: EdgeInsets.only(top: 20.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
@@ -553,7 +606,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       ),
       height: 60.0,
       child: Container(
-        margin: EdgeInsets.only(left: 25.0,),
+        margin: EdgeInsets.only(
+          left: 25.0,
+        ),
         width: _width,
         child: Container(
           child: TextFormField(
@@ -574,7 +629,8 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                   color: Colors.green[400],
                 ),
               ),
-              hintText: translations[localeName]!['match.create.playerForMatch']!,
+              hintText:
+                  translations[localeName]!['match.create.playerForMatch']!,
               hintStyle: kHintTextStyle,
             ),
             onChanged: (val) {
@@ -624,98 +680,107 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: this.isLoading ? null : () async {
-            if (this.userLocationDesc == '') {
-              return showAlert(
-                context,
-                'Atencion!',
-                'Debes indicar el lugar donde se juega el partido',
-              );
-            }
+          onPressed: this.isLoading
+              ? null
+              : () async {
+                  if (this.userLocationDesc == '') {
+                    return showAlert(
+                      context,
+                      'Atencion!',
+                      'Debes indicar el lugar donde se juega el partido',
+                    );
+                  }
 
-            if (this.whenPlay == '') {
-              return showAlert(
-                context,
-                'Atencion!',
-                'Debes indicar cuando se va a jugar el partido',
-              );
-            }
+                  if (this.whenPlay == '') {
+                    return showAlert(
+                      context,
+                      'Atencion!',
+                      'Debes indicar cuando se va a jugar el partido',
+                    );
+                  }
 
-            if (this.matchCost.round() == 0) {
-              return showAlert(
-                context,
-                'Atencion!',
-                'Debes indicar el costo aproximado',
-              );
-            }
+                  if (!this.isFreeMatch && this.matchCost.round() == 0) {
+                    return showAlert(
+                      context,
+                      'Atencion!',
+                      'Debes indicar el costo aproximado',
+                    );
+                  }
 
-            if (this.playersForMatch == 0) {
-              return showAlert(
-                context,
-                'Atencion!',
-                'Debes indicar al menos un jugador para el partido',
-              );
-            }
+                  if (this.playersForMatch == 0) {
+                    return showAlert(
+                      context,
+                      'Atencion!',
+                      'Debes indicar al menos un jugador para el partido',
+                    );
+                  }
 
-            setState(() {
-              this.isLoading = true;
-            });
+                  setState(() {
+                    this.isLoading = true;
+                  });
 
-            int? genreId = this.matchGender.firstWhereOrNull((Genre genre) {
-              bool? isChecked = genre.checked;
-              if (isChecked == null) {
-                return false;
-              }
-              return isChecked;
-            })!.id;
+                  int? genreId =
+                      this.matchGender.firstWhereOrNull((Genre genre) {
+                    bool? isChecked = genre.checked;
+                    if (isChecked == null) {
+                      return false;
+                    }
+                    return isChecked;
+                  })!.id;
 
-            int? typeId = this.matchType.firstWhereOrNull((Type type) {
-              bool? isChecked = type.checked;
-              if (isChecked == null) {
-                return false;
-              }
-              return isChecked;
-            })!.id;
+                  int? typeId = this.matchType.firstWhereOrNull((Type type) {
+                    bool? isChecked = type.checked;
+                    if (isChecked == null) {
+                      return false;
+                    }
+                    return isChecked;
+                  })!.id;
 
-            int? currencyId = this.currencies.firstWhereOrNull((Currency currency) => currency.code == this.currencySelected)!.id;
+                  int? currencyId = this
+                      .currencies
+                      .firstWhereOrNull((Currency currency) =>
+                          currency.code == this.currencySelected)!
+                      .id;
 
-            final response = await MatchRepository().create(
-              this.userLocationDetails,
-              this.whenPlay,
-              genreId!,
-              typeId!,
-              currencyId!,
-              this.matchCost,
-              this.playersForMatch,
-            );
+                  final response = await MatchRepository().create(
+                      this.userLocationDetails,
+                      this.whenPlay,
+                      genreId!,
+                      typeId!,
+                      this.isFreeMatch ? 0 : currencyId!,
+                      this.isFreeMatch ? 0 : this.matchCost,
+                      this.playersForMatch,
+                      this.isFreeMatch);
 
-            if (response['success']) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyMatchesScreen(),
+                  if (response['success']) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyMatchesScreen(),
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      this.isLoading = false;
+                    });
+                    return showAlert(
+                      context,
+                      'Error',
+                      'Ooops, ocurrió un error',
+                    );
+                  }
+                },
+          child: this.isLoading
+              ? whiteCircularLoading
+              : Text(
+                  translations[localeName]!['general.create']!.toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSans',
+                    fontSize: 16.0,
+                  ),
                 ),
-              );
-            } else {
-              setState(() {
-                this.isLoading = false;
-              });
-              return showAlert(
-                context,
-                'Error',
-                'Ooops, ocurrió un error',
-              );
-            }
-          },
-          child: this.isLoading ? whiteCircularLoading :  Text(
-            translations[localeName]!['general.create']!.toUpperCase(),
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenSans',
-              fontSize: 16.0,
-            ),
-          ),
         ),
       ),
     );

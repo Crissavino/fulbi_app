@@ -16,6 +16,8 @@ import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
+import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:fulbito_app/widgets/map.dart';
@@ -59,6 +61,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   String? currencySelected;
   Future? _future;
   bool isLoading = false;
+  bool isFreeMatch = false;
 
   // controllers
   final _myNumPlayersController = TextEditingController();
@@ -127,6 +130,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           isByLatLng: location.isByLatLng != null ? location.isByLatLng : false
         );
         Match match = response['match'];
+        this.isFreeMatch = match.isFreeMatch;
         this.whenPlay = DateFormat('dd/MM/yyyy HH:mm').format(match.whenPlay);
         Genre genre = response['genre'];
         this
@@ -157,6 +161,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           lng: this.userLocationDetails['lng'],
           isByLatLng: true
       );
+      this.isFreeMatch = widget.editedValues['isFreeMatch'];
       this.whenPlay = widget.editedValues['whenPlay'];
       this.matchGender = widget.editedValues['matchGender'];
       this.matchType = widget.editedValues['matchType'];
@@ -218,7 +223,10 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                     height: _height,
                     child: Padding(
                       padding: EdgeInsets.only(
-                          bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                        bottom: (MediaQuery.of(context).viewInsets.bottom),
+                        left: 15.0,
+                        right: 15.0,
+                      ),
                       child: FutureBuilder(
                         future: this._future,
                         builder: (BuildContext context,
@@ -246,7 +254,13 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                                 _buildWhenPlay(context),
                                 _buildMatchSex(),
                                 _buildMatchType(),
-                                _buildMatchCost(playersEnrolled),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildMatchCost(playersEnrolled),
+                                    _buildIsFreeMatch()
+                                  ],
+                                ),
                                 _buildPlayerForMatch(),
                                 SizedBox(height: 30.0,),
                                 _buildEditMatchButton(widget.match.id)
@@ -281,6 +295,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
             : this.playersForMatch.toString();
 
         final editedValues = {
+          'isFreeMatch': this.isFreeMatch,
           'whenPlay': this.whenPlay,
           'matchGender': this.matchGender,
           'matchType': this.matchType,
@@ -311,7 +326,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       },
       child: Container(
         alignment: Alignment.centerLeft,
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -428,7 +443,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       },
       child: Container(
         alignment: Alignment.centerLeft,
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -485,7 +500,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     return GestureDetector(
       child: Container(
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -535,7 +550,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     return GestureDetector(
       child: Container(
-        width: _width * .95,
+        width: _width,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -590,6 +605,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     } else {
       this.matchCost = 0;
     }
+    print('this.matchCost');
+    print(this.matchCost);
   }
 
   Widget _buildMatchCost(playersEnrolled) {
@@ -597,7 +614,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     return Container(
       alignment: Alignment.centerLeft,
-      width: _width * .95,
+      width: _width * .5,
       margin: EdgeInsets.only(top: 20.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
@@ -619,7 +636,11 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         child: Container(
           child: TextFormField(
             controller: this._myMatchCostController,
-            enabled: playersEnrolled > 0 ? false : true,
+            enabled: playersEnrolled > 0
+                ? false
+                : this.isFreeMatch
+                  ? false
+                  : true,
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -633,7 +654,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                 margin: EdgeInsets.only(left: 10.0, right: 10.0),
                 child: currencySelect(playersEnrolled),
               ),
-              hintText: translations[localeName]!['match.create.aproxCost']!,
+              hintText: translations[localeName]!['match.create.cost']!,
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -644,7 +665,11 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
   currencySelect(playersEnrolled) {
     return DropdownButton<String>(
-      value: currencySelected,
+      value: this.isFreeMatch
+          ? this.currencies.first.code
+          : this.currencySelected == null
+            ? this.currencies.first.code
+            : this.currencySelected,
       iconSize: 20,
       elevation: 16,
       style: TextStyle(color: Colors.green[400], fontSize: 30.0),
@@ -673,6 +698,55 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
+  Widget _buildIsFreeMatch() {
+    final _width = MediaQuery.of(context).size.width;
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      width: _width * .35,
+      margin: EdgeInsets.only(top: 20.0, right: 10.0),
+      height: 60.0,
+      child: GFCheckboxListTile(
+        title: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Text(
+              translations[localeName]!['general.free']!,
+              style: TextStyle(
+                fontSize: 16.0,
+              ),
+            ),
+          ),
+        ),
+        size: 35,
+        activeBgColor: Colors.green[400]!,
+        inactiveBorderColor: Colors.green[700]!,
+        activeBorderColor: Colors.green[700]!,
+        type: GFCheckboxType.circle,
+        padding: EdgeInsets.all(0),
+        activeIcon: Icon(
+          Icons.sports_soccer,
+          size: 25,
+          color: Colors.white,
+        ),
+        onChanged: (value) {
+          this.isFreeMatch = !this.isFreeMatch;
+          if (!this.isFreeMatch && this.currencySelected == null) {
+            this.currencySelected = this.currencies.first.code;
+          }
+          if (this.isFreeMatch) {
+            this._myMatchCostController.text = '0.0';
+            this.matchCost = 0.0;
+          }
+          print(this.matchCost);
+          setState(() {});
+        },
+        value: this.isFreeMatch,
+        inactiveIcon: null,
+      ),
+    );
+  }
+
   void _printLatestPlayerForMatchValue() {
     if (this._myNumPlayersController.text.isNotEmpty) {
       this.playersForMatch = int.parse(this._myNumPlayersController.text);
@@ -686,7 +760,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     return Container(
       alignment: Alignment.centerLeft,
-      width: _width * .95,
+      width: _width,
       margin: EdgeInsets.only(top: 20.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
@@ -783,7 +857,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               );
             }
 
-            if (this.matchCost.round() == 0) {
+            if (!this.isFreeMatch && this.matchCost.round() == 0) {
               return showAlert(
                 context,
                 'Atencion!',
@@ -834,9 +908,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               currencyId!,
               this.matchCost,
               int.parse(this._myNumPlayersController.text),
+              this.isFreeMatch,
             );
-
-            // Navigator.replace(context, oldRoute: oldRoute, newRoute: newRoute)
 
             if (response['success']) {
               Navigator.pushReplacement(

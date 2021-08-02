@@ -4,8 +4,6 @@ import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/environment.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path/path.dart';
-import 'package:async/async.dart';
 
 class Api {
   final String _url = EnvironmentConstants.apiUrl;

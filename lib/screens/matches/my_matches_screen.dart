@@ -25,7 +25,6 @@ class MyMatchesScreen extends StatefulWidget {
 }
 
 class _MyMatchesScreenState extends State<MyMatchesScreen> {
-  Future? _future;
   List<Match?> matches = [];
   User? myUser;
   StreamController matchesStreamController = StreamController.broadcast();
@@ -34,7 +33,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    this._future = getMyMatches();
+    getMyMatches();
     this.getMyUser();
     silentNotificationListener();
   }
@@ -95,8 +94,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.width;
-    final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -117,7 +114,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                       builder:
                           (BuildContext context, BoxConstraints constraints) {
                         double innerHeight = constraints.maxHeight;
-                        double innerWidth = constraints.maxWidth;
 
                         return Stack(
                           children: [

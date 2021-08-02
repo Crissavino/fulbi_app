@@ -37,6 +37,8 @@ class MatchRepository {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       final localeName = Platform.localeName.split('_')[0];
 
+      FirebaseCrashlytics.instance.log(body['location']);
+
       final response = {
         'success': true,
         'myUser': User.fromJson(jsonDecode(localStorage.getString('user')!)),

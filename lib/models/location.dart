@@ -14,11 +14,11 @@ class Location {
     required this.lat,
     required this.lng,
     required this.country,
-    required this.countryCode,
+    this.countryCode,
     required this.province,
-    required this.provinceCode,
+    this.provinceCode,
     required this.city,
-    required this.placeId,
+    this.placeId,
     required this.formattedAddress,
     this.isByLatLng,
     required this.deletedAt,
@@ -30,11 +30,11 @@ class Location {
   double lat;
   double lng;
   String country;
-  String countryCode;
+  String? countryCode;
   String province;
-  String provinceCode;
+  String? provinceCode;
   String city;
-  String placeId;
+  String? placeId;
   String formattedAddress;
   bool? isByLatLng;
   dynamic deletedAt;
@@ -46,11 +46,11 @@ class Location {
     lat: double.parse(json["lat"]),
     lng: double.parse(json["lng"]),
     country: json["country"],
-    countryCode: json["country_code"],
+    countryCode: json["country_code"] == null ? null : json["country_code"],
     province: json["province"],
-    provinceCode: json["province_code"],
+    provinceCode: json["province_code"] == null ? null : json["province_code"],
     city: json["city"],
-    placeId: json["place_id"],
+    placeId: json["place_id"] == null ? null : json["place_id"],
     formattedAddress: json["formatted_address"],
     isByLatLng: ((json["is_by_lat_lng"] == 1) || json["is_by_lat_lng"] == true) ? true : false,
     deletedAt: json["deleted_at"],

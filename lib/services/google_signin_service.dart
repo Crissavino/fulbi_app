@@ -11,17 +11,9 @@ class GoogleSignInService {
   static Future<Map?> singInWithGoogle() async {
     try {
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      final googleKey = await account?.authentication;
-      print(account);
-      print('=========== ID TOKEN ===========');
-      // print(googleKey?.idToken);
-      print('=========== ID accessToken ===========');
-      print(googleKey?.accessToken);
-      print('=========== ID serverAuthCode ===========');
-      print(googleKey?.serverAuthCode);
-
-      // TODO llamar a nuestro backend con idToken
-      return await UserRepository().loginWithGoogle(googleKey?.idToken);
+      if (account == null) return {'canceled': true};
+      final googleKey = await account.authentication;
+      return await UserRepository().loginWithGoogle(googleKey.idToken);
       // return account;
     } catch (e) {
       print('Error en Google Singin');

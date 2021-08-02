@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -25,6 +26,10 @@ class MatchRepository {
   Future getMatch(matchId) async {
 
     final res = await api.getData('/match/$matchId');
+
+    FirebaseCrashlytics.instance.log(res.toString());
+    FirebaseCrashlytics.instance.log(res.body.toString());
+    FirebaseCrashlytics.instance.log(res.statusCode.toString());
 
     Map body = json.decode(res.body);
 

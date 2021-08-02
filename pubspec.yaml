@@ -53,6 +53,7 @@ dependencies:
   sign_in_with_apple:
   google_maps_flutter:
   animate_do:
+  device_info:
 
 dev_dependencies:
   flutter_test:

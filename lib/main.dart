@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -31,8 +32,12 @@ import 'screens/matches/matches_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PushNotificationService.initializeApp();
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-  runApp(MyApp());
+  runZonedGuarded<Future<void>>(() async {
+    // The following lines are the same as previously explained in "Handling uncaught errors"
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+    runApp(MyApp());
+  }, FirebaseCrashlytics.instance.recordError);
 }
 
 class MyApp extends StatefulWidget {

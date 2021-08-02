@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fulbito_app/bloc/register/register_bloc.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -19,7 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final _formKey = GlobalKey<FormState>();
   String error = '';
-  bool loading = false;
+  bool isLoading = false;
   UserRepository _userRepository = UserRepository();
 
   // text field state
@@ -247,70 +248,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildRegisterBtn() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 25.0),
-      width: double.infinity,
-      child: RaisedButton(
-        elevation: 5.0,
-        onPressed: () async {
-          if (fullName.isEmpty) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['mandatoryFullName']!,
-            );
-          } else if (email.isEmpty) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['mandatoryEmail']!,
-            );
-          } else if (password.isEmpty) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['mandatoryPass']!,
-            );
-          } else if (password.length < 6) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['passWithMoreSix']!,
-            );
-          } else if (confirmPassword.isEmpty) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['mandatoryConfirmPass']!,
-            );
-          } else if (confirmPassword.length < 6) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['passWithMoreSix']!,
-            );
-          } else if (password != confirmPassword) {
-            showAlert(
-              context,
-              translations[localeName]!['registerFails']!,
-              translations[localeName]!['passNotMatch']!,
-            );
-          } else {
-            FocusScope.of(context).unfocus();
-            await _register();
-          }
-        },
-        padding: EdgeInsets.all(15.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        color: Colors.white,
-        child: Text(
-          'SIGN UP',
-          style: TextStyle(
-            color: Color(0xFF527DAA),
-            letterSpacing: 1.5,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'OpenSans',
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(2.0),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: TextButton(
+            style: ButtonStyle(
+              overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent),
+            ),
+            onPressed: this.isLoading ? () {} : () async {
+              if (fullName.isEmpty) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['mandatoryFullName']!,
+                );
+              } else if (email.isEmpty) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['mandatoryEmail']!,
+                );
+              } else if (password.isEmpty) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['mandatoryPass']!,
+                );
+              } else if (password.length < 6) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['passWithMoreSix']!,
+                );
+              } else if (confirmPassword.isEmpty) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['mandatoryConfirmPass']!,
+                );
+              } else if (confirmPassword.length < 6) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['passWithMoreSix']!,
+                );
+              } else if (password != confirmPassword) {
+                showAlert(
+                  context,
+                  translations[localeName]!['registerFails']!,
+                  translations[localeName]!['passNotMatch']!,
+                );
+              } else {
+                setState(() {
+                  this.isLoading = true;
+                });
+                FocusScope.of(context).unfocus();
+                await _register();
+              }
+            },
+            child: this.isLoading ? circularLoading : Text(
+              translations[localeName]!['signUp']!.toUpperCase(),
+              style: TextStyle(
+                color: Color(0xFF527DAA),
+                letterSpacing: 1.5,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenSans',
+              ),
+            ),
           ),
         ),
       ),
@@ -318,22 +328,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    BlocProvider.of<RegisterBloc>(context).add(
-        RegisteringEvent()
-    );
 
     final Map res = await _userRepository.register(email, password, confirmPassword, fullName);
 
     if (res.containsKey('success') && res['success'] == true) {
-      Navigator.pushReplacementNamed(context, 'complete_profile');
-
-      BlocProvider.of<RegisterBloc>(context).add(
-          RegisteredEvent()
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => CompleteRegisterScreen()),
+            (Route<dynamic> route) => false,
       );
     } else {
-      BlocProvider.of<RegisterBloc>(context).add(
-          RegisterErrorEvent()
-      );
+      setState(() {
+        this.isLoading = false;
+      });
       showAlert(
         context,
         translations[localeName]!['registerFails']!,
@@ -345,21 +352,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildSignInBtn() {
     return GestureDetector(
       onTap: () => Navigator.pushReplacementNamed(context, 'login'),
-      // onTap: () {
-      //   Navigator.pushReplacementNamed(context, 'login');
-      // Navigator.pushReplacement(
-      //   context,
-      //   PageRouteBuilder(
-      //     pageBuilder: (_, __, ___) => SigninScreen(),
-      //     transitionDuration: Duration(milliseconds: 0),
-      //   ),
-      // );
-      // },
       child: RichText(
         text: TextSpan(
           children: [
             TextSpan(
-              text: 'Do you have an Account? ',
+              text: translations[localeName]!['doHaveAccount']!,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
@@ -367,7 +364,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             TextSpan(
-              text: 'Sign In',
+              text: translations[localeName]!['signIn']!,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
@@ -397,52 +394,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: verticalGradient,
                 height: double.infinity,
                 padding: EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
-                child: BlocBuilder<RegisterBloc, RegisterState>(
-                  builder: (BuildContext context, state) {
-
-                    if (state is RegisteringState) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          whiteCircularLoading
-                        ],
-                      );
-                    }
-
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
-                      child: SingleChildScrollView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            _buildPageTitle(),
-                            SizedBox(height: 30.0),
-                            Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  _buildFullNameTF(),
-                                  SizedBox(height: 10.0),
-                                  _buildEmailTF(),
-                                  SizedBox(height: 10.0),
-                                  _buildPasswordTF(),
-                                  SizedBox(height: 10.0),
-                                  _buildConfirmPasswordTF(),
-                                  SizedBox(height: 20.0),
-                                  // _buildRememberMeCheckbox(),
-                                  _buildRegisterBtn(),
-                                  SizedBox(height: 10.0),
-                                  _buildSignInBtn()
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: (MediaQuery.of(context).viewInsets.bottom)),
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _buildPageTitle(),
+                        SizedBox(height: 30.0),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              _buildFullNameTF(),
+                              SizedBox(height: 10.0),
+                              _buildEmailTF(),
+                              SizedBox(height: 10.0),
+                              _buildPasswordTF(),
+                              SizedBox(height: 10.0),
+                              _buildConfirmPasswordTF(),
+                              SizedBox(height: 20.0),
+                              // _buildRememberMeCheckbox(),
+                              _buildRegisterBtn(),
+                              SizedBox(height: 10.0),
+                              _buildSignInBtn()
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               )
             ],

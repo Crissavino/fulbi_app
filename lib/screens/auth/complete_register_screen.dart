@@ -29,6 +29,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
   String userLocationDesc = '';
   var userLocationDetails;
   UserRepository _userRepository = UserRepository();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +335,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                         height: 50.0,
                         child: Center(
                           child: TextButton(
-                            onPressed: () async {
+                            onPressed: this.isLoading ? null : () async {
 
                               if (userLocationDesc.isEmpty){
                                 return showAlert(
@@ -349,6 +350,10 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                                   'Debes seleccionar tu sexo',
                                 );
                               }
+
+                              setState(() {
+                                this.isLoading = true;
+                              });
 
                               bool isMale = _male;
                               var genreId;
@@ -366,6 +371,9 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                               if (completeUserProfileResponse['success'] == true) {
                                 Navigator.pushReplacementNamed(context, 'intro');
                               } else {
+                                setState(() {
+                                  this.isLoading = false;
+                                });
                                 return showAlert(
                                   context,
                                   'Error!',
@@ -374,7 +382,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                               }
 
                             },
-                            child: Text(
+                            child: this.isLoading ? circularLoading : Text(
                               translations[localeName]!['general.done']!.toUpperCase(),
                               style: TextStyle(
                                 color: Color(0xFF527DAA),

@@ -4,6 +4,8 @@ PODS:
     - AppAuth/ExternalUserAgent (= 1.4.0)
   - AppAuth/Core (1.4.0)
   - AppAuth/ExternalUserAgent (1.4.0)
+  - device_info (0.0.1):
+    - Flutter
   - Firebase/Analytics (8.0.0):
     - Firebase/Core
   - Firebase/Core (8.0.0):
@@ -169,6 +171,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - Firebase/Analytics
   - Firebase/Core
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -208,6 +211,8 @@ SPEC REPOS:
     - PromisesObjC
 
 EXTERNAL SOURCES:
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_crashlytics:
@@ -239,6 +244,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 73c3e3b216ec1ecbc54d2ffdd4670c65c749edb1
   firebase_core: cda81ae37eda6df2bc2d16027fda527987c4bd33
   firebase_crashlytics: 19eca4f6f262e11e3f6306d16cbb3f643b828ce1

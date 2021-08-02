@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info/device_info.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/player.dart';
 import 'package:fulbito_app/models/position_db.dart';
@@ -49,9 +50,14 @@ class UserRepository {
     return body;
   }
 
-  Future<bool> logout() async {
+  Future<bool> logout(int userId) async {
 
-    final res = await api.postData([], '/logout');
+    final data = {
+      'user_id': userId,
+      'uuid': await getDeviceUuid()
+    };
+
+    final res = await api.postData(data, '/logout');
 
     final body = json.decode(res.body);
 
@@ -69,9 +75,11 @@ class UserRepository {
     String email,
     String password,
   ) async {
+
     final data = {
       'email': email,
       'password': password,
+      'uuid': await getDeviceUuid()
     };
 
     final res = await api.authData(data, '/login');
@@ -92,11 +100,25 @@ class UserRepository {
     return body;
   }
 
+  Future<String> getDeviceUuid() async {
+    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    String uuid;
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidDeviceInfo = await deviceInfoPlugin.androidInfo;
+      uuid = androidDeviceInfo.androidId;
+    } else {
+      IosDeviceInfo iosDeviceInfo = await deviceInfoPlugin.iosInfo;
+      uuid = iosDeviceInfo.identifierForVendor;
+    }
+    return uuid;
+  }
+
   Future<Map> loginWithGoogle(
       String? token,
       ) async {
     final data = {
       'id_token': token,
+      'uuid': await getDeviceUuid()
     };
 
     final res = await api.authData(data, '/login-with-google');
@@ -132,6 +154,7 @@ class UserRepository {
       'last_name': lastName,
       'use_bundle_id': useBundleId,
       'state': state,
+      'uuid': await getDeviceUuid()
     };
 
     final res = await api.authData(data, '/login-with-apple');
@@ -165,6 +188,7 @@ class UserRepository {
       'password': password,
       'password_confirmation': confirmPassword,
       'name': fullName,
+      'uuid': await getDeviceUuid()
     };
 
     final res = await api.authData(data, '/register');

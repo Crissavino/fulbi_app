@@ -6,6 +6,7 @@ import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
@@ -118,63 +119,61 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                               double innerHeight = constraints.maxHeight;
                               double innerWidth = constraints.maxWidth;
 
-                              return SafeArea(
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    Positioned(
-                                      bottom: 0.0,
-                                      left: 0.0,
-                                      right: 0.0,
-                                      child: Container(
-                                        height: innerHeight * 0.89,
-                                        width: innerWidth,
-                                        decoration: BoxDecoration(
-                                          borderRadius: screenBorders,
-                                          color: Colors.white,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 6.0,
-                                              offset: Offset(0, -2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Container(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                                children: [circularLoading],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 0.0,
-                                      left: 0.0,
-                                      right: 0.0,
-                                      child: Center(
-                                        child: CircleAvatar(
-                                          backgroundColor: Colors.white,
-                                          radius: 60,
-                                          child: Icon(
-                                            Icons.person,
-                                            color: Colors.green[700],
-                                            size: 100.0,
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Positioned(
+                                    bottom: 0.0,
+                                    left: 0.0,
+                                    right: 0.0,
+                                    child: Container(
+                                      height: innerHeight * 0.87,
+                                      width: innerWidth,
+                                      decoration: BoxDecoration(
+                                        borderRadius: screenBorders,
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12,
+                                            blurRadius: 6.0,
+                                            offset: Offset(0, -2),
                                           ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Container(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [circularLoading],
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 15.0,
+                                    left: 0.0,
+                                    right: 0.0,
+                                    child: Center(
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 60,
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.green[700],
+                                          size: 100.0,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               );
                             },
                           ),
@@ -215,7 +214,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                   left: 0.0,
                                   right: 0.0,
                                   child: Container(
-                                    height: innerHeight * 0.89,
+                                    height: innerHeight * 0.87,
                                     width: innerWidth,
                                     decoration: BoxDecoration(
                                       borderRadius: screenBorders,
@@ -636,10 +635,15 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   _buildLogOutButton(BuildContext context) {
     return Center(
       child: Container(
+        width: 150.0,
+        height: 50.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: TextButton(
+          style: ButtonStyle(
+            overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent),
+          ),
           onPressed: () => _logout(context),
           child: Text(
             translations[localeName]!['profile.logout']!,
@@ -651,8 +655,12 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   }
 
   void _logout(BuildContext context) async {
-    if (await UserRepository().logout()) {
-      Navigator.pushReplacementNamed(context, 'login');
+    if (await UserRepository().logout(this._currentUser!.id)) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
     } else {
       print('Error con el logout');
     }

@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fulbito_app/models/map_box_search_response.dart';
-import 'package:fulbito_app/utils/api.dart';
 import 'package:fulbito_app/utils/debouncer.dart';
 import 'package:fulbito_app/utils/environment.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
@@ -24,11 +23,14 @@ class MapBoxService {
   Stream<MapBoxSearchResponse> get suggestionsStream => this._suggestionsStreamController.stream;
 
   Future<MapBoxSearchResponse> searchPlaceByQuery(String search, LatLng proximity) async {
-    print('Buscando!!!');
     final String apiUrl = '$_baseUrl/mapbox.places/$search.json?access_token=$apiToken&cachebuster=1626765438887&autocomplete=true&proximity=${proximity.longitude},${proximity.latitude}';
 
     Uri fullUrl = Uri.parse(apiUrl);
     final res = await http.get(fullUrl);
+
+    FirebaseCrashlytics.instance.log(res.toString());
+    FirebaseCrashlytics.instance.log(res.body.toString());
+    FirebaseCrashlytics.instance.log(res.statusCode.toString());
 
     if (res.statusCode == 200) {
       final mapBoxSearchResponse = mapBoxResponseFromJson(res.body);

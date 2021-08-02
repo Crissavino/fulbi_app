@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final mapBoxResponse = mapBoxResponseFromJson(jsonString);
-
 import 'dart:convert';
 
 MapBoxSearchResponse mapBoxResponseFromJson(String str) => MapBoxSearchResponse.fromJson(json.decode(str));
@@ -22,10 +18,10 @@ class MapBoxSearchResponse {
   String attribution;
 
   factory MapBoxSearchResponse.fromJson(Map<String, dynamic> json) => MapBoxSearchResponse(
-    type: json["type"],
+    type: json["type"] == null ? null : json["type"],
     query: json["query"] != null ? List<String>.from(json["query"].map((x) => x.toString())) : [],
     features: json["features"] != null ? List<Feature>.from(json["features"].map((x) => Feature.fromJson(x))) : [],
-    attribution: json["attribution"],
+    attribution: json["attribution"] == null ? null : json["attribution"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -42,12 +38,12 @@ class Feature {
     required this.type,
     required this.placeType,
     required this.relevance,
-    required this.properties,
+    this.properties,
     required this.text,
     required this.placeName,
     required this.bbox,
     required this.center,
-    required this.geometry,
+    this.geometry,
     required this.context,
   });
 
@@ -55,25 +51,25 @@ class Feature {
   String type;
   List<String> placeType;
   double relevance;
-  Properties properties;
+  Properties? properties;
   String text;
   String placeName;
   List<double>? bbox;
   List<double> center;
-  Geometry geometry;
+  Geometry? geometry;
   List<Context> context;
 
   factory Feature.fromJson(Map<String, dynamic> json) => Feature(
-    id: json["id"],
-    type: json["type"],
-    placeType: List<String>.from(json["place_type"].map((x) => x)),
-    relevance: double.parse(json["relevance"].toString()),
-    properties: Properties.fromJson(json["properties"]),
-    text: json["text"],
-    placeName: json["place_name"],
+    id: json["id"] == null ? [] : json["id"],
+    type: json["type"] == null ? [] : json["type"],
+    placeType: json["place_type"] == null ? [] : List<String>.from(json["place_type"].map((x) => x)),
+    relevance: json["relevance"] == null ? 0.0 : double.parse(json["relevance"].toString()),
+    properties: json["properties"] == null ? null : Properties.fromJson(json["properties"]),
+    text: json["text"] == null ? null : json["text"],
+    placeName: json["place_name"] == null ? null : json["place_name"],
     bbox: json["bbox"] == null ? null : List<double>.from(json["bbox"].map((x) => x.toDouble())),
-    center: List<double>.from(json["center"].map((x) => x.toDouble())),
-    geometry: Geometry.fromJson(json["geometry"]),
+    center: json["center"] == null ? [] : List<double>.from(json["center"].map((x) => x.toDouble())),
+    geometry: json["geometry"] == null ? null : Geometry.fromJson(json["geometry"]),
     context: json["context"] != null ? List<Context>.from(json["context"].map((x) => Context.fromJson(x))) : [],
   );
 
@@ -82,12 +78,12 @@ class Feature {
     "type": type,
     "place_type": List<dynamic>.from(placeType.map((x) => x)),
     "relevance": relevance,
-    "properties": properties.toJson(),
+    "properties": properties!.toJson(),
     "text": text,
     "place_name": placeName,
     "bbox": bbox == null ? null : List<dynamic>.from(bbox!.map((x) => x)),
     "center": List<dynamic>.from(center.map((x) => x)),
-    "geometry": geometry.toJson(),
+    "geometry": geometry!.toJson(),
     "context": List<dynamic>.from(context.map((x) => x.toJson())),
   };
 }
@@ -106,10 +102,10 @@ class Context {
   String text;
 
   factory Context.fromJson(Map<String, dynamic> json) => Context(
-    id: json["id"],
-    wikidata: json["wikidata"] == null ? null : json["wikidata"],
-    shortCode: json["short_code"] == null ? null : json["short_code"],
-    text: json["text"],
+    id: json["id"] == null ? null : json["id"],
+    wikidata: json["wikidata"] == null ? null : json["wikidata"] == null ? null : json["wikidata"],
+    shortCode: json["short_code"] == null ? null : json["short_code"] == null ? null : json["short_code"],
+    text: json["text"] == null ? null : json["text"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -130,8 +126,8 @@ class Geometry {
   List<double> coordinates;
 
   factory Geometry.fromJson(Map<String, dynamic> json) => Geometry(
-    type: json["type"],
-    coordinates: List<double>.from(json["coordinates"].map((x) => x.toDouble())),
+    type: json["type"] == null ? null : json["type"],
+    coordinates: json["coordinates"] == [] ? List<double>.from(json["coordinates"].map((x) => x.toDouble())),
   );
 
   Map<String, dynamic> toJson() => {

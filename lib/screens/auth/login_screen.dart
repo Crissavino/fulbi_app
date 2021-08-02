@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fulbito_app/bloc/login/login_bloc.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
+import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/services/apple_singin_service.dart';
 import 'package:fulbito_app/services/google_signin_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
@@ -158,25 +160,31 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginBtn() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 25.0),
-      width: double.infinity,
-      child: RaisedButton(
-        elevation: 5.0,
-        onPressed: () async {
-          await postSignIn();
-        },
-        padding: EdgeInsets.all(15.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        color: Colors.white,
-        child: this.isLoading ? circularLoading : Text(
-          translations[localeName]!['signIn']!.toUpperCase(),
-          style: TextStyle(
-            color: Color(0xFF527DAA),
-            letterSpacing: 1.5,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'OpenSans',
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(2.0),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: TextButton(
+            style: ButtonStyle(
+              overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent),
+            ),
+            onPressed: this.isLoading ? null : () async {
+              await postSignIn();
+            },
+            child: this.isLoading ? circularLoading : Text(
+              translations[localeName]!['signIn']!.toUpperCase(),
+              style: TextStyle(
+                color: Color(0xFF527DAA),
+                letterSpacing: 1.5,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenSans',
+              ),
+            ),
           ),
         ),
       ),
@@ -216,9 +224,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (res.containsKey('success') && res['success'] == true) {
       User user = res['user'];
       if (user.isFullySet) {
-        Navigator.pushReplacementNamed(context, 'matches');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MatchesScreen()),
+              (Route<dynamic> route) => false,
+        );
       } else {
-        Navigator.pushReplacementNamed(context, 'complete_profile');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => CompleteRegisterScreen()),
+              (Route<dynamic> route) => false,
+        );
       }
       BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
     } else {
@@ -304,12 +320,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
                 BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else if (res!.containsKey('canceled') && res['canceled'] == true){
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
               } else {
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
                 showAlert(
                   context,
                   translations[localeName]!['loginFails']!,
-                  res['message'],
+                  res['message'] ?? "",
                 );
               }
             },
@@ -331,6 +349,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
                 BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else if(res.containsKey('canceled') && res['canceled'] == true) {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
               } else {
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
                 showAlert(
@@ -375,6 +395,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
                 BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
+              } else if(res.containsKey('canceled') && res['canceled'] == true) {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
               } else {
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
                 showAlert(
@@ -423,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             TextSpan(
-              text: 'Sign Up',
+              text: translations[localeName]!['signUp']!,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,

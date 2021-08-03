@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/genre.dart';
+import 'package:fulbito_app/models/player.dart';
 import 'package:fulbito_app/models/position.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
@@ -31,19 +33,46 @@ class _PlayersScreenState extends State<PlayersScreen> {
   List<User?> players = [];
   Future? _future;
   bool isLoading = false;
+  var responseFromStorage;
+  StreamController playersStreamController = StreamController.broadcast();
 
   @override
   void initState() {
     // TODO: implement initState
 
     super.initState();
+    loadFromLocalStorage();
     this._searchedGender[1].checked = true;
     List<int?> genres = [1, 2];
-    this._future = getUsersOffers(
+    getUsersOffers(
       _searchedRange['distance']!.toInt(),
       genres,
       _searchedPlayerPositions.map((Position pos) => pos.id).toList(),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    playersStreamController.close();
+  }
+
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('playersScreen.players')) {
+      var thisPlayers = json.decode(json.decode(localStorage.getString('playersScreen.players')!));
+      List players = thisPlayers;
+      thisPlayers = players.map((user) => User.fromJson(user)).toList();
+
+      this.players = thisPlayers;
+      if (!playersStreamController.isClosed)
+        playersStreamController.sink.add(
+          this.players,
+        );
+
+    }
+
   }
 
   Future getUsersOffers(
@@ -57,9 +86,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
       positionsIds,
     );
     if (response['success']) {
-      setState(() {
-        this.players = response['players'];
-      });
+      this.players = response['players'];
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonPlayers = this.players.map((e) => json.encode(e)).toList();
+      await localStorage.setString('playersScreen.players', json.encode(jsonPlayers.toString()));
+
+      if (!playersStreamController.isClosed)
+        playersStreamController.sink.add(
+          this.players,
+        );
     }
 
     return response;
@@ -111,21 +146,19 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 SharedPreferences localStorage =
                     await SharedPreferences.getInstance();
                 List players = jsonDecode(localStorage.getString('players')!);
-                setState(() {
+                this.players = players.map((user) => User.fromJson(user)).toList();
+                this.players = this.players.where((player) {
+                  return player!.name.contains(val) ||
+                      player.nickname.contains(val);
+                }).toList();
+                if (val.isEmpty) {
                   this.players =
                       players.map((user) => User.fromJson(user)).toList();
-                  this.players = this.players.where((player) {
-                    return player!.name.contains(val) ||
-                        player.nickname.contains(val);
-                  }).toList();
-                  // search = val
-                });
-                if (val.isEmpty) {
-                  setState(() {
-                    this.players =
-                        players.map((user) => User.fromJson(user)).toList();
-                  });
                 }
+                if (!playersStreamController.isClosed)
+                  playersStreamController.sink.add(
+                    this.players,
+                  );
               },
             ),
           ),
@@ -151,9 +184,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 );
 
                 if (filteredPlayers != null) {
-                  setState(() {
-                    this.players = filteredPlayers;
-                  });
+                  this.players = filteredPlayers;
+                  if (!playersStreamController.isClosed)
+                    playersStreamController.sink.add(
+                      this.players,
+                    );
                 }
               },
             ),
@@ -217,84 +252,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                 margin: EdgeInsets.only(top: 20.0),
                                 width: _width,
                                 height: _height,
-                                child: FutureBuilder(
-                                  future: this._future,
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<dynamic> snapshot) {
-                                    dynamic response = snapshot.data;
-
-                                    if (!snapshot.hasData) {
-
-                                      this.isLoading = true;
-
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [circularLoading],
-                                        ),
-                                      );
-                                    }
-
-                                    this.isLoading = false;
-
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        !snapshot.hasData) {
-
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Center(
-                                            child: Text(
-                                                translations[localeName]![
-                                                    'general.noPlayers']!)),
-                                      );
-                                    }
-
-                                    if (!response['success']) {
-                                      return showAlert(context, 'Error',
-                                          'Oops, ocurrió un error');
-                                    }
-
-                                    if (this.players != null &&
-                                        this.players.isEmpty) {
-                                      return Container(
-                                        width: _width,
-                                        height: _height,
-                                        child: Center(
-                                            child: Text(
-                                                translations[localeName]![
-                                                    'general.noPlayers']!)),
-                                      );
-                                    }
-
-                                    return RefreshIndicator(
-                                      onRefresh: () => getRefreshData(
-                                        _searchedRange['distance']!.toInt(),
-                                        _searchedGender.first.id,
-                                        _searchedPlayerPositions
-                                            .map((Position pos) => pos.id)
-                                            .toList(),
-                                      ),
-                                      child: ListView.builder(
-                                        physics: AlwaysScrollableScrollPhysics(),
-                                        itemBuilder: (
-                                          BuildContext context,
-                                          int index,
-                                        ) {
-                                          return _buildPlayerRow(
-                                              this.players[index]!);
-                                        },
-                                        itemCount: this.players.length,
-                                      ),
-                                    );
-                                  },
-                                ),
+                                child: buildPlayersStreamBuilder(),
                               ),
                             ),
                           ],
@@ -309,6 +267,82 @@ class _PlayersScreenState extends State<PlayersScreen> {
           )
         ],
       ),
+    );
+  }
+
+  buildPlayersStreamBuilder() {
+    return StreamBuilder(
+      stream: playersStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        final _width = MediaQuery.of(context).size.width;
+        final _height = MediaQuery.of(context).size.height;
+
+        if (!snapshot.hasData) {
+
+          this.isLoading = true;
+
+          return Container(
+            width: _width,
+            height: _height,
+            child: Column(
+              mainAxisAlignment:
+              MainAxisAlignment.center,
+              crossAxisAlignment:
+              CrossAxisAlignment.center,
+              children: [circularLoading],
+            ),
+          );
+        }
+
+        this.isLoading = false;
+
+        if (snapshot.connectionState ==
+            ConnectionState.done &&
+            !snapshot.hasData) {
+          return Container(
+            width: _width,
+            height: _height,
+            child: Center(
+                child: Text(
+                    translations[localeName]![
+                    'general.noPlayers']!)),
+          );
+        }
+
+        List players = snapshot.data;
+
+        if (players != null && players.isEmpty) {
+          return Container(
+            width: _width,
+            height: _height,
+            child: Center(
+                child: Text(
+                    translations[localeName]![
+                    'general.noPlayers']!)),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => getRefreshData(
+            _searchedRange['distance']!.toInt(),
+            _searchedGender.first.id,
+            _searchedPlayerPositions
+                .map((Position pos) => pos.id)
+                .toList(),
+          ),
+          child: ListView.builder(
+            physics: AlwaysScrollableScrollPhysics(),
+            itemBuilder: (
+                BuildContext context,
+                int index,
+                ) {
+              return _buildPlayerRow(
+                  players[index]!);
+            },
+            itemCount: players.length,
+          ),
+        );
+      },
     );
   }
 
@@ -331,9 +365,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
       positionsIds,
     );
     if (response['success']) {
-      setState(() {
-        this.players = response['players'];
-      });
+      this.players = response['players'];
+      if (!playersStreamController.isClosed)
+        playersStreamController.sink.add(
+          this.players,
+        );
     }
   }
 

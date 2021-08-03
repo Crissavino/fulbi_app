@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MatchesScreen extends StatefulWidget {
   @override
@@ -39,6 +41,7 @@ class _MatchesState extends State<MatchesScreen> {
   @override
   void initState() {
     super.initState();
+    loadFromLocalStorage();
     getMatchesOffers(
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
@@ -47,6 +50,30 @@ class _MatchesState extends State<MatchesScreen> {
     );
 
     silentNotificationListener();
+  }
+
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('matchesScreen.matches') && localStorage.containsKey('matchesScreen.areNotifications')) {
+      var thisAreNotifications = json.decode(json.decode(localStorage.getString('matchesScreen.areNotifications')!));
+      var thisMatches = json.decode(json.decode(localStorage.getString('matchesScreen.matches')!));
+
+      List matches = thisMatches;
+      thisMatches = matches.map((match) => Match.fromJson(match)).toList();
+
+      this.areNotifications = thisAreNotifications;
+      this.matches = thisMatches;
+
+      if (!notificationStreamController.isClosed)
+        notificationStreamController.sink.add(
+          this.areNotifications,
+        );
+      if (!matchesStreamController.isClosed)
+        matchesStreamController.sink.add(
+          this.matches,
+        );
+    }
+
   }
 
   void silentNotificationListener() {
@@ -88,13 +115,18 @@ class _MatchesState extends State<MatchesScreen> {
     final responseMyMatches = await MatchRepository().getMyMatches();
 
     if (response['success']) {
-      setState(() {
+      // setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
         this.areNotifications = myMatches
             .firstWhereOrNull((match) => match.haveNotifications == true) !=
             null;
         this.matches = response['matches'];
-      });
+      // });
+
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+      await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
 
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
@@ -456,13 +488,13 @@ class _MatchesState extends State<MatchesScreen> {
     final responseMyMatches = await MatchRepository().getMyMatches();
 
     if (response['success']) {
-      setState(() {
+      // setState(() {
         List<Match> myMatches = responseMyMatches['matches'];
         this.areNotifications = myMatches
             .firstWhereOrNull((match) => match.haveNotifications == true) !=
             null;
         this.matches = response['matches'];
-      });
+      // });
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
           this.areNotifications,

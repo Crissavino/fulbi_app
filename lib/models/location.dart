@@ -43,8 +43,8 @@ class Location {
 
   factory Location.fromJson(Map<String, dynamic> json) => Location(
     id: json["id"],
-    lat: double.parse(json["lat"]),
-    lng: double.parse(json["lng"]),
+    lat: json["lat"] is double ? json["lat"] : double.parse(json["lat"]),
+    lng: json["lng"] is double ? json["lng"] : double.parse(json["lng"]),
     country: json["country"],
     countryCode: json["country_code"] == null ? null : json["country_code"],
     province: json["province"],

@@ -589,7 +589,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         Location location = snapshot.data['location'];
         Genre genre = snapshot.data['genre'];
         Type type = snapshot.data['type'];
-        String currencySymbol = snapshot.data['currency'];
+        String? currencySymbol = snapshot.data['currency'];
         int playersEnrolled = snapshot.data['playersEnrolled'];
         String spotsAvailable =
         (match.numPlayers - playersEnrolled).toString();

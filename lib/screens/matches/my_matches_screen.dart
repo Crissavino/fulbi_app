@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyMatchesScreen extends StatefulWidget {
   MyMatchesScreen({Key? key}) : super(key: key);
@@ -33,13 +35,14 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadFromLocalStorage();
     getMyMatches();
     this.getMyUser();
     silentNotificationListener();
   }
 
   void silentNotificationListener() {
-    PushNotificationService.messageStream.listen((notificationData) {
+    PushNotificationService.messageStream.listen((notificationData) async {
       if (notificationData.containsKey('silentUpdateChat') ||
           notificationData.containsKey('silentUpdateMatch')) {
         final Match? editedMatch = notificationData['match'];
@@ -49,10 +52,18 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
         this.matches.replaceRange(index, index + 1, [editedMatch]);
         if (!matchesStreamController.isClosed)
           matchesStreamController.sink.add(this.matches);
+
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+        await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
       } else if (notificationData.containsKey('silentUpdateMyMatches')) {
         this.matches = notificationData['matches'];
         if (!matchesStreamController.isClosed)
           matchesStreamController.sink.add(this.matches);
+
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+        await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
       }
     });
   }
@@ -63,12 +74,34 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
     matchesStreamController.close();
   }
 
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('myMatchesScreen.matches')) {
+      var thisMatches = json.decode(json.decode(localStorage.getString('myMatchesScreen.matches')!));
+
+      List matches = thisMatches;
+      thisMatches = matches.map((match) => Match.fromJson(match)).toList();
+
+      this.matches = thisMatches;
+
+      if (!matchesStreamController.isClosed)
+        matchesStreamController.sink.add(
+          this.matches,
+        );
+    }
+
+  }
+
   Future getMyMatches() async {
     final response = await MatchRepository().getMyMatches();
     if (response['success']) {
       setState(() {
         this.matches = response['matches'];
       });
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+
       if (!matchesStreamController.isClosed)
         matchesStreamController.sink.add(this.matches);
 
@@ -84,6 +117,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
       setState(() {
         this.matches = response['matches'];
       });
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
       if (!matchesStreamController.isClosed)
         matchesStreamController.sink.add(this.matches);
     }
@@ -326,9 +362,14 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 () async {
                   final response = await MatchRepository().joinMatch(match.id);
                   if (response['success']) {
-                    setState(() {
-                      this.matches = response['matches'];
-                    });
+                    this.matches = response['matches'];
+                    if (!matchesStreamController.isClosed)
+                      matchesStreamController.sink.add(this.matches);
+
+                    SharedPreferences localStorage = await SharedPreferences.getInstance();
+                    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                    await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                    setState(() {});
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -347,9 +388,14 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                   final response =
                       await MatchRepository().rejectInvitationToMatch(match.id);
                   if (response['success']) {
-                    setState(() {
-                      this.matches = response['matches'];
-                    });
+                    this.matches = response['matches'];
+                    if (!matchesStreamController.isClosed)
+                      matchesStreamController.sink.add(this.matches);
+
+                    SharedPreferences localStorage = await SharedPreferences.getInstance();
+                    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                    await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                    setState(() {});
                     Navigator.pop(context);
                   } else {
                     Navigator.pop(context);

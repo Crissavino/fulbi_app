@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ import 'package:fulbito_app/widgets/your_settings.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrivateProfileScreen extends StatefulWidget {
   const PrivateProfileScreen({Key? key}) : super(key: key);
@@ -34,6 +37,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   final picker = ImagePicker();
   String? profileImagePath;
   bool isLoading = false;
+  StreamController userStreamController = StreamController.broadcast();
 
   Future updateProfileImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -53,6 +57,8 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
       if (response['success']) {
         User user = response['user'];
         this.profileImagePath = user.profileImage;
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        await localStorage.setString('privateProfileScreen.profileImagePath', json.encode(this.profileImagePath.toString()));
       }
 
       setState(() {});
@@ -67,21 +73,79 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     // TODO: implement initState
 
     super.initState();
-    this._future = getUserData();
+    loadFromLocalStorage();
+    getUserData();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    userStreamController.close();
+  }
+
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('privateProfileScreen.currentUser') &&
+        localStorage.containsKey('privateProfileScreen.userPositions') &&
+        localStorage.containsKey('privateProfileScreen.userLocation') &&
+        localStorage.containsKey('privateProfileScreen.profileImagePath')) {
+
+      this._currentUser = User.fromJson(json.decode(localStorage.getString('privateProfileScreen.currentUser')!));
+
+      var posDB = json.decode(json.decode(localStorage.getString('privateProfileScreen.userPositions')!));
+      List pos = posDB;
+      List<PositionDB>? positions = pos.map((position) => PositionDB.fromJson(position)).toList();
+      this._userPositions = positions;
+
+      this._userLocation = Location.fromJson(json.decode(localStorage.getString('privateProfileScreen.userLocation')!));
+      this.profileImagePath = json.decode(localStorage.getString('privateProfileScreen.profileImagePath')!);
+
+      var streamData = {
+        'currentUser': this._currentUser,
+        'userPositions': this._userPositions,
+        'userLocation': this._userLocation,
+        'profileImagePath': this.profileImagePath
+      };
+      if (!userStreamController.isClosed)
+        userStreamController.sink.add(
+          streamData,
+        );
+    }
   }
 
   Future<dynamic> getUserData() async {
     final response = await UserRepository.getAllCurrentUserData();
     if (response['success']) {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+
       this._currentUser = response['user'];
+      await localStorage.setString('privateProfileScreen.currentUser', json.encode(this._currentUser!.toJson()));
+
       this._userPositions = response['positions'];
+      var userPosition = this._userPositions!.map((e) => json.encode(e)).toList();
+      await localStorage.setString('privateProfileScreen.userPositions', json.encode(userPosition.toString()));
+
       this._userLocation = response['location'];
+      await localStorage.setString('privateProfileScreen.userLocation', json.encode(this._userLocation!.toJson()));
+
       if(this._currentUser!.profileImage != null) {
         this.profileImagePath = this._currentUser!.profileImage!;
       } else {
         this.profileImagePath = '';
-
       }
+      await localStorage.setString('privateProfileScreen.profileImagePath', json.encode(this.profileImagePath.toString()));
+
+      var streamData = {
+        'currentUser': this._currentUser,
+        'userPositions': this._userPositions,
+        'userLocation': this._userLocation,
+        'profileImagePath': this.profileImagePath
+      };
+      if (!userStreamController.isClosed)
+        userStreamController.sink.add(
+            streamData,
+        );
     }
 
     return response;
@@ -93,99 +157,14 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
 
     return Stack(
       children: [
-        FutureBuilder(
-            future: this._future,
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        StreamBuilder(
+          stream: userStreamController.stream,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            // final _width = MediaQuery.of(context).size.width;
+            // final _height = MediaQuery.of(context).size.height;
 
-              if (!snapshot.hasData) {
-                this.isLoading = true;
-
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Scaffold(
-                    resizeToAvoidBottomInset: false,
-                    body: AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: Platform.isIOS
-                          ? SystemUiOverlayStyle.light
-                          : SystemUiOverlayStyle.dark,
-                      child: Center(
-                        child: Container(
-                          height: _height,
-                          decoration: horizontalGradient,
-                          padding: EdgeInsets.only(top: 25.0),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              double innerHeight = constraints.maxHeight;
-                              double innerWidth = constraints.maxWidth;
-
-                              return Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Positioned(
-                                    bottom: 0.0,
-                                    left: 0.0,
-                                    right: 0.0,
-                                    child: Container(
-                                      height: innerHeight * 0.87,
-                                      width: innerWidth,
-                                      decoration: BoxDecoration(
-                                        borderRadius: screenBorders,
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 6.0,
-                                            offset: Offset(0, -2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                              children: [circularLoading],
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 15.0,
-                                    left: 0.0,
-                                    right: 0.0,
-                                    child: Center(
-                                      child: CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        radius: 60,
-                                        child: Icon(
-                                          Icons.person,
-                                          color: Colors.green[700],
-                                          size: 100.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    bottomNavigationBar: _buildBottomNavigationBarRounded(context),
-                  ),
-                );
-              }
-
-              this.isLoading = false;
+            if (!snapshot.hasData) {
+              this.isLoading = true;
 
               return SafeArea(
                 top: false,
@@ -229,23 +208,17 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                     ),
                                     child: Column(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                      MainAxisAlignment.spaceAround,
                                       children: [
-                                        SizedBox(height: 55.0),
-                                        _buildUserName(),
-                                        SizedBox(height: 5.0),
-                                        // _buildUserReviews(innerWidth),
-                                        // SizedBox(height: 5.0),
-                                        _buildUserPositions(innerWidth, context),
-                                        // SizedBox(height: 5.0),
-                                        // _buildUserSettings(innerWidth),
-                                        SizedBox(height: 5.0),
-                                        _buildUserLocation(innerWidth, context),
-                                        SizedBox(height: 5.0),
-                                        _buildUserSettings(innerWidth, context),
-                                        SizedBox(height: 10.0),
-                                        _buildLogOutButton(context),
-                                        SizedBox(height: 10.0),
+                                        Container(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [circularLoading],
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -255,36 +228,13 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                   left: 0.0,
                                   right: 0.0,
                                   child: Center(
-                                    child: this.profileImagePath == ''
-                                        ? CircleAvatar(
+                                    child: CircleAvatar(
                                       backgroundColor: Colors.white,
                                       radius: 60,
                                       child: Icon(
                                         Icons.person,
                                         color: Colors.green[700],
                                         size: 100.0,
-                                      ),
-                                    )
-                                        : CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      radius: 60,
-                                      backgroundImage: NetworkImage(this.profileImagePath!),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 90.0,
-                                  left: 80.0,
-                                  right: 0.0,
-                                  child: Center(
-                                    child: CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Colors.white,
-                                      child: Container(
-                                        child: IconButton(
-                                          icon: Icon(Icons.edit, color: Colors.blue,),
-                                          onPressed: updateProfileImage,
-                                        ),
                                       ),
                                     ),
                                   ),
@@ -299,7 +249,129 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                   bottomNavigationBar: _buildBottomNavigationBarRounded(context),
                 ),
               );
-            }),
+            }
+
+            this.isLoading = false;
+
+            User? currentUser = snapshot.data['currentUser'];
+            List<PositionDB>? userPositions = snapshot.data['userPositions'];
+            Location? userLocation = snapshot.data['userLocation'];
+            String? profileImagePath = snapshot.data['profileImagePath'];
+
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                body: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: Platform.isIOS
+                      ? SystemUiOverlayStyle.light
+                      : SystemUiOverlayStyle.dark,
+                  child: Center(
+                    child: Container(
+                      height: _height,
+                      decoration: horizontalGradient,
+                      padding: EdgeInsets.only(top: 25.0),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          double innerHeight = constraints.maxHeight;
+                          double innerWidth = constraints.maxWidth;
+
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Positioned(
+                                bottom: 0.0,
+                                left: 0.0,
+                                right: 0.0,
+                                child: Container(
+                                  height: innerHeight * 0.87,
+                                  width: innerWidth,
+                                  decoration: BoxDecoration(
+                                    borderRadius: screenBorders,
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 6.0,
+                                        offset: Offset(0, -2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      SizedBox(height: 55.0),
+                                      _buildUserName(currentUser),
+                                      SizedBox(height: 5.0),
+                                      // _buildUserReviews(innerWidth),
+                                      // SizedBox(height: 5.0),
+                                      _buildUserPositions(innerWidth, context, userPositions),
+                                      // SizedBox(height: 5.0),
+                                      // _buildUserSettings(innerWidth),
+                                      SizedBox(height: 5.0),
+                                      _buildUserLocation(innerWidth, context, userLocation),
+                                      SizedBox(height: 5.0),
+                                      _buildUserSettings(innerWidth, context, currentUser),
+                                      SizedBox(height: 10.0),
+                                      _buildLogOutButton(context, currentUser),
+                                      SizedBox(height: 10.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 15.0,
+                                left: 0.0,
+                                right: 0.0,
+                                child: Center(
+                                  child: profileImagePath == ''
+                                      ? CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    radius: 60,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.green[700],
+                                      size: 100.0,
+                                    ),
+                                  )
+                                      : CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    radius: 60,
+                                    backgroundImage: NetworkImage(profileImagePath!),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 90.0,
+                                left: 80.0,
+                                right: 0.0,
+                                child: Center(
+                                  child: CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.white,
+                                    child: Container(
+                                      child: IconButton(
+                                        icon: Icon(Icons.edit, color: Colors.blue,),
+                                        onPressed: updateProfileImage,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                bottomNavigationBar: _buildBottomNavigationBarRounded(context),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -486,11 +558,11 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildUserName() {
+  _buildUserName(User? currentUser) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.0),
       child: Text(
-        this._currentUser!.name,
+        currentUser!.name,
         style: TextStyle(
           color: Colors.black,
           fontFamily: 'Nunito',
@@ -503,7 +575,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  _buildUserPositions(innerWidth, BuildContext context) {
+  _buildUserPositions(innerWidth, BuildContext context, List<PositionDB>? userPositions) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -534,19 +606,33 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           isScrollControlled: true,
           builder: (BuildContext context) {
             return YourPositions(
-              userPositions: this._userPositions,
+              userPositions: userPositions,
             );
           },
         );
 
         if (wasSavedData == true) {
           this._userPositions = await UserRepository.getUserPositions();
+          SharedPreferences localStorage = await SharedPreferences.getInstance();
+          var userPosition = this._userPositions!.map((e) => json.encode(e)).toList();
+          await localStorage.setString('privateProfileScreen.userPositions', json.encode(userPosition.toString()));
+
+          var streamData = {
+            'currentUser': this._currentUser,
+            'userPositions': this._userPositions,
+            'userLocation': this._userLocation,
+            'profileImagePath': this.profileImagePath
+          };
+          if (!userStreamController.isClosed)
+            userStreamController.sink.add(
+              streamData,
+            );
         }
       },
     );
   }
 
-  _buildUserLocation(innerWidth, BuildContext context) {
+  _buildUserLocation(innerWidth, BuildContext context, Location? userLocation) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -577,19 +663,32 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           isScrollControlled: true,
           builder: (BuildContext context) {
             return YourLocation(
-              userLocation: this._userLocation,
+              userLocation: userLocation,
             );
           },
         );
 
         if (wasSavedData == true) {
           this._userLocation = await UserRepository().getUserLocation();
+          SharedPreferences localStorage = await SharedPreferences.getInstance();
+          await localStorage.setString('privateProfileScreen.userLocation', json.encode(this._userLocation!.toJson()));
+
+          var streamData = {
+            'currentUser': this._currentUser,
+            'userPositions': this._userPositions,
+            'userLocation': this._userLocation,
+            'profileImagePath': this.profileImagePath
+          };
+          if (!userStreamController.isClosed)
+            userStreamController.sink.add(
+              streamData,
+            );
         }
       },
     );
   }
 
-  _buildUserSettings(innerWidth, BuildContext context) {
+  _buildUserSettings(innerWidth, BuildContext context, User? currentUser) {
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,
@@ -620,19 +719,32 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           isScrollControlled: true,
           builder: (BuildContext context) {
             return YourSettings(
-              user: this._currentUser
+              user: currentUser
             );
           },
         );
 
         if (user != null) {
           this._currentUser = user;
+          SharedPreferences localStorage = await SharedPreferences.getInstance();
+          await localStorage.setString('privateProfileScreen.currentUser', json.encode(this._currentUser!.toJson()));
+
+          var streamData = {
+            'currentUser': this._currentUser,
+            'userPositions': this._userPositions,
+            'userLocation': this._userLocation,
+            'profileImagePath': this.profileImagePath
+          };
+          if (!userStreamController.isClosed)
+            userStreamController.sink.add(
+              streamData,
+            );
         }
       },
     );
   }
 
-  _buildLogOutButton(BuildContext context) {
+  _buildLogOutButton(BuildContext context, User? currentUser) {
     return Center(
       child: Container(
         width: 150.0,
@@ -644,7 +756,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
           style: ButtonStyle(
             overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent),
           ),
-          onPressed: () => _logout(context),
+          onPressed: () => _logout(context, currentUser),
           child: Text(
             translations[localeName]!['profile.logout']!,
             style: TextStyle(color: Colors.black),
@@ -654,8 +766,8 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     );
   }
 
-  void _logout(BuildContext context) async {
-    if (await UserRepository().logout(this._currentUser!.id)) {
+  void _logout(BuildContext context, User? currentUser) async {
+    if (await UserRepository().logout(currentUser!.id)) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),

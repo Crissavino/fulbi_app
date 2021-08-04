@@ -37,6 +37,7 @@ class _MatchesState extends State<MatchesScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchesStreamController = StreamController.broadcast();
   bool isLoading = false;
+  bool noMoreMatches = false;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _MatchesState extends State<MatchesScreen> {
       _searchedGender.first,
       _searchedMatchType.map((Type type) => type.id).toList(),
       true,
+      null
     );
 
     silentNotificationListener();
@@ -99,7 +101,13 @@ class _MatchesState extends State<MatchesScreen> {
     matchesStreamController.close();
   }
 
-  Future getMatchesOffers(int range, Genre genre, List<int?> types, calledFromInitState) async {
+  Future getMatchesOffers(
+    int range,
+    Genre genre,
+    List<int?> types,
+    calledFromInitState,
+    whenPlay,
+  ) async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (calledFromInitState && localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
@@ -112,6 +120,7 @@ class _MatchesState extends State<MatchesScreen> {
       range,
       genre,
       types,
+      whenPlay
     );
     final responseMyMatches = await MatchRepository().getMyMatches();
 
@@ -448,33 +457,111 @@ class _MatchesState extends State<MatchesScreen> {
                 bottom: 20.0, left: 20.0, right: 20.0),
             margin: EdgeInsets.only(top: 20.0),
             width: _width,
-            child: RefreshIndicator(
-              onRefresh: () => this.getRefreshData(
-                this
-                    ._searchedRange['distance']!
-                    .toInt(),
-                this._searchedGender.first,
-                this
-                    ._searchedMatchType
-                    .map((Type type) => type.id)
-                    .toList(),
-                true
-              ),
-              child: ListView.builder(
-                itemBuilder: (
-                    BuildContext context,
-                    int index,
-                    ) {
-                  return _buildMatchRow(
-                      matches[index]);
+            child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (!this.isLoading && scrollInfo.metrics.pixels ==
+                      scrollInfo.metrics.maxScrollExtent &&
+                      this.noMoreMatches == false) {
+                    final lastMatch = this.matches.last;
+                    loadMoreMatchesOffers(
+                        _searchedRange['distance']!.toInt(),
+                        _searchedGender.first,
+                        _searchedMatchType.map((Type type) => type.id).toList(),
+                        true,
+                        lastMatch!.whenPlay.toString()
+                    );
+                  }
+                  print('scrollInfo.metrics.pixels');
+                  print(scrollInfo.metrics.pixels);
+                  print('scrollInfo.metrics.maxScrollExtent');
+                  print(scrollInfo.metrics.maxScrollExtent);
+                  return true;
                 },
-                itemCount: matches.length,
+              child: RefreshIndicator(
+                onRefresh: () => this.getRefreshData(
+                  this
+                      ._searchedRange['distance']!
+                      .toInt(),
+                  this._searchedGender.first,
+                  this
+                      ._searchedMatchType
+                      .map((Type type) => type.id)
+                      .toList(),
+                  true
+                ),
+                child: ListView.builder(
+                  itemBuilder: (
+                      BuildContext context,
+                      int index,
+                      ) {
+                    return _buildMatchRow(
+                        matches[index]);
+                  },
+                  itemCount: matches.length,
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Future loadMoreMatchesOffers(
+      int range,
+      Genre genre,
+      List<int?> types,
+      calledFromInitState,
+      whenPlay,
+      ) async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (calledFromInitState && localStorage.containsKey('user')) {
+      User user = await UserRepository.getCurrentUser();
+      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      if (userGenre != null) {
+        genre = userGenre;
+      }
+    }
+    final response = await MatchRepository().getMatchesOffers(
+        range,
+        genre,
+        types,
+        whenPlay
+    );
+    final responseMyMatches = await MatchRepository().getMyMatches();
+
+    if (response['success']) {
+      List<Match?> matches = response['matches'];
+      if (matches.length > 0) {
+        // setState(() {
+        List<Match> myMatches = responseMyMatches['matches'];
+        this.areNotifications = myMatches
+            .firstWhereOrNull((match) => match.haveNotifications == true) !=
+            null;
+        this.matches = this.matches..insertAll(this.matches.length, matches);
+        // });
+
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+        await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+        await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
+
+        if (!notificationStreamController.isClosed)
+          notificationStreamController.sink.add(
+            this.areNotifications,
+          );
+        if (!matchesStreamController.isClosed)
+          matchesStreamController.sink.add(
+            this.matches,
+          );
+        return this.matches;
+      } else {
+        this.noMoreMatches = true;
+      }
+
+    }
+
+    return response;
   }
 
   Future<void> getRefreshData(
@@ -496,6 +583,7 @@ class _MatchesState extends State<MatchesScreen> {
       range,
       genre,
       types,
+      null
     );
     final responseMyMatches = await MatchRepository().getMyMatches();
 

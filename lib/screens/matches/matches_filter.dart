@@ -358,6 +358,7 @@ class _MatchesFilterState extends State<MatchesFilter> {
                 widget.searchedRange!['distance']!.toInt(),
                 gender!,
                 types.map((Type type) => type.id).toList(),
+                null
               );
 
               if (filterResponse['success']) {

@@ -54,12 +54,13 @@ class MatchRepository {
     return body;
   }
 
-  Future getMatchesOffers(int range, Genre genre, List<int?> types) async {
+  Future getMatchesOffers(int range, Genre genre, List<int?> types, whenPlay) async {
 
     final data = {
       "range": range,
       "genre_id": genre.id,
       "types": jsonEncode(types),
+      "when_play": whenPlay
     };
 
     final res = await api.postData(data, '/matches/get-matches-offers');

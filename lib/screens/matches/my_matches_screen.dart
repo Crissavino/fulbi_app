@@ -44,9 +44,13 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           notificationData.containsKey('silentUpdateMatch')) {
         final Match? editedMatch = notificationData['match'];
         final Match? editedMatchToReplace =
-            this.matches.firstWhere((match) => match!.id == editedMatch!.id);
+        this.matches.firstWhere((match) => match!.id == editedMatch!.id);
         var index = this.matches.indexOf(editedMatchToReplace);
         this.matches.replaceRange(index, index + 1, [editedMatch]);
+        if (!matchesStreamController.isClosed)
+          matchesStreamController.sink.add(this.matches);
+      } else if (notificationData.containsKey('silentUpdateMyMatches')) {
+        this.matches = notificationData['matches'];
         if (!matchesStreamController.isClosed)
           matchesStreamController.sink.add(this.matches);
       }

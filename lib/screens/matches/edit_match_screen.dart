@@ -258,7 +258,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     _buildMatchCost(playersEnrolled),
-                                    _buildIsFreeMatch()
+                                    _buildIsFreeMatch(playersEnrolled)
                                   ],
                                 ),
                                 _buildPlayerForMatch(),
@@ -682,7 +682,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           currencySelected = newValue!;
         });
       },
-      items: playersEnrolled > 0
+      items: playersEnrolled > 0 && !this.isFreeMatch
           ? [
               DropdownMenuItem<String>(
                 value: this.currencySelected,
@@ -698,7 +698,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
-  Widget _buildIsFreeMatch() {
+  Widget _buildIsFreeMatch(playersEnrolled) {
     final _width = MediaQuery.of(context).size.width;
 
     return Container(
@@ -730,6 +730,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           color: Colors.white,
         ),
         onChanged: (value) {
+          if (playersEnrolled > 0) return;
           this.isFreeMatch = !this.isFreeMatch;
           if (!this.isFreeMatch && this.currencySelected == null) {
             this.currencySelected = this.currencies.first.code;

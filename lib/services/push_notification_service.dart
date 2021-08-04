@@ -76,47 +76,7 @@ class PushNotificationService {
     }
 
     // silence
-    if (message.data['notification_type'] == 'silence_match_edited') {
-      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
-      if (getMatchResponse['success']){
-        _messageStreamController.sink.add({
-          'silentUpdateMatch': true,
-          'match': getMatchResponse['match'],
-          'response': getMatchResponse,
-        });
-      }
-    }
-
-    if (message.data['notification_type'] == 'silence_join_match' ||
-        message.data['notification_type'] == 'silence_leave_match') {
-      final getMatchResponse =
-          await MatchRepository().getMatch(message.data['match_id']);
-      if (getMatchResponse['success']) {
-        _messageStreamController.sink.add({
-          'silentUpdateParticipants': true,
-          'match': getMatchResponse['match'],
-          'response': getMatchResponse,
-        });
-      }
-    }
-
-    if (message.data['notification_type'] == 'silence_new_chat_message') {
-      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
-      final messageData = json.decode(message.data['message']);
-      final Message newMessage = Message.fromJson(messageData);
-      if (getMatchResponse['success']){
-        _messageStreamController.sink.add({
-          'silentUpdateChat': true,
-          'match': getMatchResponse['match'],
-          'newMessage': newMessage,
-        });
-      }
-      // final Message newMessage = Message.fromJson(message.data['message']);
-      // _messageStreamController.sink.add({
-      //   'silentUpdateChat': true,
-      //   'newMessage': newMessage,
-      // });
-    }
+    await handleSilenceNotification(message);
   }
 
   static Future<void> _onMessageOpenedHandler(RemoteMessage message) async {
@@ -179,47 +139,7 @@ class PushNotificationService {
     }
 
     // silence
-    if (message.data['notification_type'] == 'silence_match_edited') {
-      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
-      if (getMatchResponse['success']){
-        _messageStreamController.sink.add({
-          'silentUpdateMatch': true,
-          'match': getMatchResponse['match'],
-          'response': getMatchResponse,
-        });
-      }
-    }
-
-    if (message.data['notification_type'] == 'silence_join_match' ||
-        message.data['notification_type'] == 'silence_leave_match') {
-      final getMatchResponse =
-          await MatchRepository().getMatch(message.data['match_id']);
-      if (getMatchResponse['success']) {
-        _messageStreamController.sink.add({
-          'silentUpdateParticipants': true,
-          'match': getMatchResponse['match'],
-          'response': getMatchResponse,
-        });
-      }
-    }
-
-    if (message.data['notification_type'] == 'silence_new_chat_message') {
-      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
-      final messageData = json.decode(message.data['message']);
-      final Message newMessage = Message.fromJson(messageData);
-      if (getMatchResponse['success']){
-        _messageStreamController.sink.add({
-          'silentUpdateChat': true,
-          'match': getMatchResponse['match'],
-          'newMessage': newMessage,
-        });
-      }
-      // final Message newMessage = Message.fromJson(message.data['message']);
-      // _messageStreamController.sink.add({
-      //   'silentUpdateChat': true,
-      //   'newMessage': newMessage,
-      // });
-    }
+    await handleSilenceNotification(message);
   }
 
   static Future<void> _onMessageHandler(RemoteMessage message) async {
@@ -290,6 +210,10 @@ class PushNotificationService {
     }
 
     // silence
+    await handleSilenceNotification(message);
+  }
+
+  static Future<void> handleSilenceNotification(RemoteMessage message) async {
     if (message.data['notification_type'] == 'silence_match_edited') {
       final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
       if (getMatchResponse['success']){
@@ -304,7 +228,7 @@ class PushNotificationService {
     if (message.data['notification_type'] == 'silence_join_match' ||
         message.data['notification_type'] == 'silence_leave_match') {
       final getMatchResponse =
-          await MatchRepository().getMatch(message.data['match_id']);
+      await MatchRepository().getMatch(message.data['match_id']);
       if (getMatchResponse['success']) {
         _messageStreamController.sink.add({
           'silentUpdateParticipants': true,
@@ -323,6 +247,18 @@ class PushNotificationService {
           'silentUpdateChat': true,
           'match': getMatchResponse['match'],
           'newMessage': newMessage,
+        });
+      }
+    }
+
+    if (message.data['notification_type'] == 'silence_invited_match' ||
+        message.data['notification_type'] == 'silence_rejected_match') {
+      final getMatchesResponse = await MatchRepository().getMyMatches();
+      if (getMatchesResponse['success']) {
+        _messageStreamController.sink.add({
+          'silentUpdateMatch': true,
+          'matches': getMatchesResponse['matches'],
+          'response': getMatchesResponse,
         });
       }
     }

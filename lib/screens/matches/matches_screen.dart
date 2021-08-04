@@ -46,7 +46,7 @@ class _MatchesState extends State<MatchesScreen> {
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
       _searchedMatchType.map((Type type) => type.id).toList(),
-      calledFromInitState: true,
+      true,
     );
 
     silentNotificationListener();
@@ -99,8 +99,9 @@ class _MatchesState extends State<MatchesScreen> {
     matchesStreamController.close();
   }
 
-  Future getMatchesOffers(int range, Genre genre, List<int?> types, {calledFromInitState = false}) async {
-    if (calledFromInitState) {
+  Future getMatchesOffers(int range, Genre genre, List<int?> types, calledFromInitState) async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (calledFromInitState && localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
       Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
       if (userGenre != null) {
@@ -457,6 +458,7 @@ class _MatchesState extends State<MatchesScreen> {
                     ._searchedMatchType
                     .map((Type type) => type.id)
                     .toList(),
+                true
               ),
               child: ListView.builder(
                 itemBuilder: (
@@ -479,7 +481,17 @@ class _MatchesState extends State<MatchesScreen> {
       range,
       genre,
       types,
+      calledFromInitState
       ) async {
+
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (calledFromInitState && localStorage.containsKey('user')) {
+      User user = await UserRepository.getCurrentUser();
+      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      if (userGenre != null) {
+        genre = userGenre;
+      }
+    }
     final response = await MatchRepository().getMatchesOffers(
       range,
       genre,

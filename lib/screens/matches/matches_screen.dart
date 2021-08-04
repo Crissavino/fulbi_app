@@ -16,6 +16,7 @@ import 'package:fulbito_app/screens/matches/matches_filter.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
+import 'package:fulbito_app/services/db_service.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -518,7 +519,10 @@ class _MatchesState extends State<MatchesScreen> {
     }
   }
 
-  Widget _buildMatchRow(match) {
+  Widget _buildMatchRow(Match match) {
+    // if (match.id == 8) {
+      DBService.db.insertNewMatch(match);
+    // }
     return GestureDetector(
       onTap: () {
         Navigator.push(

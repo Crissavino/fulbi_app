@@ -143,13 +143,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 hintStyle: kHintTextStyle,
               ),
               onChanged: (val) async {
+                val = val.toLowerCase();
                 SharedPreferences localStorage =
                     await SharedPreferences.getInstance();
                 List players = jsonDecode(localStorage.getString('players')!);
                 this.players = players.map((user) => User.fromJson(user)).toList();
                 this.players = this.players.where((player) {
-                  return player!.name.contains(val) ||
-                      player.nickname.contains(val);
+                  return player!.name.toLowerCase().contains(val) ||
+                      player.nickname.toLowerCase().contains(val);
                 }).toList();
                 if (val.isEmpty) {
                   this.players =

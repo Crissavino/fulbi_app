@@ -356,7 +356,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   Container _buildMatchCost(String? currencySymbol, Match match) {
     return Container(
       padding: EdgeInsets.only(top: 40.0),
-      child: (this.isFreeMatch)
+      child: this.isFreeMatch
           ? Text(
               translations[localeName]!['match.isFree']!,
               overflow: TextOverflow.clip,
@@ -446,7 +446,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                 ),
                 Container(
                   child: Text(
-                    'Ver mapa',
+                    translations[localeName]!['match.info.seeMap']!,
                     style: TextStyle(color: Colors.blueAccent),
                   ),
                 ),

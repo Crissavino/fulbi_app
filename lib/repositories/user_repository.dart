@@ -92,7 +92,9 @@ class UserRepository {
       await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
       await localStorage.setString('user', json.encode(body['user']));
       await localStorage.setString('userPositions', json.encode(body['user']!['player']!['positions']!));
-      await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      if (body['user']['player']['location'] != null) {
+        await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      }
       String? userStr = localStorage.getString("user");
       body['user'] = User.fromJson(jsonDecode(userStr!));
     }

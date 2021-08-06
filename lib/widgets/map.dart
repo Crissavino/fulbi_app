@@ -58,14 +58,16 @@ class _MapState extends State<Map> {
     GoogleMap _buildGoogleMap() {
       return GoogleMap(
         initialCameraPosition: CameraPosition(target: this.target, zoom: 15.0),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: false,
+        zoomGesturesEnabled: true,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
         onCameraMove: (CameraPosition position) {
           this.centerPosition = position.target;
         },
-        zoomControlsEnabled: true,
-        zoomGesturesEnabled: true,
       );
     }
 

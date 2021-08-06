@@ -198,7 +198,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
                     title: Text(
-                      'Editar partido',
+                      translations[localeName]!['match.editMatch']!,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

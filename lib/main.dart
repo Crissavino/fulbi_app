@@ -22,6 +22,7 @@ import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/custom_snack_bar.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
+import 'package:fulbito_app/utils/translations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -81,7 +82,7 @@ class _MyAppState extends State<MyApp> {
             );
           } else {
             Navigator.pop(context);
-            showAlert(context, 'Error', 'Oooops ocurrio un error');
+            showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
           }
         }
 
@@ -103,7 +104,7 @@ class _MyAppState extends State<MyApp> {
             );
           } else {
             Navigator.pop(context);
-            showAlert(context, 'Error', 'Oooops ocurrio un error');
+            showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
           }
         }
 
@@ -144,7 +145,7 @@ class _MyAppState extends State<MyApp> {
           );
         } else {
           Navigator.pop(context);
-          showAlert(context, 'Error', 'Oooops ocurrio un error');
+          showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
         }
       }
 
@@ -166,7 +167,7 @@ class _MyAppState extends State<MyApp> {
           );
         } else {
           Navigator.pop(context);
-          showAlert(context, 'Error', 'Oooops ocurrio un error');
+          showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
         }
       }
     }

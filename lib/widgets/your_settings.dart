@@ -157,8 +157,8 @@ class _YourSettingsState extends State<YourSettings> {
             if (this.newNickname == '' || this.newNickname == null) {
               return showAlert(
                 context,
-                'Atencion!',
-                'El nickname es obligatorio',
+                translations[localeName]!['attention']!,
+                translations[localeName]!['attention.mandatoryNick']!,
               );
             }
 
@@ -178,8 +178,8 @@ class _YourSettingsState extends State<YourSettings> {
               });
               return showAlert(
                 context,
-                'Error',
-                'Ooops, ocurrió un error',
+                translations[localeName]!['error']!,
+                translations[localeName]!['error.ops']!,
               );
             }
           },
@@ -363,20 +363,20 @@ class _YourSettingsState extends State<YourSettings> {
             if (this.newPassword == '' || this.confirmNewPassword == '') {
               return showAlert(
                 context,
-                'Atencion!',
-                'La contraseña es obligatorio',
+                translations[localeName]!['attention']!,
+                translations[localeName]!['mandatoryPass']!,
               );
             } else if(this.newPassword.length < 6 || this.confirmNewPassword.length < 6) {
               return showAlert(
                 context,
-                'Atencion!',
-                'Las contraseñas no coinciden',
+                translations[localeName]!['attention']!,
+                translations[localeName]!['passNotMatch']!,
               );
             } else if(this.newPassword != this.confirmNewPassword) {
               return showAlert(
                 context,
-                'Atencion!',
-                'Las contraseñas no coinciden',
+                translations[localeName]!['attention']!,
+                translations[localeName]!['passNotMatch']!,
               );
             }
 
@@ -391,8 +391,8 @@ class _YourSettingsState extends State<YourSettings> {
             if (response['success']) {
               await showAlert(
                 context,
-                'Password changed',
-                'Password changed successfully',
+                translations[localeName]!['passChanged']!,
+                translations[localeName]!['passChangedSuccess']!,
               );
               Navigator.pop(context, response['user']);
             } else {
@@ -401,8 +401,8 @@ class _YourSettingsState extends State<YourSettings> {
               });
               return showAlert(
                 context,
-                'Error',
-                'Ooops, ocurrió un error',
+                translations[localeName]!['error']!,
+                translations[localeName]!['error.ops']!,
               );
             }
           },

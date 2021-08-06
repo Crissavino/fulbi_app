@@ -95,8 +95,8 @@ class _YourPositionsState extends State<YourPositions> {
                     onPressed: () {
                       showAlert(
                         context,
-                        'Informacion',
-                        'Selecciona la/las posiciones en la que sueles jugar',
+                        translations[localeName]!['information']!,
+                        translations[localeName]!['information.selectUsualPositions']!,
                       );
                     },
                   ),
@@ -270,8 +270,8 @@ class _YourPositionsState extends State<YourPositions> {
                           });
                           return showAlert(
                             context,
-                            'Atencion!',
-                            'Debes seleccionar alguna posicion en la que usualmente juegas',
+                            translations[localeName]!['attention']!,
+                            translations[localeName]!['attention.selectOnePosition']!,
                           );
                         } else {
 
@@ -291,8 +291,8 @@ class _YourPositionsState extends State<YourPositions> {
                             });
                             return showAlert(
                               context,
-                              'Error!',
-                              'Ocurrió un error al guardar las posiciones!',
+                              translations[localeName]!['error']!,
+                              translations[localeName]!['error.ops.savePositions']!,
                             );
                           }
                         }

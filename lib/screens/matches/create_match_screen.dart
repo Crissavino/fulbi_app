@@ -686,32 +686,32 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                   if (this.userLocationDesc == '') {
                     return showAlert(
                       context,
-                      'Atencion!',
-                      'Debes indicar el lugar donde se juega el partido',
+                      translations[localeName]!['attention']!,
+                      translations[localeName]!['attention.selectMatchPlace']!,
                     );
                   }
 
                   if (this.whenPlay == '') {
                     return showAlert(
                       context,
-                      'Atencion!',
-                      'Debes indicar cuando se va a jugar el partido',
+                      translations[localeName]!['attention']!,
+                      translations[localeName]!['attention.selectMatchDate']!,
                     );
                   }
 
                   if (!this.isFreeMatch && this.matchCost.round() == 0) {
                     return showAlert(
                       context,
-                      'Atencion!',
-                      'Debes indicar el costo aproximado',
+                      translations[localeName]!['attention']!,
+                      translations[localeName]!['attention.match.cost']!,
                     );
                   }
 
                   if (this.playersForMatch == 0) {
                     return showAlert(
                       context,
-                      'Atencion!',
-                      'Debes indicar al menos un jugador para el partido',
+                      translations[localeName]!['attention']!,
+                      translations[localeName]!['attention.match.atLeastOnePlayer']!,
                     );
                   }
 
@@ -765,8 +765,8 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     });
                     return showAlert(
                       context,
-                      'Error',
-                      'Ooops, ocurrió un error',
+                      translations[localeName]!['error']!,
+                      translations[localeName]!['error.ops']!,
                     );
                   }
                 },

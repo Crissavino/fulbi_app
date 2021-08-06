@@ -340,14 +340,14 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                               if (userLocationDesc.isEmpty){
                                 return showAlert(
                                   context,
-                                  'Atencion!',
-                                  'Debes seleccionar algun lugar en el que usualmente juegas',
+                                  translations[localeName]!['attention']!,
+                                  translations[localeName]!['attention.selectPlace']!,
                                 );
                               } else if (!_male && !_female){
                                 return showAlert(
                                   context,
-                                  'Atencion!',
-                                  'Debes seleccionar tu sexo',
+                                  translations[localeName]!['attention']!,
+                                  translations[localeName]!['attention.selectSex']!,
                                 );
                               }
 
@@ -376,8 +376,8 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                                 });
                                 return showAlert(
                                   context,
-                                  'Error!',
-                                  'Ocurrió un error al completar el perfil!',
+                                  translations[localeName]!['error']!,
+                                  translations[localeName]!['error.completeProfile']!,
                                 );
                               }
 

@@ -79,7 +79,7 @@ class SearchLocationMatch extends SearchDelegate<Feature?> {
 
         if (snapshot.data == null || places == null || places.isEmpty) {
           return ListTile(
-            title: Text('No hay resultados para $query'),
+            title: Text('${translations[localeName]!['search.noResultsFor']!} $query'),
           );
         }
 

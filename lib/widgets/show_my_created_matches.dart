@@ -89,7 +89,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
 
                         if (!response['success']) {
                           return showAlert(
-                              context, 'Error', 'Oops, ocurrió un error');
+                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                         }
 
                         if (this.matches.isEmpty) {
@@ -176,7 +176,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                 );
               } else {
                 Navigator.pop(context);
-                showAlert(context, 'Error', 'Oooops ocurrio un error');
+                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
               }
             },
           );

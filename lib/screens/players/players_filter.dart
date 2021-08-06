@@ -309,8 +309,8 @@ class _PlayersFilterState extends State<PlayersFilter> {
               if (noPositionSelected) {
                 return showAlert(
                   context,
-                  'Atencion!',
-                  'Debes seleccionar alguna posicion en la que usualmente juegas',
+                  translations[localeName]!['attention']!,
+                  translations[localeName]!['attention.selectOnePosition']!,
                 );
               } else {
                 setState(() {
@@ -350,8 +350,8 @@ class _PlayersFilterState extends State<PlayersFilter> {
                   });
                   return showAlert(
                     context,
-                    'Error!',
-                    'Ocurrió un error cargar los jugadores!',
+                    translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops.loadPlayers']!,
                   );
                 }
               }

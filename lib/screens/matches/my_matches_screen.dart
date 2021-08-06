@@ -381,7 +381,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                     );
                   } else {
                     Navigator.pop(context);
-                    showAlert(context, 'Error', 'Oooops ocurrio un error');
+                    showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                   }
                 },
                 () async {
@@ -399,7 +399,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                     Navigator.pop(context);
                   } else {
                     Navigator.pop(context);
-                    showAlert(context, 'Error', 'Oooops ocurrio un error');
+                    showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                   }
                 },
               );
@@ -571,14 +571,6 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                               color: Colors.white,
                               size: 30.0,
                             ),
-                            // Text(
-                            //   "Edit",
-                            //   style: TextStyle(
-                            //     fontWeight: FontWeight.w600,
-                            //     fontSize: 16,
-                            //     color: Colors.white,
-                            //   ),
-                            // )
                           ],
                         ),
                       ),
@@ -647,7 +639,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                         } else {
                           Navigator.pop(context);
                           showAlert(
-                              context, 'Error', 'Oooops ocurrio un error');
+                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                         }
                       },
                     );
@@ -670,7 +662,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                         } else {
                           Navigator.pop(context);
                           showAlert(
-                              context, 'Error', 'Oooops ocurrio un error');
+                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                         }
                       },
                     );

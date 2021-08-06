@@ -253,14 +253,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSignInWithText() {
     return Column(
       children: <Widget>[
-        // Text(
-        //   '- OR -',
-        //   style: TextStyle(
-        //     color: Colors.white,
-        //     fontWeight: FontWeight.w400,
-        //   ),
-        // ),
-        // SizedBox(height: 20.0),
         Text(
           translations[localeName]!['signInWith']!,
           style: kLabelStyle,
@@ -424,15 +416,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSignUpBtn() {
     return GestureDetector(
       onTap: () => Navigator.pushReplacementNamed(context, 'register'),
-      // onTap: () {
-      // Navigator.pushReplacement(
-      //   context,
-      //   PageRouteBuilder(
-      //     pageBuilder: (_, __, ___) => SignupScreen(),
-      //     transitionDuration: Duration(milliseconds: 0),
-      //   ),
-      // );
-      // },
       child: RichText(
         text: TextSpan(
           children: [

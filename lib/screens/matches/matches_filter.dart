@@ -369,8 +369,8 @@ class _MatchesFilterState extends State<MatchesFilter> {
                 });
                 return showAlert(
                   context,
-                  'Error!',
-                  'Ocurrió un error cargar los jugadores!',
+                  translations[localeName]!['error']!,
+                  translations[localeName]!['error.ops.loadPlayers']!,
                 );
               }
             },

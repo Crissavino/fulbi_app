@@ -227,8 +227,8 @@ class _YourLocationState extends State<YourLocation> {
                                 });
                                 return showAlert(
                                   context,
-                                  'Error!',
-                                  'Ocurrió un error al guardar tu ubicacion!',
+                                  translations[localeName]!['error']!,
+                                  translations[localeName]!['error.ops.saveLocation']!,
                                 );
                               }
                             },

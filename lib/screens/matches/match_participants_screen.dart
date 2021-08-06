@@ -186,7 +186,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                 onPressed: () {
                   if (this.imInscribed) {
                     showAlert(
-                        context, 'Error', 'Ya estas inscripto en este partido');
+                        context, translations[localeName]!['error']!, 'Ya estas inscripto en este partido');
                   } else {
                     showAlertWithEvent(
                       context,
@@ -204,7 +204,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                         } else {
                           Navigator.pop(context);
                           showAlert(
-                              context, 'Error', 'Oooops ocurrio un error');
+                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
                         }
                       },
                     );
@@ -264,7 +264,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                 );
               } else {
                 Navigator.pop(context);
-                showAlert(context, 'Error', 'Oooops ocurrio un error');
+                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
               }
             },
           );

@@ -611,6 +611,18 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
   Widget _buildMatchCost(playersEnrolled) {
     final _width = MediaQuery.of(context).size.width;
+    final allFree = this.isFreeMatch && this.currencySelected == null && this.matchCost == 0.0;
+    Widget currencyWidget;
+
+    if (allFree && playersEnrolled > 0) {
+      this.currencySelected = this.currencies.first.code;
+      currencyWidget = currencySelectBlocked();
+    } else if(allFree) {
+      this.currencySelected = this.currencies.first.code;
+      currencyWidget = currencySelectBlocked();
+    } else {
+      currencyWidget = currencySelect();
+    }
 
     return Container(
       alignment: Alignment.centerLeft,
@@ -636,11 +648,9 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         child: Container(
           child: TextFormField(
             controller: this._myMatchCostController,
-            enabled: playersEnrolled > 0
+            enabled: playersEnrolled > 0 || this.isFreeMatch
                 ? false
-                : this.isFreeMatch
-                  ? false
-                  : true,
+                : true,
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -652,7 +662,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Container(
                 margin: EdgeInsets.only(left: 10.0, right: 10.0),
-                child: currencySelect(playersEnrolled),
+                child: currencyWidget,
               ),
               hintText: translations[localeName]!['match.create.cost']!,
               hintStyle: kHintTextStyle,
@@ -663,13 +673,33 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
-  currencySelect(playersEnrolled) {
+  Widget currencySelectBlocked() {
     return DropdownButton<String>(
-      value: this.isFreeMatch
-          ? this.currencies.first.code
-          : this.currencySelected == null
-            ? this.currencies.first.code
-            : this.currencySelected,
+        value: this.currencySelected,
+        iconSize: 20,
+        elevation: 16,
+        style: TextStyle(color: Colors.green[400], fontSize: 30.0),
+        underline: Container(
+          height: 0,
+          color: Colors.transparent,
+        ),
+        onChanged: (String? newValue) {
+          setState(() {
+            currencySelected = newValue!;
+          });
+        },
+        items: [
+          DropdownMenuItem<String>(
+            value: this.currencySelected,
+            child: Text(this.currencySelected!),
+          )
+        ],
+    );
+  }
+
+  Widget currencySelect() {
+    return DropdownButton<String>(
+      value: this.currencySelected,
       iconSize: 20,
       elevation: 16,
       style: TextStyle(color: Colors.green[400], fontSize: 30.0),
@@ -682,19 +712,12 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           currencySelected = newValue!;
         });
       },
-      items: playersEnrolled > 0 && !this.isFreeMatch
-          ? [
-              DropdownMenuItem<String>(
-                value: this.currencySelected,
-                child: Text(this.currencySelected!),
-              )
-            ]
-          : this.currencies.map<DropdownMenuItem<String>>((Currency currency) {
-              return DropdownMenuItem<String>(
-                value: currency.code,
-                child: Text(currency.code!),
-              );
-            }).toList(),
+      items: this.currencies.map<DropdownMenuItem<String>>((Currency currency) {
+        return DropdownMenuItem<String>(
+          value: currency.code,
+          child: Text(currency.code!),
+        );
+      }).toList(),
     );
   }
 

@@ -45,6 +45,54 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
+class CustomError extends StatelessWidget {
+  final FlutterErrorDetails errorDetails;
+
+  const CustomError({
+    required this.errorDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 5.0,
+      child: Column(
+        children: [
+          Padding(
+            child: Text(
+              "Something is not right here...",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            padding: const EdgeInsets.all(8.0),
+          ),
+          Padding(
+            child: Text(
+              errorDetails.exceptionAsString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 10,
+            ),
+            padding: const EdgeInsets.all(8.0),
+          ),
+        ],
+      ),
+      color: Colors.red,
+      margin: EdgeInsets.only(
+        top: 100.0,
+        left: 60.0,
+        right: 60.0,
+        bottom: 200.0
+      ),
+    );
+  }
+}
+
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldMessengerState> messengerKey =
@@ -286,6 +334,14 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? widget) {
+          ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+            FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+            return CustomError(errorDetails: errorDetails);
+          };
+
+          return widget!;
+        },
         title: 'Fulbito',
         theme: ThemeData(
           primarySwatch: Colors.blue,

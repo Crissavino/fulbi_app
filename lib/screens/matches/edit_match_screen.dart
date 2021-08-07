@@ -761,8 +761,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           if (this.isFreeMatch) {
             this._myMatchCostController.text = '0.0';
             this.matchCost = 0.0;
+            this.currencySelected = this.currencies.first.code;
           }
-          print(this.matchCost);
           setState(() {});
         },
         value: this.isFreeMatch,

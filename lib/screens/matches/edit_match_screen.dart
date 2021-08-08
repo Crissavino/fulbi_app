@@ -101,23 +101,22 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   Future getMatch() async {
     final response = await MatchRepository().getMatch(widget.match.id);
     if (response['success'] && widget.manualSelection == null) {
-      setState(() {
-        Location location = response['location'];
-        this.userLocationDesc = location.formattedAddress;
-        this.userLocationDetails = {
-          'lat': location.lat,
-          'lng': location.lng,
-          'formatted_address': location.formattedAddress,
-          'place_name': location.formattedAddress,
-          'place_id': null,
-          'city': location.city,
-          'province': location.province,
-          'province_code': null,
-          'country': location.country,
-          'country_code': null,
-          'is_by_lat_lng': true,
-        };
-        this.userLocation = UserLocation(
+      Location location = response['location'];
+      this.userLocationDesc = location.formattedAddress;
+      this.userLocationDetails = {
+        'lat': location.lat,
+        'lng': location.lng,
+        'formatted_address': location.formattedAddress,
+        'place_name': location.formattedAddress,
+        'place_id': null,
+        'city': location.city,
+        'province': location.province,
+        'province_code': null,
+        'country': location.country,
+        'country_code': null,
+        'is_by_lat_lng': true,
+      };
+      this.userLocation = UserLocation(
           country: location.country,
           countryCode: location.countryCode,
           province: location.province,
@@ -128,24 +127,25 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
           lat: location.lat,
           lng: location.lng,
           isByLatLng: location.isByLatLng != null ? location.isByLatLng : false
-        );
-        Match match = response['match'];
-        this.isFreeMatch = match.isFreeMatch;
-        this.whenPlay = DateFormat('dd/MM/yyyy HH:mm').format(match.whenPlay);
-        Genre genre = response['genre'];
-        this
-            .matchGender
-            .firstWhereOrNull((gender) => gender.id == genre.id!)!
-            .checked = true;
+      );
+      Match match = response['match'];
+      this.isFreeMatch = match.isFreeMatch;
+      this.whenPlay = DateFormat('dd/MM/yyyy HH:mm').format(match.whenPlay);
+      Genre genre = response['genre'];
+      this
+          .matchGender
+          .firstWhereOrNull((gender) => gender.id == genre.id!)!
+          .checked = true;
 
-        Type type = response['type'];
-        this.matchType.firstWhereOrNull((mType) => mType.id == type.id!)!.checked =
-            true;
+      Type type = response['type'];
+      this.matchType.firstWhereOrNull((mType) => mType.id == type.id!)!.checked =
+      true;
 
-        String currencySymbol = response['currency'];
-        this.currencySelected = currencySymbol;
-        this.matchCost = match.cost.toDouble();
-      });
+      String currencySymbol = response['currency'];
+      this.currencySelected = currencySymbol;
+      this.matchCost = match.cost.toDouble();
+      setState(() {});
+      return response;
     } else if (widget.manualSelection != null) {
       this.userLocationDesc = widget.userLocationDesc!;
       this.userLocationDetails = widget.userLocationDetails!;
@@ -170,9 +170,12 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       this.currencySelected = widget.editedValues['currencySelected'];
       this.playersForMatch = int.parse(widget.editedValues['playersForMatch']);
       this._myNumPlayersController.text = this.playersForMatch.toString();
+      setState(() {});
+      return response;
+    } else {
+      return response;
     }
 
-    return response;
   }
 
   @override
@@ -239,6 +242,18 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [circularLoading],
+                              ),
+                            );
+                          }
+
+                          if (snapshot.data['success'] == false) {
+                            return Container(
+                              width: _width,
+                              height: _height,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [Text('Error...')],
                               ),
                             );
                           }

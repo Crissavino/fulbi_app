@@ -10,7 +10,7 @@ String locationToJson(Location data) => json.encode(data.toJson());
 
 class Location {
   Location({
-    required this.id,
+    this.id,
     required this.lat,
     required this.lng,
     required this.country,
@@ -21,12 +21,12 @@ class Location {
     this.placeId,
     required this.formattedAddress,
     this.isByLatLng,
-    required this.deletedAt,
-    required this.createdAt,
-    required this.updatedAt,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  int id;
+  int? id;
   double lat;
   double lng;
   String country;
@@ -38,8 +38,8 @@ class Location {
   String formattedAddress;
   bool? isByLatLng;
   dynamic deletedAt;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   factory Location.fromJson(Map<String, dynamic> json) => Location(
     id: json["id"],
@@ -71,7 +71,7 @@ class Location {
     "formatted_address": formattedAddress,
     "is_by_lat_lng": isByLatLng,
     "deleted_at": deletedAt,
-    "created_at": createdAt.toIso8601String(),
-    "updated_at": updatedAt.toIso8601String(),
+    "created_at": createdAt!.toIso8601String(),
+    "updated_at": updatedAt!.toIso8601String(),
   };
 }

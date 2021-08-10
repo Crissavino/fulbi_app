@@ -10,6 +10,7 @@ import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/create_match_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_filter.dart';
@@ -114,6 +115,14 @@ class _MatchesState extends State<MatchesScreen> {
       types,
     );
     final responseMyMatches = await MatchRepository().getMyMatches();
+
+    if (response['message'] == 'Unauthenticated.') {
+      return Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
 
     if (response['success']) {
       // setState(() {

@@ -136,6 +136,15 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
 
   Future<dynamic> getUserData() async {
     final response = await UserRepository.getAllCurrentUserData();
+
+    if (response['message'] == 'Unauthenticated.') {
+      return Navigator.pushAndRemoveUntil(
+        this.context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+
     if (response['success']) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
 

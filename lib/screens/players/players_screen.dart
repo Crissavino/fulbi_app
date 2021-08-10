@@ -9,6 +9,7 @@ import 'package:fulbito_app/models/player.dart';
 import 'package:fulbito_app/models/position.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_filter.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
@@ -85,6 +86,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
       genres,
       positionsIds,
     );
+
+    if (response['message'] == 'Unauthenticated.') {
+      return Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+
     if (response['success']) {
       this.players = response['players'];
       SharedPreferences localStorage = await SharedPreferences.getInstance();

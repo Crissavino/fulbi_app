@@ -124,15 +124,15 @@ class _PlayersFilterState extends State<PlayersFilter> {
             ),
           ),
           child: Slider(
-            value: widget.searchedRange['distance']!,
-            min: 0,
+            value: widget.searchedRange['distance']!.round().toDouble(),
+            min: 1,
             max: 50,
-            divisions: 10,
-            label: widget.searchedRange['distance'].toString(),
+            divisions: 49,
+            label: widget.searchedRange['distance']?.round().toString(),
             onChanged: (value) {
               setState(
                 () {
-                  widget.searchedRange['distance'] = value;
+                  widget.searchedRange['distance'] = value.round().toDouble();
                 },
               );
             },

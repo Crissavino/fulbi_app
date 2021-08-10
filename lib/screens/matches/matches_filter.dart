@@ -113,15 +113,15 @@ class _MatchesFilterState extends State<MatchesFilter> {
             ),
           ),
           child: Slider(
-            value: widget.searchedRange!['distance']!,
-            min: 0,
-            max: 50,
-            divisions: 10,
-            label: widget.searchedRange!['distance'].toString(),
+            value: widget.searchedRange!['distance']!.round().toDouble(),
+            min: 1.0,
+            max: 50.0,
+            divisions: 49,
+            label: widget.searchedRange!['distance']?.round().toString(),
             onChanged: (value) {
               setState(
                 () {
-                  widget.searchedRange!['distance'] = value;
+                  widget.searchedRange!['distance'] = value.round().toDouble();
                 },
               );
             },

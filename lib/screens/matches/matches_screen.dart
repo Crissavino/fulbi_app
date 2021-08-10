@@ -634,7 +634,6 @@ class _MatchesState extends State<MatchesScreen> {
       currentIndex: 1,
       onTap: (index) {
         if (index != 1) {
-          print(this.isLoading);
           _navigateToSection(index);
         }
       },

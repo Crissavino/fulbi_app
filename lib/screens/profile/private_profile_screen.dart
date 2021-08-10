@@ -37,12 +37,16 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   final picker = ImagePicker();
   String? profileImagePath;
   bool isLoading = false;
+  bool loadingProfileImage = false;
   StreamController userStreamController = StreamController.broadcast();
 
   Future updateProfileImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      setState(() {
+        this.loadingProfileImage = true;
+      });
       _image = File(pickedFile.path);
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String appDocPath = appDocDir.path;
@@ -59,11 +63,27 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
         this.profileImagePath = user.profileImage;
         SharedPreferences localStorage = await SharedPreferences.getInstance();
         await localStorage.setString('privateProfileScreen.profileImagePath', json.encode(this.profileImagePath.toString()));
-      }
 
-      setState(() {});
+        var streamData = {
+          'currentUser': this._currentUser,
+          'userPositions': this._userPositions,
+          'userLocation': this._userLocation,
+          'profileImagePath': this.profileImagePath
+        };
+        if (!userStreamController.isClosed)
+          userStreamController.sink.add(
+            streamData,
+          );
+        setState(() {
+          this.loadingProfileImage = false;
+        });
+
+      }
     } else {
       //User canceled the picker. You need do something here, or just add return
+      setState(() {
+        this.loadingProfileImage = false;
+      });
       return;
     }
   }
@@ -339,7 +359,8 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                       : CircleAvatar(
                                     backgroundColor: Colors.white,
                                     radius: 60,
-                                    backgroundImage: NetworkImage(profileImagePath!),
+                                    child: this.loadingProfileImage ? circularLoading : null,
+                                    backgroundImage: this.loadingProfileImage ? null : NetworkImage(profileImagePath!),
                                   ),
                                 ),
                               ),

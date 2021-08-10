@@ -32,7 +32,7 @@ class User {
   bool isFullySet;
   bool premium;
   int matchesCreated;
-  int genreId;
+  int? genreId;
   String? profileImage;
   DateTime createdAt;
   DateTime updatedAt;

@@ -480,6 +480,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
         if (!this.imInscribed) {
+          this.isLoading = false;
           return showAlertWithEvent(
             context,
             translations[localeName]!['match.chat.join']!,
@@ -501,6 +502,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   ),
                 );
               } else {
+                this.isLoading = false;
                 Navigator.pop(context);
                 showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
               }

@@ -242,6 +242,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
         if (!this.imInscribed) {
+          this.isLoading = false;
           return showAlertWithEvent(
             context,
             translations[localeName]!['match.chat.join']!,
@@ -263,6 +264,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   ),
                 );
               } else {
+                this.isLoading = false;
                 Navigator.pop(context);
                 showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
               }

@@ -78,9 +78,10 @@ class _MatchesState extends State<MatchesScreen> {
   }
 
   void silentNotificationListener() {
-    PushNotificationService.messageStream.listen((notificationData) {
+    PushNotificationService.messageStream.listen((notificationData) async {
       if (notificationData.containsKey('silentUpdateChat')) {
         if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
+        await saveVariablesInLocalStorage();
       }
       if (notificationData.containsKey('silentUpdateMatch')) {
         final Match? editedMatch = notificationData['match'];
@@ -89,8 +90,23 @@ class _MatchesState extends State<MatchesScreen> {
         this.matches.replaceRange(index, index + 1, [editedMatch]);
         if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
         if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
+        await saveVariablesInLocalStorage();
+      }
+      if (notificationData.containsKey('silentCreatedMatch')) {
+        final Match? editedMatch = notificationData['match'];
+        this.matches.add(editedMatch);
+        this.matches.sort((a,b) => a!.whenPlay.compareTo(b!.whenPlay));
+        if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+        await saveVariablesInLocalStorage();
       }
     });
+  }
+
+  Future<void> saveVariablesInLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+    await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+    await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
   }
 
   @override
@@ -125,18 +141,13 @@ class _MatchesState extends State<MatchesScreen> {
     }
 
     if (response['success']) {
-      // setState(() {
-        List<Match> myMatches = responseMyMatches['matches'];
-        this.areNotifications = myMatches
-            .firstWhereOrNull((match) => match.haveNotifications == true) !=
-            null;
-        this.matches = response['matches'];
-      // });
+      List<Match> myMatches = responseMyMatches['matches'];
+      this.areNotifications = myMatches
+          .firstWhereOrNull((match) => match.haveNotifications == true) !=
+          null;
+      this.matches = response['matches'];
 
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
-      var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
-      await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
+      await saveVariablesInLocalStorage();
 
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(

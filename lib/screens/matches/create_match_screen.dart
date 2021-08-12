@@ -578,6 +578,11 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
         onChanged: (value) {
           setState(() {
             this.isFreeMatch = !this.isFreeMatch;
+            print(this.isFreeMatch);
+            if (this.isFreeMatch) {
+              this.matchCost = 0.0;
+              this.currencySelected = currencies.first.code;
+            }
           });
         },
         value: this.isFreeMatch,
@@ -747,10 +752,11 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                       this.whenPlay,
                       genreId!,
                       typeId!,
-                      this.isFreeMatch ? 0 : currencyId!,
-                      this.isFreeMatch ? 0 : this.matchCost,
+                      currencyId!,
+                      this.matchCost,
                       this.playersForMatch,
-                      this.isFreeMatch);
+                      this.isFreeMatch,
+                  );
 
                   if (response['success']) {
                     Navigator.pushReplacement(

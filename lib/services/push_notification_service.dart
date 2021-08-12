@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:fulbito_app/models/message.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 
@@ -18,6 +19,8 @@ class PushNotificationService {
   static Stream<Map<String, dynamic>> get messageStream => _messageStreamController.stream;
 
   static Future<void> _onBackgroundHandler(RemoteMessage message) async {
+    await Firebase.initializeApp();
+
     // cuando la app esta en segundo plano
     if (message.data['notification_type'] == 'new_chat_message') {
       final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
@@ -77,6 +80,9 @@ class PushNotificationService {
 
     // silence
     await handleSilenceNotification(message);
+
+    FlutterAppBadger.updateBadgeCount(1);
+
   }
 
   static Future<void> _onMessageOpenedHandler(RemoteMessage message) async {
@@ -137,13 +143,14 @@ class PushNotificationService {
         'inApp': false,
       });
     }
-
     // silence
     await handleSilenceNotification(message);
+
+    FlutterAppBadger.removeBadge();
+
   }
 
   static Future<void> _onMessageHandler(RemoteMessage message) async {
-
     // cuando estas en la app
     // if (message.data['notification_type'] == 'new_chat_message') {
     //   final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
@@ -209,11 +216,24 @@ class PushNotificationService {
       });
     }
 
+    FlutterAppBadger.removeBadge();
     // silence
     await handleSilenceNotification(message);
   }
 
   static Future<void> handleSilenceNotification(RemoteMessage message) async {
+
+    if (message.data['notification_type'] == 'silence_match_created') {
+      final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']){
+        _messageStreamController.sink.add({
+          'silentCreatedMatch': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
+    }
+
     if (message.data['notification_type'] == 'silence_match_edited') {
       final getMatchResponse = await MatchRepository().getMatch(message.data['match_id']);
       if (getMatchResponse['success']){
@@ -270,7 +290,6 @@ class PushNotificationService {
 
     try{
       token = await FirebaseMessaging.instance.getToken();
-      print('token $token');
     } catch(error) {
       token = '';
       print('error $error');
@@ -290,7 +309,6 @@ class PushNotificationService {
     settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional
     ) {
-      print('User granted permission');
       // handlers
       FirebaseMessaging.onBackgroundMessage(_onBackgroundHandler);
       FirebaseMessaging.onMessage.listen(_onMessageHandler);

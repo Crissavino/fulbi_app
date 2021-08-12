@@ -54,6 +54,7 @@ dependencies:
   google_maps_flutter:
   animate_do:
   device_info:
+  flutter_app_badger:
 
 dev_dependencies:
   flutter_test:

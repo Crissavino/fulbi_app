@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,6 +99,7 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldMessengerState> messengerKey =
       GlobalKey<ScaffoldMessengerState>();
+  String _appBadgeSupported = 'Unknown';
 
   void initDynamicLinks() async {
     FirebaseDynamicLinks.instance.onLink(
@@ -221,11 +224,19 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void _addBadge() {
+    FlutterAppBadger.updateBadgeCount(1);
+  }
+
+  void _removeBadge() {
+    FlutterAppBadger.removeBadge();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //FirebaseCrashlytics.instance.crash();
+    initPlatformState();
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('chatMessage')) {
         if (notificationData['inApp']) {
@@ -314,6 +325,29 @@ class _MyAppState extends State<MyApp> {
       }
     });
     this.initDynamicLinks();
+  }
+
+  initPlatformState() async {
+    String appBadgeSupported;
+    try {
+      bool res = await FlutterAppBadger.isAppBadgeSupported();
+      if (res) {
+        appBadgeSupported = 'Supported';
+      } else {
+        appBadgeSupported = 'Not supported';
+      }
+    } on PlatformException {
+      appBadgeSupported = 'Failed to get badge support.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _appBadgeSupported = appBadgeSupported;
+    });
   }
 
   @override

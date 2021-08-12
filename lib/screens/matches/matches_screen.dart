@@ -38,6 +38,7 @@ class _MatchesState extends State<MatchesScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchesStreamController = StreamController.broadcast();
   bool isLoading = false;
+  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _MatchesState extends State<MatchesScreen> {
       thisMatches = matches.map((match) => Match.fromJson(match)).toList();
 
       this.areNotifications = thisAreNotifications;
-      this.matches = thisMatches;
+      // this.matches = thisMatches;
 
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
@@ -125,15 +126,15 @@ class _MatchesState extends State<MatchesScreen> {
     }
 
     if (response['success']) {
-      // setState(() {
-        List<Match> myMatches = responseMyMatches['matches'];
-        this.areNotifications = myMatches
-            .firstWhereOrNull((match) => match.haveNotifications == true) !=
-            null;
-        this.matches = response['matches'];
-      // });
+      List<Match> myMatches = responseMyMatches['matches'];
+      this.areNotifications = myMatches
+          .firstWhereOrNull((match) => match.haveNotifications == true) !=
+          null;
+      this.matches = response['matches'];
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
+      compareMatches(localStorage, response);
+
       var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
       await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
       await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
@@ -150,6 +151,29 @@ class _MatchesState extends State<MatchesScreen> {
     }
 
     return response;
+  }
+
+  void compareMatches(SharedPreferences localStorage, response) {
+    List thisMatchesLS = json.decode(json.decode(localStorage.getString('matchesScreen.matches')!));
+    List localStorageMatches = thisMatchesLS;
+    thisMatchesLS = localStorageMatches.map((match) => Match.fromJson(match).toJson()).toList();
+
+    List matchesFromDB = response['matches'];
+    List thisMatchesDB = matchesFromDB.map((match) => match.toJson()).toList();
+
+    Function unOrdDeepEq = const DeepCollectionEquality.unordered().equals;
+    if (!unOrdDeepEq(thisMatchesLS, thisMatchesDB)) {
+      List diff = thisMatchesDB.where((element) => !thisMatchesLS.contains(element)).toList();
+
+      List<Match?> matchesFromLS = thisMatchesLS.map((match) => Match.fromJson(match)).toList();
+      List<Match?> animated = matchesFromLS;
+      diff.forEach((element) {
+        print(element);
+        animated.add(Match.fromJson(element));
+      });
+      // diff.forEach((element) => animated.add(element));
+
+    }
   }
 
   @override
@@ -469,6 +493,19 @@ class _MatchesState extends State<MatchesScreen> {
                     .toList(),
                 true
               ),
+              // child: AnimatedList(
+              //   key: listKey,
+              //   initialItemCount: matches.length,
+              //   itemBuilder: (context, index, animation) {
+              //     return SlideTransition(
+              //       position: Tween<Offset>(
+              //         begin: const Offset(-1, 0),
+              //         end: Offset(0, 0),
+              //       ).animate(animation),
+              //       child: _buildMatchRow(matches[index]),
+              //     );
+              //   },
+              // ),
               child: ListView.builder(
                 itemBuilder: (
                     BuildContext context,

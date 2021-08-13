@@ -306,7 +306,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                 onPressed: () {
                   if (this.imInscribed) {
                     showAlert(
-                        context, translations[localeName]!['error']!, 'Ya estas inscripto en este partido');
+                        context, translations[localeName]!['error']!, translations[localeName]!['error.alreadyInscribed']!);
                   } else {
                     showAlertWithEvent(
                       context,

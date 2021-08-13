@@ -46,6 +46,7 @@ class _MapState extends State<Map> {
     super.initState();
     this.target = LatLng(widget.currentPosition['latitude'],
         widget.currentPosition['longitude']);
+    this.centerPosition = this.target;
   }
 
   @override
@@ -58,7 +59,7 @@ class _MapState extends State<Map> {
 
     GoogleMap _buildGoogleMap() {
       return GoogleMap(
-        initialCameraPosition: CameraPosition(target: this.target, zoom: 15.0),
+        initialCameraPosition: CameraPosition(target: this.target, zoom: 20.0),
         myLocationEnabled: true,
         zoomControlsEnabled: false,
         zoomGesturesEnabled: true,
@@ -190,8 +191,14 @@ class _MapState extends State<Map> {
 
                 if (result != null) {
                   final Feature place = result.features[0];
-                  final double latitude = place.center[1].toDouble();
-                  final double longitude = place.center[0].toDouble();
+                  // lat lng from mapbox
+                  // final double latitude = place.center[1].toDouble();
+                  // final double longitude = place.center[0].toDouble();
+                  // lat lng from mapbox
+                  // lat lng from google
+                  final double latitude = this.centerPosition!.latitude;
+                  final double longitude = this.centerPosition!.longitude;
+                  // lat lng from google
 
                   final city = place.context
                       .firstWhere((Context con) => con.id!.contains('place'))
@@ -224,7 +231,8 @@ class _MapState extends State<Map> {
                         pageBuilder: (context, animation1, animation2) =>
                             CreateMatchScreen(
                           manualSelection: true,
-                          userLocationDesc: place.text,
+                          userLocationDesc: '${latitude.toStringAsFixed(3)} - ${longitude.toStringAsFixed(3)}',
+                          // userLocationDesc: place.text,
                           userLocationDetails: this.userLocationDetails,
                         ),
                         transitionDuration: Duration(seconds: 0),
@@ -241,7 +249,8 @@ class _MapState extends State<Map> {
                             match: editedMatch,
                             editedValues: widget.editedValues,
                             manualSelection: true,
-                            userLocationDesc: place.text,
+                            userLocationDesc: '${latitude.toStringAsFixed(3)} - ${longitude.toStringAsFixed(3)}',
+                            // userLocationDesc: place.text,
                             userLocationDetails: this.userLocationDetails,
                           ),
                           transitionDuration: Duration(seconds: 0),

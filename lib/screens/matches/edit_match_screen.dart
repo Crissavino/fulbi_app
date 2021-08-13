@@ -101,7 +101,8 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     if (response['success'] && widget.manualSelection == null) {
 
       Location location = response['location'];
-      this.userLocationDesc = location.formattedAddress;
+      // this.userLocationDesc = location.formattedAddress;
+      this.userLocationDesc = '${location.lat.toStringAsFixed(3)} - ${location.lng.toStringAsFixed(3)}';
       this.userLocationDetails = {
         'lat': location.lat,
         'lng': location.lng,

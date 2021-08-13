@@ -7,7 +7,9 @@ import 'package:fulbito_app/models/player.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/utils/api.dart';
+import 'package:fulbito_app/utils/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class UserRepository {
   Api api = Api();
@@ -69,6 +71,16 @@ class UserRepository {
     } else {
       return false;
     }
+  }
+
+  Future<Map> getAppMinimumVersion() async {
+
+    Uri fullUrl = Uri.parse(EnvironmentConstants.apiUrl + '/app/minimum-version');
+    final res = await http.get(fullUrl);
+
+    Map body = json.decode(res.body);
+
+    return body;
   }
 
   Future<Map> login(

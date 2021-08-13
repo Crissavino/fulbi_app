@@ -20,6 +20,9 @@ import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
+import 'package:fulbito_app/utils/check_app_version.dart';
+import 'package:fulbito_app/utils/check_auth.dart';
+import 'package:fulbito_app/utils/custom_error.dart';
 import 'package:fulbito_app/utils/custom_snack_bar.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -43,54 +46,6 @@ class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
   _MyAppState createState() => _MyAppState();
-}
-
-class CustomError extends StatelessWidget {
-  final FlutterErrorDetails errorDetails;
-
-  const CustomError({
-    required this.errorDetails,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5.0,
-      child: Column(
-        children: [
-          Padding(
-            child: Text(
-              "Something is not right here...",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            padding: const EdgeInsets.all(8.0),
-          ),
-          Padding(
-            child: Text(
-              errorDetails.exceptionAsString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 10,
-            ),
-            padding: const EdgeInsets.all(8.0),
-          ),
-        ],
-      ),
-      color: Colors.red,
-      margin: EdgeInsets.only(
-        top: 100.0,
-        left: 60.0,
-        right: 60.0,
-        bottom: 200.0
-      ),
-    );
-  }
 }
 
 class _MyAppState extends State<MyApp> {
@@ -352,7 +307,8 @@ class _MyAppState extends State<MyApp> {
         //Navigator
         scaffoldMessengerKey: messengerKey,
         // Snack
-        home: CheckAuth(),
+        home: CheckAppVersion(),
+        // home: CheckAuth(),
         // home: CompleteRegisterScreen(),
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
@@ -363,60 +319,6 @@ class _MyAppState extends State<MyApp> {
           const Locale('en'),
         ],
       ),
-    );
-  }
-}
-
-class CheckAuth extends StatefulWidget {
-  @override
-  _CheckAuthState createState() => _CheckAuthState();
-}
-
-class _CheckAuthState extends State<CheckAuth> {
-  bool isAuth = false;
-  bool isFullySet = false;
-
-  @override
-  void initState() {
-    _checkWhereUserHaveToGo();
-    super.initState();
-  }
-
-  void _checkWhereUserHaveToGo() async {
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    final token = localStorage.getString('token');
-    if (token != null) {
-      setState(() {
-        isAuth = true;
-      });
-    }
-
-    // localStorage.clear();
-
-    if (localStorage.containsKey('user')) {
-      String? userStr = localStorage.getString("user");
-      User user = User.fromJson(jsonDecode(userStr!));
-      if (user.isFullySet) {
-        setState(() {
-          isFullySet = true;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child;
-    if (isAuth && !isFullySet) {
-      child = CompleteRegisterScreen();
-    } else if (isAuth && isFullySet) {
-      child = MatchesScreen();
-    } else {
-      child = LoginScreen();
-    }
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: child,
     );
   }
 }

@@ -179,7 +179,7 @@ class _YourSettingsState extends State<YourSettings> {
               return showAlert(
                 context,
                 translations[localeName]!['error']!,
-                translations[localeName]!['error.ops']!,
+                translations[localeName]![response['messageKey']]!,
               );
             }
           },

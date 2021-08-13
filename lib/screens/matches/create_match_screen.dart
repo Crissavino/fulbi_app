@@ -18,7 +18,7 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
 import 'package:fulbito_app/widgets/map.dart';
-import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
+import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
 // ignore: must_be_immutable
@@ -51,6 +51,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
   String? currencySelected;
   bool isLoading = false;
   bool isFreeMatch = false;
+  final _myMatchCostController = TextEditingController();
 
   @override
   void initState() {
@@ -65,6 +66,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       this.userLocationDesc = widget.userLocationDesc!;
       this.userLocationDetails = widget.userLocationDetails!;
     }
+
+    this._myMatchCostController.text = '0.0';
+    this._myMatchCostController.addListener(_printLatestMatchCostValue);
   }
 
   @override
@@ -487,6 +491,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
         width: _width,
         child: Container(
           child: TextFormField(
+            controller: this._myMatchCostController,
             enabled: this.isFreeMatch ? false : true,
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textCapitalization: TextCapitalization.sentences,
@@ -518,6 +523,18 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
         ),
       ),
     );
+  }
+
+  void _printLatestMatchCostValue() {
+    if (this._myMatchCostController.text.isNotEmpty) {
+      if (this._myMatchCostController.text.contains(',')) {
+        this.matchCost = double.parse(this._myMatchCostController.text.replaceFirst(RegExp(','), '.'));
+      } else {
+        this.matchCost = double.parse(this._myMatchCostController.text);
+      }
+    } else {
+      this.matchCost = 0.0;
+    }
   }
 
   currencySelect() {
@@ -552,41 +569,40 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       width: _width * .35,
       margin: EdgeInsets.only(top: 20.0, right: 10.0),
       height: 60.0,
-      child: GFCheckboxListTile(
-        title: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Text(
-              translations[localeName]!['general.free']!,
-              style: TextStyle(
-                fontSize: 16.0,
-              ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            translations[localeName]!['general.free']!,
+            style: TextStyle(
+              fontSize: 16.0,
             ),
           ),
-        ),
-        size: 35,
-        activeBgColor: Colors.green[400]!,
-        inactiveBorderColor: Colors.green[700]!,
-        activeBorderColor: Colors.green[700]!,
-        type: GFCheckboxType.circle,
-        padding: EdgeInsets.all(0),
-        activeIcon: Icon(
-          Icons.sports_soccer,
-          size: 25,
-          color: Colors.white,
-        ),
-        onChanged: (value) {
-          setState(() {
-            this.isFreeMatch = !this.isFreeMatch;
-            print(this.isFreeMatch);
-            if (this.isFreeMatch) {
-              this.matchCost = 0.0;
-              this.currencySelected = currencies.first.code;
-            }
-          });
-        },
-        value: this.isFreeMatch,
-        inactiveIcon: null,
+          GFCheckbox(
+            size: 35,
+            activeBgColor: Colors.green[400]!,
+            inactiveBorderColor: Colors.green[700]!,
+            activeBorderColor: Colors.green[700]!,
+            type: GFCheckboxType.circle,
+            activeIcon: Icon(
+              Icons.sports_soccer,
+              size: 25,
+              color: Colors.white,
+            ),
+            onChanged: (value) {
+              setState(() {
+                this.isFreeMatch = !this.isFreeMatch;
+                if (this.isFreeMatch) {
+                  this._myMatchCostController.text = '0.0';
+                  this.matchCost = 0.0;
+                  this.currencySelected = currencies.first.code;
+                }
+              });
+            },
+            value: this.isFreeMatch,
+            inactiveIcon: null,
+          )
+        ],
       ),
     );
   }

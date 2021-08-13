@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +60,6 @@ class _MapState extends State<Map> {
       return GoogleMap(
         initialCameraPosition: CameraPosition(target: this.target, zoom: 15.0),
         myLocationEnabled: true,
-        myLocationButtonEnabled: true,
         zoomControlsEnabled: false,
         zoomGesturesEnabled: true,
         onMapCreated: (GoogleMapController controller) {
@@ -68,6 +68,7 @@ class _MapState extends State<Map> {
         onCameraMove: (CameraPosition position) {
           this.centerPosition = position.target;
         },
+        myLocationButtonEnabled: false,
       );
     }
 
@@ -265,6 +266,14 @@ class _MapState extends State<Map> {
       );
     }
 
+    void _currentLocation() async {
+      final currentPosition = await LocationRepository().determinePosition();
+
+      this.centerPosition = LatLng(currentPosition.latitude, currentPosition.longitude);
+
+      moveCamera(this.centerPosition);
+    }
+
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
@@ -278,6 +287,18 @@ class _MapState extends State<Map> {
               _buildBackArrow(context),
               _buildSearchInput(context),
               _buildSelectButton(),
+              Positioned(
+                bottom: 45.0,
+                right: 20.0,
+                child: FloatingActionButton(
+                  onPressed: _currentLocation,
+                  child: Icon(
+                    Icons.my_location,
+                    color: Colors.black87,
+                  ),
+                  backgroundColor: Colors.white,
+                ),
+              )
             ],
           ),
         ),

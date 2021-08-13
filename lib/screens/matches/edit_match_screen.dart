@@ -16,6 +16,7 @@ import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
@@ -857,60 +858,59 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
       width: _width * .35,
       margin: EdgeInsets.only(top: 20.0, right: 10.0),
       height: 60.0,
-      child: GFCheckboxListTile(
-        title: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Text(
-              translations[localeName]!['general.free']!,
-              style: TextStyle(
-                fontSize: 16.0,
-              ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            translations[localeName]!['general.free']!,
+            style: TextStyle(
+              fontSize: 16.0,
             ),
           ),
-        ),
-        size: 35,
-        activeBgColor: Colors.green[400]!,
-        inactiveBorderColor: Colors.green[700]!,
-        activeBorderColor: Colors.green[700]!,
-        type: GFCheckboxType.circle,
-        padding: EdgeInsets.all(0),
-        activeIcon: Icon(
-          Icons.sports_soccer,
-          size: 25,
-          color: Colors.white,
-        ),
-        onChanged: (value) {
-          if (playersEnrolled > 0) return;
-          match.isFreeMatch = value;
-          if (!match.isFreeMatch && currencySelected == null) {
-            currencySelected = currencies.first.code;
-          }
-          if (match.isFreeMatch) {
-            this._myMatchCostController.text = '0.0';
-            match.cost = 0.0;
-            currencySelected = currencies.first.code;
-          }
+          GFCheckbox(
+            size: 35,
+            activeBgColor: Colors.green[400]!,
+            inactiveBorderColor: Colors.green[700]!,
+            activeBorderColor: Colors.green[700]!,
+            type: GFCheckboxType.circle,
+            activeIcon: Icon(
+              Icons.sports_soccer,
+              size: 25,
+              color: Colors.white,
+            ),
+            onChanged: (value) {
+              if (playersEnrolled > 0) return;
+              match.isFreeMatch = value;
+              if (!match.isFreeMatch && currencySelected == null) {
+                currencySelected = currencies.first.code;
+              }
+              if (match.isFreeMatch) {
+                this._myMatchCostController.text = '0.0';
+                match.cost = 0.0;
+                currencySelected = currencies.first.code;
+              }
 
-          dynamic toStream = {
-            'match': match,
-            'matchGender': this.matchGender,
-            'matchType': this.matchType,
-            'currencySelected': currencySelected,
-            'userLocationDesc': this.userLocationDesc,
-            'userLocationDetails': this.userLocationDetails,
-            'userLocation': this.userLocation,
-            'whenPlay': this.whenPlay,
-            'playersForMatch': this.playersForMatch,
-          };
+              dynamic toStream = {
+                'match': match,
+                'matchGender': this.matchGender,
+                'matchType': this.matchType,
+                'currencySelected': currencySelected,
+                'userLocationDesc': this.userLocationDesc,
+                'userLocationDetails': this.userLocationDetails,
+                'userLocation': this.userLocation,
+                'whenPlay': this.whenPlay,
+                'playersForMatch': this.playersForMatch,
+              };
 
-          if (!matchStreamController.isClosed)
-            matchStreamController.sink.add(
-              toStream,
-            );
-        },
-        value: match.isFreeMatch,
-        inactiveIcon: null,
+              if (!matchStreamController.isClosed)
+                matchStreamController.sink.add(
+                  toStream,
+                );
+            },
+            value: match.isFreeMatch,
+            inactiveIcon: null,
+          )
+        ],
       ),
     );
   }

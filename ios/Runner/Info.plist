@@ -60,11 +60,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Would you give access to your camera?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open.</string>
+	<string>This app needs access to your location for give you all the matches around your area. Could you give us access?</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Would you give access to your microphone?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Would you give access to your photo library?</string>
+	<string>This app needs access to your photo library for you been able to select your profile picture. Could you give us access?</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

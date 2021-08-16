@@ -606,7 +606,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               isScrollControlled: true,
               builder: (BuildContext context) {
                 return ShowMyCreatedMatches(
-                  user: this._user!,
+                  userToInvite: this._user!,
                 );
               },
             );

@@ -257,7 +257,7 @@ class UserRepository {
 
     if (body.containsKey('success') && body['success'] == true) {
       await localStorage.setString('user', json.encode(body['user']));
-      await localStorage.setString('userLocation', json.encode(body['user']['location']));
+      await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
     }
 
     return body;
@@ -299,10 +299,9 @@ class UserRepository {
     return userPositions;
   }
 
-  Future<Location> getUserLocation() async {
+  static Future<Location> getUserLocation() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     return Location.fromJson(jsonDecode(localStorage.getString('userLocation')!));
-
   }
 
   Future<dynamic> editUserPositions(List positionsIds) async {

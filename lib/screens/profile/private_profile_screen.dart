@@ -699,9 +699,10 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
         );
 
         if (wasSavedData == true) {
-          this._userLocation = await UserRepository().getUserLocation();
+          this._userLocation = await UserRepository.getUserLocation();
           SharedPreferences localStorage = await SharedPreferences.getInstance();
           await localStorage.setString('privateProfileScreen.userLocation', json.encode(this._userLocation!.toJson()));
+          await localStorage.setString('userLocation', json.encode(this._userLocation!.toJson()));
 
           var streamData = {
             'currentUser': this._currentUser,

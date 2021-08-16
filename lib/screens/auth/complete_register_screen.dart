@@ -40,13 +40,23 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
         onTap: () async {
           final currentPosition = await LocationRepository().determinePosition();
 
-          final Feature? result = await showSearch<Feature?>(
-            context: context,
-            delegate: SearchLocationMatch(
-                calledFromCreate: true,
-                myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
-            ),
-          );
+          Feature? result;
+          if (currentPosition!.containsKey('denied') && currentPosition['denied'] == true) {
+            result = await showSearch<Feature?>(
+              context: context,
+              delegate: SearchLocationMatch(
+                  calledFromCreate: true,
+              ),
+            );
+          } else {
+            result = await showSearch<Feature?>(
+              context: context,
+              delegate: SearchLocationMatch(
+                  calledFromCreate: true,
+                  myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
+              ),
+            );
+          }
 
           if (result != null) {
             final Feature place = result;
@@ -369,7 +379,8 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                               );
 
                               if (completeUserProfileResponse['success'] == true) {
-                                Navigator.pushReplacementNamed(context, 'intro');
+                                // TODO show intro sliders
+                                Navigator.pushReplacementNamed(context, 'matches');
                               } else {
                                 setState(() {
                                   this.isLoading = false;

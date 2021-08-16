@@ -12,9 +12,9 @@ import 'package:collection/collection.dart';
 
 // ignore: must_be_immutable
 class ShowMyCreatedMatches extends StatefulWidget {
-  User user;
+  User userToInvite;
 
-  ShowMyCreatedMatches({required this.user});
+  ShowMyCreatedMatches({required this.userToInvite});
 
   @override
   _ShowMyCreatedMatchesState createState() => _ShowMyCreatedMatchesState();
@@ -104,14 +104,19 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                           );
                         }
 
-                        return ListView.builder(
+                        return ListView.separated(
+                          itemCount: this.matches.length + 1,
+                          separatorBuilder: (BuildContext _, int index,) => buildSeparator(index, this.matches),
                           itemBuilder: (
-                            BuildContext context,
-                            int index,
-                          ) {
-                            return _buildMatchRow(this.matches[index]!);
+                              BuildContext context,
+                              int index,
+                              ) {
+                            if (index == 0) {
+                              return Container();
+                            } else {
+                              return _buildMatchRow(this.matches[index - 1]!);
+                            }
                           },
-                          itemCount: this.matches.length,
                         );
                       },
                     ),
@@ -145,27 +150,107 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
     );
   }
 
+  Widget buildSeparator(index, matches) {
+
+    if (index != matches.length + 1) {
+      Match match = matches[index];
+
+      bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
+      if (isMatchSameSex) {
+        DateTime today = DateTime.now();
+        bool itsPlayToday = today.day == match.whenPlay.day;
+        bool itsPlayTomorrow = today.day + 1 == match.whenPlay.day;
+        String gameDay = DateFormat('EEEE').format(match.whenPlay);
+
+        if (itsPlayToday) {
+          if (index != 0) {
+            Match previousMatch = matches[index - 1];
+            bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+            if (itsPlaySameDay) {
+              return Container();
+            } else {
+              return dayDivider(translations[localeName]!['general.today']!);
+            }
+          }
+          return dayDivider(translations[localeName]!['general.today']!);
+        } else if(itsPlayTomorrow) {
+          if (index != 0) {
+            Match previousMatch = matches[index - 1];
+            bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+            if (itsPlaySameDay) {
+              return Container();
+            } else {
+              return dayDivider(translations[localeName]!['general.tomorrow']!);
+            }
+          }
+          return dayDivider(translations[localeName]!['general.tomorrow']!);
+        } else {
+          if (index != 0) {
+            Match previousMatch = matches[index - 1];
+            bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+            if (itsPlaySameDay) {
+              return Container();
+            } else {
+              return dayDivider(
+                '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
+              );
+            }
+          }
+          return dayDivider(
+            '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
+          );
+        }
+      }
+      return Container();
+    } else {
+      return Container();
+    }
+  }
+
+  Widget dayDivider (String day) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 5.0, right: 10.0,),
+            child: Text(day, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Divider(
+                  color: Colors.black
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Widget _buildMatchRow(Match match) {
     bool isTheUserAlreadyIn;
     if (match.participants!.isNotEmpty) {
       isTheUserAlreadyIn = (match.participants
-              ?.firstWhereOrNull((user) => user.id == widget.user.id)) !=
+              ?.firstWhereOrNull((user) => user.id == widget.userToInvite.id)) !=
           null;
     } else {
       isTheUserAlreadyIn = false;
     }
+    bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
 
-    if (!isTheUserAlreadyIn) {
+    if (!isTheUserAlreadyIn && isMatchSameSex) {
       return GestureDetector(
         onTap: () async {
           await showAlertWithEvent(
             context,
             translations[localeName]!['general.areYouGoingToInvite']! +
-                ' ${widget.user.name} ' +
+                ' ${widget.userToInvite.name} ' +
                 translations[localeName]!['general.toYourMatch']!,
             () async {
               final response = await MatchRepository()
-                  .sendInvitationToUser(widget.user.id, match.id);
+                  .sendInvitationToUser(widget.userToInvite.id, match.id);
               if (response['success']) {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
@@ -217,7 +302,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                 child: Icon(
                   Icons.sports_soccer,
                   color: Colors.green[700],
-                  size: 40.0,
+                  size: 50.0,
                 ),
               ),
               title: Text(

@@ -121,6 +121,11 @@ class _MatchesState extends State<MatchesScreen> {
     if (calledFromInitState && localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
       Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      this._searchedGender = this._searchedGender.map((Genre genre) {
+        genre.checked = false;
+        return genre;
+      }).toList();
+      this._searchedGender.firstWhere((Genre genre) => genre.id == userGenre!.id).checked = true;
       if (userGenre != null) {
         genre = userGenre;
       }
@@ -211,6 +216,7 @@ class _MatchesState extends State<MatchesScreen> {
     }
 
     Widget _buildMatchesMenu() {
+
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -480,21 +486,76 @@ class _MatchesState extends State<MatchesScreen> {
                     .toList(),
                 true
               ),
-              child: ListView.builder(
+              child: ListView.separated(
+                itemCount: matches.length + 1,
+                separatorBuilder: (BuildContext _, int index,) => buildSeparator(index, matches),
                 itemBuilder: (
-                    BuildContext context,
+                    BuildContext _,
                     int index,
                     ) {
-                  return _buildMatchRow(
-                      matches[index]);
+                  if (index == 0) {
+                    return Container();
+                  } else {
+                    return _buildMatchRow(matches[index - 1]);
+                  }
                 },
-                itemCount: matches.length,
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Widget buildSeparator(index, matches) {
+    if (index != matches.length + 1) {
+      Match match = matches[index];
+      DateTime today = DateTime.now();
+      bool itsPlayToday = today.day == match.whenPlay.day;
+      bool itsPlayTomorrow = today.day + 1 == match.whenPlay.day;
+      String gameDay = DateFormat('EEEE').format(match.whenPlay);
+      if (itsPlayToday) {
+        if (index != 0) {
+          Match previousMatch = matches[index - 1];
+          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+          if (itsPlaySameDay) {
+            return Container();
+          } else {
+            return dayDivider(translations[localeName]!['general.today']!);
+          }
+        }
+        return dayDivider(translations[localeName]!['general.today']!);
+      } else if(itsPlayTomorrow) {
+        if (index != 0) {
+          Match previousMatch = matches[index - 1];
+          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+          if (itsPlaySameDay) {
+            return Container();
+          } else {
+            return dayDivider(translations[localeName]!['general.tomorrow']!);
+          }
+        }
+        return dayDivider(translations[localeName]!['general.tomorrow']!);
+      } else {
+        if (index != 0) {
+          Match previousMatch = matches[index - 1];
+          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
+          if (itsPlaySameDay) {
+            return Container();
+          } else {
+            return dayDivider(
+              '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
+            );
+          }
+        }
+        return dayDivider(
+          '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
+        );
+      }
+
+    } else {
+      return Container();
+    }
   }
 
   Future<void> getRefreshData(
@@ -505,9 +566,10 @@ class _MatchesState extends State<MatchesScreen> {
       ) async {
 
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (calledFromInitState && localStorage.containsKey('user')) {
+    if (localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
-      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      // Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => genre.checked == true);
       if (userGenre != null) {
         genre = userGenre;
       }
@@ -520,13 +582,11 @@ class _MatchesState extends State<MatchesScreen> {
     final responseMyMatches = await MatchRepository().getMyMatches();
 
     if (response['success']) {
-      // setState(() {
-        List<Match> myMatches = responseMyMatches['matches'];
-        this.areNotifications = myMatches
-            .firstWhereOrNull((match) => match.haveNotifications == true) !=
-            null;
-        this.matches = response['matches'];
-      // });
+      List<Match> myMatches = responseMyMatches['matches'];
+      this.areNotifications = myMatches
+          .firstWhereOrNull((match) => match.haveNotifications == true) !=
+          null;
+      this.matches = response['matches'];
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
           this.areNotifications,
@@ -538,7 +598,29 @@ class _MatchesState extends State<MatchesScreen> {
     }
   }
 
-  Widget _buildMatchRow(match) {
+  Widget dayDivider (String day) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 5.0, right: 10.0,),
+            child: Text(day, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Divider(
+                  color: Colors.black
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchRow(Match match) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -587,12 +669,13 @@ class _MatchesState extends State<MatchesScreen> {
               child: Icon(
                 Icons.sports_soccer,
                 color: Colors.green[700],
-                size: 40.0,
+                size: 50.0,
               ),
             ),
             title: Text(
-              DateFormat('dd/MM HH:mm').format(match.whenPlay),
+              DateFormat('HH:mm').format(match.whenPlay),
               style: TextStyle(
+                fontSize: 20.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),

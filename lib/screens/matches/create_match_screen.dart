@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:fulbito_app/models/currency.dart';
 import 'package:fulbito_app/models/genre.dart';
+import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/type.dart';
 import 'package:fulbito_app/repositories/location_repository.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
+import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
@@ -178,10 +180,17 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
     return GestureDetector(
       onTap: () async {
         final currentPosition = await LocationRepository().determinePosition();
-        final myLatLong = {
-          "latitude": currentPosition.latitude,
-          "longitude": currentPosition.longitude
+        Location userLocation = await UserRepository.getUserLocation();
+        var myLatLong = {
+          "latitude": userLocation.lat,
+          "longitude": userLocation.lng
         };
+        if (!currentPosition!.containsKey('denied')) {
+          myLatLong = {
+            "latitude": currentPosition.latitude,
+            "longitude": currentPosition.longitude
+          };
+        }
 
         Navigator.pushReplacement(
           context,

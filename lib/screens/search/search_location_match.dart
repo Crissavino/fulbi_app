@@ -10,9 +10,9 @@ class SearchLocationMatch extends SearchDelegate<Feature?> {
   final String searchFieldLabel;
   bool calledFromCreate;
   final MapBoxService _mapBoxService;
-  final LatLng myCurrentLocation;
+  final LatLng? myCurrentLocation;
 
-  SearchLocationMatch({required this.calledFromCreate, required this.myCurrentLocation})
+  SearchLocationMatch({required this.calledFromCreate, this.myCurrentLocation})
       : this.searchFieldLabel = translations[localeName!]!['search']! + '...',
         this._mapBoxService = new MapBoxService();
 

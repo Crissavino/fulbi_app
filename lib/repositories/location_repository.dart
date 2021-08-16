@@ -4,7 +4,7 @@ class LocationRepository {
   // final String _accessToken = 'pk.eyJ1IjoiY3Jpc3NhdmlubyIsImEiOiJja2R4OXk4YmQyemUwMnl0YXBtb2psc2tiIn0.P857CLf3OM5PRBPL7IPHbw';
   // String _searchLatLongUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
-  Future<Position> determinePosition() async {
+  Future<dynamic> determinePosition({bool calledFromCreateMatch = false}) async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -15,16 +15,18 @@ class LocationRepository {
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permantly denied, we cannot request permissions.');
+      return {
+        'denied': true
+      };
     }
 
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse &&
           permission != LocationPermission.always) {
-        return Future.error(
-            'Location permissions are denied (actual value: $permission).');
+        return {
+          'denied': true
+        };
       }
     }
 

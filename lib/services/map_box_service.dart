@@ -22,8 +22,11 @@ class MapBoxService {
   final StreamController<MapBoxSearchResponse> _suggestionsStreamController = new StreamController<MapBoxSearchResponse>.broadcast();
   Stream<MapBoxSearchResponse> get suggestionsStream => this._suggestionsStreamController.stream;
 
-  Future<MapBoxSearchResponse> searchPlaceByQuery(String search, LatLng proximity) async {
-    final String apiUrl = '$_baseUrl/mapbox.places/$search.json?access_token=$apiToken&cachebuster=1626765438887&autocomplete=true&proximity=${proximity.longitude},${proximity.latitude}';
+  Future<MapBoxSearchResponse> searchPlaceByQuery(String search, LatLng? proximity) async {
+    String apiUrl = '$_baseUrl/mapbox.places/$search.json?access_token=$apiToken&cachebuster=1626765438887&autocomplete=true';
+    if (proximity != null) {
+      apiUrl = '$_baseUrl/mapbox.places/$search.json?access_token=$apiToken&cachebuster=1626765438887&autocomplete=true&proximity=${proximity.longitude},${proximity.latitude}';
+    }
 
     Uri fullUrl = Uri.parse(apiUrl);
     final res = await http.get(fullUrl);
@@ -38,23 +41,29 @@ class MapBoxService {
       return mapBoxSearchResponse;
     } else {
       return MapBoxSearchResponse(
-        attribution: '',
-        features: [],
-        query: [],
-        type: ''
+          attribution: '',
+          features: [],
+          query: [],
+          type: ''
       );
     }
 
-
   }
 
-  void getSuggestionsByQuery( String search, LatLng proximity ) {
+  void getSuggestionsByQuery( String search, LatLng? proximity ) {
 
     debouncer.value = '';
-    debouncer.onValue = ( value ) async {
-      final results = await this.searchPlaceByQuery(value, proximity);
-      this._suggestionsStreamController.add(results);
-    };
+    if (proximity == null) {
+      debouncer.onValue = ( value ) async {
+        final results = await this.searchPlaceByQuery(value, proximity);
+        this._suggestionsStreamController.add(results);
+      };
+    } else {
+      debouncer.onValue = ( value ) async {
+        final results = await this.searchPlaceByQuery(value, proximity);
+        this._suggestionsStreamController.add(results);
+      };
+    }
 
     final timer = Timer.periodic(Duration(milliseconds: 200), (_) {
       debouncer.value = search;

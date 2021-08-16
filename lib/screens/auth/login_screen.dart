@@ -15,6 +15,7 @@ import 'package:fulbito_app/services/google_signin_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -304,7 +305,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               final res = await AppleSignInService.signIn();
 
-              if (res!.containsKey('success') && res['success'] == true) {
+              if (res is SignInWithAppleAuthorizationException) {
+                BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
+              } else if (res!.containsKey('success') && res['success'] == true) {
                 User user = res['user'];
                 if (user.isFullySet) {
                   Navigator.pushReplacementNamed(context, 'matches');
@@ -312,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
                 BlocProvider.of<LoginBloc>(context).add(LoggedInEvent());
-              } else if (res!.containsKey('canceled') && res['canceled'] == true){
+              } else if ((res!.containsKey('canceled') && res['canceled'] == true) || (res!.containsKey('code') && res['code'] == 'AuthorizationErrorCode.unknown')){
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
               } else {
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());

@@ -372,10 +372,19 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   Container _buildMatchGenre(Genre genre) {
+    String genreText = '';
+    if (genre.id == 1) {
+      genreText = translations[localeName]!['general.for']! + ' ' + translations[localeName]!['general.genres.males']!.toLowerCase();
+    } else if(genre.id == 2) {
+      genreText = translations[localeName]!['general.for']! + ' ' + translations[localeName]!['general.genres.females']!.toLowerCase();
+    } else {
+      genreText = translations[localeName]!['general.is']! + ' ' + translations[localeName]!['general.genres.mix']!.toLowerCase();
+    }
+
     return Container(
       padding: EdgeInsets.only(top: 40.0),
       child: Text(
-        translations[localeName]!['general.for']! + ' ' + genre.name!,
+        genreText,
         style: TextStyle(),
         overflow: TextOverflow.clip,
       ),

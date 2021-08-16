@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +58,7 @@ class _MapState extends State<Map> {
 
     GoogleMap _buildGoogleMap() {
       return GoogleMap(
-        initialCameraPosition: CameraPosition(target: this.target, zoom: 20.0),
+        initialCameraPosition: CameraPosition(target: this.target, zoom: 18.0),
         myLocationEnabled: true,
         zoomControlsEnabled: false,
         zoomGesturesEnabled: true,
@@ -127,14 +126,14 @@ class _MapState extends State<Map> {
               ]),
         ),
         onTap: () async {
-          final myLatLong = await LocationRepository().determinePosition();
+          // final myLatLong = await LocationRepository().determinePosition();
 
           final Feature? result = await showSearch<Feature?>(
             context: context,
             delegate: SearchLocationMatch(
                 calledFromCreate: true,
                 myCurrentLocation:
-                    LatLng(myLatLong.latitude, myLatLong.longitude)),
+                    LatLng(widget.currentPosition['latitude'], widget.currentPosition['longitude'])),
           );
 
           if (result != null) {
@@ -277,8 +276,18 @@ class _MapState extends State<Map> {
 
     void _currentLocation() async {
       final currentPosition = await LocationRepository().determinePosition();
+      var myLatLong = {
+        "latitude": widget.currentPosition['latitude'],
+        "longitude": widget.currentPosition['longitude']
+      };
+      if (!currentPosition!.containsKey('denied')) {
+        myLatLong = {
+          "latitude": currentPosition.latitude,
+          "longitude": currentPosition.longitude
+        };
+      }
 
-      this.centerPosition = LatLng(currentPosition.latitude, currentPosition.longitude);
+      this.centerPosition = LatLng(myLatLong['latitude'], myLatLong['longitude']);
 
       moveCamera(this.centerPosition);
     }

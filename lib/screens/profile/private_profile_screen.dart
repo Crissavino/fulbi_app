@@ -12,6 +12,7 @@ import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/your_location.dart';
 import 'package:fulbito_app/widgets/your_positions.dart';
@@ -39,54 +40,6 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   bool isLoading = false;
   bool loadingProfileImage = false;
   StreamController userStreamController = StreamController.broadcast();
-
-  Future updateProfileImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        this.loadingProfileImage = true;
-      });
-      _image = File(pickedFile.path);
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      String appDocPath = appDocDir.path;
-
-      final fileName = basename(_image!.path);
-      final File localImage = await _image!.copy('$appDocPath/$fileName');
-
-      final response = await UserRepository().updateProfilePicture(
-          localImage
-      );
-
-      if (response['success']) {
-        User user = response['user'];
-        this.profileImagePath = user.profileImage;
-        SharedPreferences localStorage = await SharedPreferences.getInstance();
-        await localStorage.setString('privateProfileScreen.profileImagePath', json.encode(this.profileImagePath.toString()));
-
-        var streamData = {
-          'currentUser': this._currentUser,
-          'userPositions': this._userPositions,
-          'userLocation': this._userLocation,
-          'profileImagePath': this.profileImagePath
-        };
-        if (!userStreamController.isClosed)
-          userStreamController.sink.add(
-            streamData,
-          );
-        setState(() {
-          this.loadingProfileImage = false;
-        });
-
-      }
-    } else {
-      //User canceled the picker. You need do something here, or just add return
-      setState(() {
-        this.loadingProfileImage = false;
-      });
-      return;
-    }
-  }
 
   @override
   void initState() {
@@ -183,6 +136,62 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final _height = MediaQuery.of(context).size.height;
+
+    Future updateProfileImage() async {
+
+      try {
+        final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+        if (pickedFile != null) {
+          setState(() {
+            this.loadingProfileImage = true;
+          });
+          _image = File(pickedFile.path);
+          Directory appDocDir = await getApplicationDocumentsDirectory();
+          String appDocPath = appDocDir.path;
+
+          final fileName = basename(_image!.path);
+          final File localImage = await _image!.copy('$appDocPath/$fileName');
+
+          final response = await UserRepository().updateProfilePicture(
+              localImage
+          );
+
+          if (response['success']) {
+            User user = response['user'];
+            this.profileImagePath = user.profileImage;
+            SharedPreferences localStorage = await SharedPreferences.getInstance();
+            await localStorage.setString('privateProfileScreen.profileImagePath', json.encode(this.profileImagePath.toString()));
+
+            var streamData = {
+              'currentUser': this._currentUser,
+              'userPositions': this._userPositions,
+              'userLocation': this._userLocation,
+              'profileImagePath': this.profileImagePath
+            };
+            if (!userStreamController.isClosed)
+              userStreamController.sink.add(
+                streamData,
+              );
+            setState(() {
+              this.loadingProfileImage = false;
+            });
+
+          }
+        } else {
+          //User canceled the picker. You need do something here, or just add return
+          setState(() {
+            this.loadingProfileImage = false;
+          });
+          return;
+        }
+      } catch (e) {
+        if (e is PlatformException && e.code == 'photo_access_denied') {
+          showAlert(context, translations[localeName]!['general.noPermissions']!, 'If you want to select your profile picture please allow the access on your Settings');
+        }
+        return;
+      }
+    }
 
     return Stack(
       children: [
@@ -354,22 +363,25 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                 top: 15.0,
                                 left: 0.0,
                                 right: 0.0,
-                                child: Center(
-                                  child: profileImagePath == ''
-                                      ? CircleAvatar(
-                                    backgroundColor: Colors.white,
-                                    radius: 60,
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.green[700],
-                                      size: 100.0,
+                                child: GestureDetector(
+                                  onTap: updateProfileImage,
+                                  child: Center(
+                                    child: profileImagePath == ''
+                                        ? CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      radius: 60,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.green[700],
+                                        size: 100.0,
+                                      ),
+                                    )
+                                        : CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      radius: 60,
+                                      child: this.loadingProfileImage ? circularLoading : null,
+                                      backgroundImage: this.loadingProfileImage ? null : NetworkImage(profileImagePath!),
                                     ),
-                                  )
-                                      : CircleAvatar(
-                                    backgroundColor: Colors.white,
-                                    radius: 60,
-                                    child: this.loadingProfileImage ? circularLoading : null,
-                                    backgroundImage: this.loadingProfileImage ? null : NetworkImage(profileImagePath!),
                                   ),
                                 ),
                               ),

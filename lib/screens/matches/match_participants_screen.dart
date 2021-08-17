@@ -40,6 +40,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
   bool isLoading = false;
+  bool isFull = false;
 
   Future getFutureData() async {
     final response = await MatchRepository().getMatch(widget.match.id);
@@ -47,6 +48,16 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
     if (response['success']) {
       List<User?> participants = response['match'].participants!;
       User myUser = response['myUser'];
+
+      Match match = response['match'];
+      int playersEnrolled = response['playersEnrolled'];
+      int spotsAvailable = match.numPlayers - playersEnrolled;
+      if (spotsAvailable == 0) {
+        setState(() {
+          this.isFull = true;
+        });
+      }
+
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
           response['match'].haveNotifications,
@@ -176,7 +187,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   child: buildMatchStreamBuilder(),
                 ),
               ),
-              floatingActionButton: this.imInscribed
+              floatingActionButton: (this.imInscribed || this.isFull)
                   ? null
                   : FloatingActionButton(
                 child: Icon(
@@ -241,6 +252,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
+        if (this.isFull) return;
         if (!this.imInscribed) {
           this.isLoading = false;
           return showAlertWithEvent(

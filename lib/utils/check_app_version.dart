@@ -108,8 +108,9 @@ class _CheckAppVersionState extends State<CheckAppVersion> {
                                     child: Center(
                                       child: TextButton(
                                         onPressed: () => LaunchReview.launch(
+                                          writeReview: false,
                                           androidAppId: "com.crissavino.fulbito.fulbito_app",
-                                          iOSAppId: "585027354",
+                                          iOSAppId: "1576482106",
                                         ),
                                         child: Text(
                                           translations[localeName]!['general.update']!.toUpperCase(),

@@ -48,6 +48,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   StreamController matchStreamController = StreamController.broadcast();
   bool isLoading = false;
   bool isFreeMatch = false;
+  bool isFull = false;
 
   Future<void> _createDynamicLinkToNewPlayer(bool short) async {
     setState(() {
@@ -126,6 +127,15 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
           response['match'].haveNotifications
       );
+
+      Match match = response['match'];
+      int playersEnrolled = response['playersEnrolled'];
+      int spotsAvailable = match.numPlayers - playersEnrolled;
+      if (spotsAvailable == 0) {
+        setState(() {
+          this.isFull = true;
+        });
+      }
 
       if (participants.isNotEmpty) {
         User? me = participants.firstWhereOrNull(
@@ -296,7 +306,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   child: buildMatchStreamBuilder(),
                 ),
               ),
-              floatingActionButton: this.imInscribed
+              floatingActionButton: (this.imInscribed || this.isFull)
                   ? null
                   : FloatingActionButton(
                 child: Icon(
@@ -488,6 +498,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         break;
       case 2:
         User currentUser = await UserRepository.getCurrentUser();
+        if (this.isFull) return;
         if (!this.imInscribed) {
           this.isLoading = false;
           return showAlertWithEvent(

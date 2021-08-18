@@ -465,9 +465,9 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     );
   }
 
-  Future<dynamic> _selectDate(BuildContext context) async {
+  Future<dynamic> _selectDate(BuildContext context, DateTime whenPlay) async {
 
-    final DateTime today = DateTime.now();
+    final DateTime today = whenPlay;
 
     final DateTime? picked = await showDatePicker(
       locale: Locale(localeName!),
@@ -483,11 +483,11 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     }
   }
 
-  Future<dynamic> _selectTime(BuildContext context) async {
+  Future<dynamic> _selectTime(BuildContext context, DateTime whenPlay) async {
 
     TimeOfDay timeNow = TimeOfDay(
-      hour: DateTime.now().hour,
-      minute: DateTime.now().minute,
+      hour: whenPlay.hour,
+      minute: whenPlay.minute,
     );
 
     final TimeOfDay? picked = await showTimePicker(
@@ -501,12 +501,12 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     }
   }
 
-  Widget _buildWhenPlay(context, match, whenPlay) {
+  Widget _buildWhenPlay(context, Match match, whenPlay) {
     final _width = MediaQuery.of(context).size.width;
 
     return GestureDetector(
       onTap: () {
-        _selectDate(context).then((value) {
+        _selectDate(context, match.whenPlay).then((value) {
           if (value != false) {
             DateTime selectedDate = value;
             final day = selectedDate.day.toString().length == 1
@@ -515,7 +515,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
             final month = selectedDate.month.toString().length == 1
                 ? '0${selectedDate.month}'
                 : selectedDate.month;
-            _selectTime(context).then((value) {
+            _selectTime(context, match.whenPlay).then((value) {
               if (value != false) {
                 TimeOfDay selectedTime = value;
                 final hour = selectedTime.hour.toString().length == 1

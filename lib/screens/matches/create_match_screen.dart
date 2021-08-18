@@ -20,6 +20,7 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
 import 'package:fulbito_app/widgets/map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
@@ -185,7 +186,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
           "latitude": userLocation.lat,
           "longitude": userLocation.lng
         };
-        if (!currentPosition!.containsKey('denied')) {
+        if (currentPosition is Position) {
           myLatLong = {
             "latitude": currentPosition.latitude,
             "longitude": currentPosition.longitude

@@ -91,7 +91,9 @@ class UserRepository {
     final data = {
       'email': email,
       'password': password,
-      'uuid': await getDeviceUuid()
+      'uuid': await getDeviceUuid(),
+      'language': Platform.localeName.split('_')[0],
+      'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
     final res = await api.authData(data, '/login');
@@ -132,7 +134,9 @@ class UserRepository {
       ) async {
     final data = {
       'id_token': token,
-      'uuid': await getDeviceUuid()
+      'uuid': await getDeviceUuid(),
+      'language': Platform.localeName.split('_')[0],
+      'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
     final res = await api.authData(data, '/login-with-google');
@@ -168,7 +172,9 @@ class UserRepository {
       'last_name': lastName,
       'use_bundle_id': useBundleId,
       'state': state,
-      'uuid': await getDeviceUuid()
+      'uuid': await getDeviceUuid(),
+      'language': Platform.localeName.split('_')[0],
+      'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
     final res = await api.authData(data, '/login-with-apple');
@@ -202,7 +208,9 @@ class UserRepository {
       'password': password,
       'password_confirmation': confirmPassword,
       'name': fullName,
-      'uuid': await getDeviceUuid()
+      'uuid': await getDeviceUuid(),
+      'language': Platform.localeName.split('_')[0],
+      'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
     final res = await api.authData(data, '/register');

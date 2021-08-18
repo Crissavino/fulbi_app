@@ -10,6 +10,7 @@ import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/services/map_box_service.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/manual_location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:fulbito_app/models/match.dart';
 
@@ -280,7 +281,7 @@ class _MapState extends State<Map> {
         "latitude": widget.currentPosition['latitude'],
         "longitude": widget.currentPosition['longitude']
       };
-      if (!currentPosition!.containsKey('denied')) {
+      if (currentPosition is Position) {
         myLatLong = {
           "latitude": currentPosition.latitude,
           "longitude": currentPosition.longitude

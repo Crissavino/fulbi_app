@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -14,32 +14,34 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/routes.dart';
-import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
-import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/check_app_version.dart';
-import 'package:fulbito_app/utils/check_auth.dart';
 import 'package:fulbito_app/utils/custom_error.dart';
 import 'package:fulbito_app/utils/custom_snack_bar.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'screens/matches/matches_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await PushNotificationService.initializeApp();
-  runZonedGuarded<Future<void>>(() async {
-    // The following lines are the same as previously explained in "Handling uncaught errors"
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+  await SentryFlutter.init(
+      (options) {
+        options.dsn = 'https://f511d436e9b54b04a6b7c96dc476ff85@o965176.ingest.sentry.io/5916005';
+      },
+    appRunner: () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await PushNotificationService.initializeApp();
+      runZonedGuarded<Future<void>>(() async {
+        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
-    runApp(MyApp());
-  }, FirebaseCrashlytics.instance.recordError);
+        runApp(MyApp());
+      }, FirebaseCrashlytics.instance.recordError);
+    }
+  );
 }
 
 class MyApp extends StatefulWidget {

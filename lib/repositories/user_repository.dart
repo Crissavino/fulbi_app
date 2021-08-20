@@ -8,6 +8,7 @@ import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/utils/api.dart';
 import 'package:fulbito_app/utils/environment.dart';
+import 'package:fulbito_app/utils/translations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -92,7 +93,7 @@ class UserRepository {
       'email': email,
       'password': password,
       'uuid': await getDeviceUuid(),
-      'language': Platform.localeName.split('_')[0],
+      'language': localeName,
       'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
@@ -135,7 +136,7 @@ class UserRepository {
     final data = {
       'id_token': token,
       'uuid': await getDeviceUuid(),
-      'language': Platform.localeName.split('_')[0],
+      'language': localeName,
       'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
@@ -173,7 +174,7 @@ class UserRepository {
       'use_bundle_id': useBundleId,
       'state': state,
       'uuid': await getDeviceUuid(),
-      'language': Platform.localeName.split('_')[0],
+      'language': localeName,
       'platform': Platform.isIOS ? 'ios' : 'android'
     };
 
@@ -209,7 +210,7 @@ class UserRepository {
       'password_confirmation': confirmPassword,
       'name': fullName,
       'uuid': await getDeviceUuid(),
-      'language': Platform.localeName.split('_')[0],
+      'language': localeName,
       'platform': Platform.isIOS ? 'ios' : 'android'
     };
 

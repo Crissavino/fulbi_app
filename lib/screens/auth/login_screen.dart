@@ -34,7 +34,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // bool _rememberMe = false;
   bool cantSeePassword = true;
-  String? localeName = Platform.localeName.split('_')[0];
 
   Text _buildPageTitle() {
     return Text(

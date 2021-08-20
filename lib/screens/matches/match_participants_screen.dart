@@ -35,7 +35,6 @@ class MatchParticipantsScreen extends StatefulWidget {
 }
 
 class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
-  String localeName = Platform.localeName.split('_')[0];
   bool imInscribed = true;
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();

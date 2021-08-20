@@ -31,7 +31,6 @@ class PlayersFilter extends StatefulWidget {
 
 class _PlayersFilterState extends State<PlayersFilter> {
   // text field state
-  String localeName = Platform.localeName.split('_')[0];
   bool isLoading = false;
 
   @override

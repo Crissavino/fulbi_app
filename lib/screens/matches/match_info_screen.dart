@@ -40,7 +40,6 @@ class MatchInfoScreen extends StatefulWidget {
 }
 
 class _MatchInfoScreenState extends State<MatchInfoScreen> {
-  String localeName = Platform.localeName.split('_')[0];
   bool _isCreatingLink = false;
   String? _linkMessage;
   bool imInscribed = true;
@@ -453,7 +452,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         Container(
           child: GestureDetector(
             onTap: () async {
-              await MapsUtil.openMap(location.lat, location.lng);
+              await MapsUtil.openMapApp(location.lat, location.lng);
             },
             child: Column(
               children: [

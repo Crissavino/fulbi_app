@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
@@ -17,7 +15,6 @@ class MatchTypeFilter extends StatefulWidget {
 }
 
 class _MatchTypeFilterState extends State<MatchTypeFilter> {
-  String localeName = Platform.localeName.split('_')[0];
 
   @override
   Widget build(BuildContext context) {

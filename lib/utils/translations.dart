@@ -1,6 +1,9 @@
 import 'dart:io';
 
-String? localeName = Platform.localeName.split('_')[0];
+String? localeName = (Platform.localeName.split('_')[0].contains('en') ||
+        Platform.localeName.split('_')[0].contains('es'))
+    ? Platform.localeName.split('_')[0]
+    : 'en';
 
 const Map<String?, Map<String?, String?>> translations = {
   'en': {
@@ -37,7 +40,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'enterEmail': 'Enter your email',
     'password': 'Password',
     'enterPass': 'Enter your password',
-    'forgotPass': 'Forgor password?',
+    'forgotPass': 'Forgot password?',
     'rememberMe': 'Remember me',
     'signInWith': 'Sign in with',
     'dontAccount': 'Don\'t have an account? ',

@@ -710,9 +710,10 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                         final response =
                             await MatchRepository().leaveMatch(match.id);
                         if (response['success']) {
-                          setState(() {
-                            this.matches = response['matches'];
-                          });
+                          this.matches = response['matches'];
+
+                          if (!matchesStreamController.isClosed)
+                            matchesStreamController.sink.add(this.matches);
                           Navigator.pop(context);
                         } else {
                           Navigator.pop(context);
@@ -733,9 +734,10 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                         final response =
                             await MatchRepository().deleteMatch(match.id);
                         if (response['success']) {
-                          setState(() {
-                            this.matches = response['matches'];
-                          });
+                          this.matches = response['matches'];
+
+                          if (!matchesStreamController.isClosed)
+                            matchesStreamController.sink.add(this.matches);
                           Navigator.pop(context);
                         } else {
                           Navigator.pop(context);
@@ -771,7 +773,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
 
   Positioned _buildNotification() {
     return Positioned(
-      top: 15.0,
+      top: 0.0,
       right: 0.0,
       child: Container(
         width: 25.0,

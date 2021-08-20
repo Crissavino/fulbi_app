@@ -57,6 +57,7 @@ dependencies:
   flutter_app_badger:
   package_info_plus:
   launch_review:
+  sentry_flutter:
 
 dev_dependencies:
   flutter_test:

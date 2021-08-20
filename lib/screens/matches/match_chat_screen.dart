@@ -36,7 +36,6 @@ class MatchChatScreen extends StatefulWidget {
 
 class _MatchChatScreenState extends State<MatchChatScreen>
     with TickerProviderStateMixin {
-  String localeName = Platform.localeName.split('_')[0];
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   String textMessage = '';

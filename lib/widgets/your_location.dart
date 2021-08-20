@@ -8,6 +8,7 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:collection/collection.dart';
 
@@ -42,13 +43,23 @@ class _YourLocationState extends State<YourLocation> {
         onTap: () async {
           final currentPosition = await LocationRepository().determinePosition();
 
-          final Feature? result = await showSearch<Feature?>(
-            context: context,
-            delegate: SearchLocationMatch(
+          Feature? result;
+          if (currentPosition is Position) {
+            result = await showSearch<Feature?>(
+              context: context,
+              delegate: SearchLocationMatch(
                 calledFromCreate: true,
-                myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
-            ),
-          );
+                myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude),
+              ),
+            );
+          } else {
+            result = await showSearch<Feature?>(
+              context: context,
+              delegate: SearchLocationMatch(
+                calledFromCreate: true,
+              ),
+            );
+          }
 
           if (result != null) {
 

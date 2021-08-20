@@ -9,6 +9,7 @@ import 'package:fulbito_app/screens/search/search_location_match.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -23,7 +24,6 @@ class CompleteRegisterScreen extends StatefulWidget {
 
 class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  String localeName = Platform.localeName.split('_')[0];
   bool _male = false;
   bool _female = false;
   String userLocationDesc = '';
@@ -41,19 +41,19 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
           final currentPosition = await LocationRepository().determinePosition();
 
           Feature? result;
-          if (currentPosition!.containsKey('denied') && currentPosition['denied'] == true) {
+          if (currentPosition is Position) {
             result = await showSearch<Feature?>(
               context: context,
               delegate: SearchLocationMatch(
                   calledFromCreate: true,
+                  myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude),
               ),
             );
           } else {
             result = await showSearch<Feature?>(
               context: context,
               delegate: SearchLocationMatch(
-                  calledFromCreate: true,
-                  myCurrentLocation: LatLng(currentPosition.latitude, currentPosition.longitude)
+                calledFromCreate: true,
               ),
             );
           }

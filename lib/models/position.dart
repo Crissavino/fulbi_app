@@ -15,10 +15,10 @@ class Position {
 
   List<Position> get positions {
     return [
-      Position(id: 1, name: translations[Platform.localeName.split('_')[0]]!['general.positions.gk']!, checked: true),
-      Position(id: 2, name: translations[Platform.localeName.split('_')[0]]!['general.positions.def']!, checked: true),
-      Position(id: 3, name: translations[Platform.localeName.split('_')[0]]!['general.positions.mid']!, checked: true),
-      Position(id: 4, name: translations[Platform.localeName.split('_')[0]]!['general.positions.for']!, checked: true),
+      Position(id: 1, name: translations[localeName]!['general.positions.gk']!, checked: true),
+      Position(id: 2, name: translations[localeName]!['general.positions.def']!, checked: true),
+      Position(id: 3, name: translations[localeName]!['general.positions.mid']!, checked: true),
+      Position(id: 4, name: translations[localeName]!['general.positions.for']!, checked: true),
     ];
   }
 }

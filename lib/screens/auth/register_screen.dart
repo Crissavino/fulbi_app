@@ -31,7 +31,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // bool _rememberMe = false;
   bool cantSeePassword = true;
   bool cantSeeConfirmPassword = true;
-  String? localeName = Platform.localeName.split('_')[0];
 
   Text _buildPageTitle() {
     return Text(

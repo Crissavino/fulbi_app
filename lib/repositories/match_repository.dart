@@ -35,7 +35,6 @@ class MatchRepository {
 
     if (body.containsKey('success') && body['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      final localeName = Platform.localeName.split('_')[0];
 
       final response = {
         'success': true,

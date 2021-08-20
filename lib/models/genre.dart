@@ -17,20 +17,17 @@ class Genre {
     return [
       Genre(
         id: 1,
-        name: translations[Platform.localeName.split('_')[0]]![
-            'general.genres.males']!,
+        name: translations[localeName]!['general.genres.males']!,
         checked: true,
       ),
       Genre(
         id: 2,
-        name: translations[Platform.localeName.split('_')[0]]![
-            'general.genres.females']!,
+        name: translations[localeName]!['general.genres.females']!,
         checked: false,
       ),
       Genre(
         id: 3,
-        name: translations[Platform.localeName.split('_')[0]]![
-            'general.genres.mix']!,
+        name: translations[localeName]!['general.genres.mix']!,
         checked: false,
       ),
     ];

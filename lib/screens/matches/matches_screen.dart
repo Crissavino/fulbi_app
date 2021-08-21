@@ -84,19 +84,29 @@ class _MatchesState extends State<MatchesScreen> {
         await saveVariablesInLocalStorage();
       }
       if (notificationData.containsKey('silentUpdateMatch')) {
-        final Match? editedMatch = notificationData['match'];
-        final Match? editedMatchToReplace = this.matches.firstWhere((match) => match!.id == editedMatch!.id);
-        var index = this.matches.indexOf(editedMatchToReplace);
-        this.matches.replaceRange(index, index + 1, [editedMatch]);
-        if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
         if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
-        await saveVariablesInLocalStorage();
+        final Match? editedMatch = notificationData['match'];
+        final Match? editedMatchToReplace = this.matches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
+        if (editedMatchToReplace != null) {
+          var index = this.matches.indexOf(editedMatchToReplace);
+          this.matches.replaceRange(index, index + 1, [editedMatch]);
+          if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+          await saveVariablesInLocalStorage();
+        }
       }
       if (notificationData.containsKey('silentCreatedMatch')) {
         final Match? editedMatch = notificationData['match'];
         this.matches.add(editedMatch);
         this.matches.sort((a,b) => a!.whenPlay.compareTo(b!.whenPlay));
         if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+        await saveVariablesInLocalStorage();
+      }
+
+      if (notificationData.containsKey('silentUpdateMatches')) {
+        final int? matchIdToDelete = int.tryParse(notificationData['matchIdToDelete']);
+        this.matches.removeWhere((match) => match!.id == matchIdToDelete!);
+        if (!matchesStreamController.isClosed)
+          matchesStreamController.sink.add(this.matches);
         await saveVariablesInLocalStorage();
       }
     });
@@ -259,7 +269,7 @@ class _MatchesState extends State<MatchesScreen> {
               iconSize: 30.0,
               color: Colors.white,
               onPressed: () async {
-                List<Match?> matches = await showModalBottomSheet(
+                List<Match?>? matches = await showModalBottomSheet(
                   backgroundColor: Colors.transparent,
                   context: context,
                   enableDrag: true,

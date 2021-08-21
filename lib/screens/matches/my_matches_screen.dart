@@ -47,17 +47,20 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           notificationData.containsKey('silentUpdateMatch')) {
         final Match? editedMatch = notificationData['match'];
         final Match? editedMatchToReplace =
-        this.matches.firstWhere((match) => match!.id == editedMatch!.id);
-        var index = this.matches.indexOf(editedMatchToReplace);
-        this.matches.replaceRange(index, index + 1, [editedMatch]);
-        if (!matchesStreamController.isClosed)
-          matchesStreamController.sink.add(this.matches);
+        this.matches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
+        if (editedMatchToReplace != null) {
+          var index = this.matches.indexOf(editedMatchToReplace);
+          this.matches.replaceRange(index, index + 1, [editedMatch]);
+          if (!matchesStreamController.isClosed)
+            matchesStreamController.sink.add(this.matches);
 
-        SharedPreferences localStorage = await SharedPreferences.getInstance();
-        var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-        await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+          SharedPreferences localStorage = await SharedPreferences.getInstance();
+          var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+          await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+        }
       } else if (notificationData.containsKey('silentUpdateMyMatches')) {
-        this.matches = notificationData['matches'];
+        final int? matchIdToDelete = int.tryParse(notificationData['matchIdToDelete']);
+        this.matches.removeWhere((match) => match!.id == matchIdToDelete!);
         if (!matchesStreamController.isClosed)
           matchesStreamController.sink.add(this.matches);
 

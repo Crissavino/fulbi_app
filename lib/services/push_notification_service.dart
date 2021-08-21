@@ -4,8 +4,13 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/message.dart';
+import 'package:fulbito_app/models/type.dart';
+import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
+import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:collection/collection.dart';
 
 // B2:AA:58:CA:75:9C:1C:D8:76:C8:61:15:34:FC:9E:8B:48:FE:A1:1C
 // P8 - Key ID:QDLXV987Q6
@@ -282,6 +287,19 @@ class PushNotificationService {
         });
       }
     }
+
+    if (message.data['notification_type'] == 'silence_deleted_match') {
+      _messageStreamController.sink.add({
+        'silentUpdateMyMatches': true,
+        'matchIdToDelete': message.data['match_id'],
+      });
+
+      _messageStreamController.sink.add({
+        'silentUpdateMatches': true,
+        'matchIdToDelete': message.data['match_id'],
+      });
+    }
+
   }
 
   static Future initializeApp() async {

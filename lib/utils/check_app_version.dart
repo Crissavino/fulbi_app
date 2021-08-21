@@ -52,6 +52,12 @@ class _CheckAppVersionState extends State<CheckAppVersion> {
           int versionMajor = snapshot.data['versionMajor'];
           int versionMinor = snapshot.data['versionMinor'];
           int versionPatch = snapshot.data['versionPatch'];
+          bool checkAppVersion = snapshot.data['checkVersion'];
+
+          if (!checkAppVersion) {
+            return CheckAuth();
+          }
+
           if (this.versionMajor == versionMajor &&
               this.versionMinor == versionMinor &&
               this.versionPatch >= versionPatch) {

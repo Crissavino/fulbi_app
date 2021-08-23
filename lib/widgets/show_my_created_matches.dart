@@ -154,6 +154,18 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
 
     if (index != matches.length + 1) {
       Match match = matches[index];
+      bool isTheUserAlreadyIn;
+      if (match.participants!.isNotEmpty) {
+        isTheUserAlreadyIn = (match.participants
+            ?.firstWhereOrNull((user) => user.id == widget.userToInvite.id)) !=
+            null;
+      } else {
+        isTheUserAlreadyIn = false;
+      }
+
+      if (isTheUserAlreadyIn) {
+        return Container();
+      }
 
       bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
       if (isMatchSameSex) {

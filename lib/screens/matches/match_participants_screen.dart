@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:collection/collection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class MatchParticipantsScreen extends StatefulWidget {
@@ -41,6 +43,19 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   bool isLoading = false;
   bool isFull = false;
 
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('matchParticipants.match')) {
+      var thisMatch = json.decode(json.decode(localStorage.getString('matchParticipants.match')!));
+      dynamic matchDynamic = thisMatch;
+      thisMatch = Match.fromJson(matchDynamic);
+
+      Match match = thisMatch;
+      if (!matchStreamController.isClosed)
+        matchStreamController.sink.add({'match': match});
+    }
+  }
+
   Future getFutureData() async {
     final response = await MatchRepository().getMatch(widget.match.id);
 
@@ -57,11 +72,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         });
       }
 
-      if (!notificationStreamController.isClosed)
-        notificationStreamController.sink.add(
-          response['match'].haveNotifications,
-        );
-
       if (participants.isNotEmpty) {
         User? me = participants.firstWhereOrNull(
                 (user) => user!.id == myUser.id);
@@ -74,10 +84,16 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         });
       }
 
-      if (!matchStreamController.isClosed) matchStreamController.sink.add(
-          response
-      );
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      await localStorage.setString('matchParticipants.match', json.encode(json.encode(match)));
 
+      if (!notificationStreamController.isClosed)
+        notificationStreamController.sink.add(
+          match.haveNotifications,
+        );
+
+      if (!matchStreamController.isClosed)
+        matchStreamController.sink.add({'match': match});
     }
 
     return response;
@@ -87,6 +103,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadFromLocalStorage();
     silentNotificationListener();
     this.getFutureData();
   }
@@ -235,15 +252,13 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
       return;
     }
     this.isLoading = true;
-    final resp = await MatchRepository().getMatch(widget.match.id);
-    Match match = resp['match'];
     switch (index) {
       case 0:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
-              match: match,
+              match: widget.match,
               calledFromMyMatches: widget.calledFromMyMatches,
             ),
           ),
@@ -286,7 +301,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MatchChatScreen(
-                match: match,
+                match: widget.match,
                 currentUser: currentUser,
                 calledFromMyMatches: widget.calledFromMyMatches,
               ),
@@ -385,72 +400,6 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
     );
   }
 
-  StreamBuilder<dynamic> buildNotificationStreamBuilder() {
-    return StreamBuilder(
-      initialData: widget.match.haveNotifications,
-      stream: notificationStreamController.stream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-
-        if (!this.imInscribed) {
-          return Stack(
-            children: [
-              Icon(Icons.chat_bubble_outline),
-            ],
-          );
-        }
-
-        if (!snapshot.hasData) {
-          return Stack(
-            children: [
-              Icon(Icons.chat_bubble_outline),
-            ],
-          );
-        }
-
-        bool areNotis = snapshot.data;
-
-        if (!areNotis) {
-          return Stack(
-            children: [
-              Icon(Icons.chat_bubble_outline),
-            ],
-          );
-        }
-
-        return Stack(
-          children: [
-            Icon(Icons.chat_bubble_outline),
-            _buildNotification(),
-          ],
-        );
-      },
-    );
-  }
-
-  Positioned _buildNotification() {
-    return Positioned(
-      top: 0.0,
-      right: 0.0,
-      child: Container(
-        width: 12.0,
-        height: 12.0,
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.all(
-            Radius.circular(50.0),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.0,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPlayerRow(User user) {
     final _width = MediaQuery.of(context).size.width;
 
@@ -524,4 +473,71 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
       ),
     );
   }
+
+  StreamBuilder<dynamic> buildNotificationStreamBuilder() {
+    return StreamBuilder(
+      initialData: widget.match.haveNotifications,
+      stream: notificationStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+
+        if (!this.imInscribed) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        bool areNotis = snapshot.data;
+
+        if (!areNotis) {
+          return Stack(
+            children: [
+              Icon(Icons.chat_bubble_outline),
+            ],
+          );
+        }
+
+        return Stack(
+          children: [
+            Icon(Icons.chat_bubble_outline),
+            _buildNotification(),
+          ],
+        );
+      },
+    );
+  }
+
+  Positioned _buildNotification() {
+    return Positioned(
+      top: 0.0,
+      right: 0.0,
+      child: Container(
+        width: 12.0,
+        height: 12.0,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.all(
+            Radius.circular(50.0),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

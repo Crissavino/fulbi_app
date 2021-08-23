@@ -22,4 +22,16 @@ class Type {
     ];
   }
 
+  factory Type.fromJson(Map<String, dynamic> json) => Type(
+    id: json["id"],
+    name: json["name"],
+    checked: json["checked"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "checked": checked,
+  };
+
 }

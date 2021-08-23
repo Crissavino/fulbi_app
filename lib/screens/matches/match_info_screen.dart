@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class MatchInfoScreen extends StatefulWidget {
@@ -123,19 +125,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     if (response['success']) {
       List<User?> participants = response['match'].participants!;
       User myUser = response['myUser'];
-      if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
-          response['match'].haveNotifications
-      );
-
-      Match match = response['match'];
-      int playersEnrolled = response['playersEnrolled'];
-      int spotsAvailable = match.numPlayers - playersEnrolled;
-      if (spotsAvailable == 0) {
-        setState(() {
-          this.isFull = true;
-        });
-      }
-
       if (participants.isNotEmpty) {
         User? me = participants.firstWhereOrNull(
                 (user) => user!.id == myUser.id);
@@ -148,8 +137,36 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         });
       }
 
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      await localStorage.setString('matchInfo.match', json.encode(json.encode(response['match'])));
+      await localStorage.setString('matchInfo.location', json.encode(json.encode(response['location'])));
+      await localStorage.setString('matchInfo.genre', json.encode(json.encode(response['genre'].toJson())));
+      await localStorage.setString('matchInfo.type', json.encode(json.encode(response['type'].toJson())));
+      await localStorage.setString('matchInfo.currency', json.encode(json.encode(response['currency'])));
+      await localStorage.setString('matchInfo.playersEnrolled', json.encode(json.encode(response['playersEnrolled'])));
+
+      Match match = response['match'];
+      if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
+          match.haveNotifications
+      );
+
+      int playersEnrolled = response['playersEnrolled'];
+      int spotsAvailable = match.numPlayers - playersEnrolled;
+      if (spotsAvailable == 0) {
+        setState(() {
+          this.isFull = true;
+        });
+      }
+
       if (!matchStreamController.isClosed) matchStreamController.sink.add(
-          response
+          {
+            'match': match,
+            'location': response['location'],
+            'genre': response['genre'],
+            'type': response['type'],
+            'currency': response['currency'],
+            'playersEnrolled': response['playersEnrolled'],
+          }
       );
 
     }
@@ -157,10 +174,43 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     return response;
   }
 
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('matchInfo.match')) {
+      var thisMatch = json.decode(json.decode(localStorage.getString('matchInfo.match')!));
+      Match match = Match.fromJson(thisMatch);
+
+      var thisLocation = json.decode(json.decode(localStorage.getString('matchInfo.location')!));
+      Location location = Location.fromJson(thisLocation);
+
+      var thisGenre = json.decode(json.decode(localStorage.getString('matchInfo.genre')!));
+      Genre genre = Genre.fromJson(thisGenre);
+
+      var thisType = json.decode(json.decode(localStorage.getString('matchInfo.type')!));
+      Type type = Type.fromJson(thisType);
+
+      String? currency = json.decode(json.decode(localStorage.getString('matchInfo.currency')!));
+
+      int playersEnrolled = json.decode(json.decode(localStorage.getString('matchInfo.playersEnrolled')!));
+
+      if (!matchStreamController.isClosed) matchStreamController.sink.add(
+          {
+            'match': match,
+            'location': location,
+            'genre': genre,
+            'type': type,
+            'currency': currency,
+            'playersEnrolled': playersEnrolled,
+          }
+      );
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadFromLocalStorage();
     silentNotificationListener();
     this.getFutureData();
   }
@@ -481,15 +531,13 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       return;
     }
     this.isLoading = true;
-    final resp = await MatchRepository().getMatch(widget.match.id);
-    Match match = resp['match'];
     switch (index) {
       case 1:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => MatchParticipantsScreen(
-              match: match,
+              match: widget.match,
               calledFromMyMatches: widget.calledFromMyMatches,
             ),
           ),
@@ -532,7 +580,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MatchChatScreen(
-                match: match,
+                match: widget.match,
                 currentUser: currentUser,
                 calledFromMyMatches: widget.calledFromMyMatches,
               ),

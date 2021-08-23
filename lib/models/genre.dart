@@ -32,4 +32,16 @@ class Genre {
       ),
     ];
   }
+
+  factory Genre.fromJson(Map<String, dynamic> json) => Genre(
+    id: json["id"],
+    name: json["name"],
+    checked: json["checked"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "checked": checked,
+  };
 }

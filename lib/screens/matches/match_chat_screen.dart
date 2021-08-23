@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -17,6 +18,7 @@ import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/widgets/chat_message.dart';
 import 'package:fulbito_app/widgets/header_message.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class MatchChatScreen extends StatefulWidget {
@@ -54,6 +56,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadFromLocalStorage();
     _loadHistory();
     _textController.addListener(_getLatestValue);
 
@@ -210,51 +213,100 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                 children: [circularLoading],
               ),
             )
-                : StreamBuilder(
-                  initialData: this._messages,
-                  stream: messagesStreamController.stream,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-
-                    if (!snapshot.hasData) {
-
-                      this.isLoading = true;
-
-                      return Container(
-                        width: _width,
-                        height: _height,
-                        child: Column(
-                          mainAxisAlignment:
-                          MainAxisAlignment.center,
-                          crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                          children: [circularLoading],
-                        ),
-                      );
-                    }
-
-                    final messages = snapshot.data;
-
-                    this.isLoading = false;
-
-                    return NotificationListener<ScrollNotification>(
-                      onNotification: (ScrollNotification scrollInfo) {
-                        if (!isLoading && scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent &&
-                            this.noMoreMessages == false) {
-                          final lastMessage = this._messages.last;
-                          _loadMoreMessages(lastMessage.time!);
-                        }
-                        return true;
-                      },
-                      child: ListView.builder(
-                          reverse: true,
-                          padding: EdgeInsets.only(top: 15.0),
-                          itemCount: messages.length,
-                          itemBuilder: (BuildContext context, int index) => messages[index]),
-                    );
-                },
-          ),
+                : messageStreamBuilder(),
     );
+  }
+
+  messageStreamBuilder() {
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
+
+    return StreamBuilder(
+      initialData: this._messages,
+      stream: messagesStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+
+        if (!snapshot.hasData) {
+
+          this.isLoading = true;
+
+          return Container(
+            width: _width,
+            height: _height,
+            child: Column(
+              mainAxisAlignment:
+              MainAxisAlignment.center,
+              crossAxisAlignment:
+              CrossAxisAlignment.center,
+              children: [circularLoading],
+            ),
+          );
+        }
+
+        final messages = snapshot.data;
+
+        this.isLoading = false;
+
+        return NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (!isLoading &&
+                scrollInfo.metrics.pixels >=
+                    (scrollInfo.metrics.maxScrollExtent/2) &&
+                this.noMoreMessages == false) {
+              final lastMessage = this._messages.last;
+              _loadMoreMessages(lastMessage.time!);
+            }
+            return true;
+          },
+          child: ListView.builder(
+              reverse: true,
+              padding: EdgeInsets.only(top: 15.0),
+              itemCount: messages.length,
+              itemBuilder: (BuildContext context, int index) => messages[index]),
+        );
+      },
+    );
+  }
+
+  void loadFromLocalStorage() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (localStorage.containsKey('matchChat.myMessages')) {
+      var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages')!));
+
+      List messages = thisMessages;
+      thisMessages = messages.map((message) => Message.fromJson(message)).toList();
+
+      AnimationController _animationController = AnimationController(
+        vsync: this,
+        duration: Duration(
+          milliseconds: 0,
+        ),
+      )..forward();
+
+      final history = thisMessages.map((message) {
+        if (message.type == Message.TYPES['text']) {
+          return ChatMessage(
+            text: message.text,
+            sender: message.owner,
+            currentUser: widget.currentUser,
+            time: message.createdAt.toString(),
+            animationController: _animationController,
+          );
+        } else if(message.type == Message.TYPES['header']) {
+          return HeaderMessage(
+              text: message.text,
+              time: message.createdAt.toString(),
+              animationController: _animationController
+          );
+        }
+      }).toList();
+
+      this._messages.insertAll(0, history);
+      messagesStreamController.sink.add(this._messages);
+      setState(() {
+        this.isLoading = false;
+      });
+    }
   }
 
   void _loadHistory() async {
@@ -269,6 +321,10 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           milliseconds: 0,
         ),
       )..forward();
+
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonMessages = myMessages.map((e) => json.encode(e)).toList();
+      await localStorage.setString('matchChat.myMessages', json.encode(jsonMessages.toString()));
 
       final history = myMessages.map((message) {
         if (message.type == Message.TYPES['text']) {
@@ -288,11 +344,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         }
       }).toList();
 
-      messagesStreamController.sink.add(history);
-      setState(() {
-        this.isLoading = false;
-        _messages.insertAll(0, history);
-      });
+      this._messages.clear();
+      this._messages.insertAll(0, history);
+      messagesStreamController.sink.add(this._messages);
     } else {
       setState(() {
         this.isLoading = false;
@@ -331,10 +385,12 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         }
       });
 
+      this._messages.insertAll(_messages.length, history);
+      messagesStreamController.sink.add(this._messages);
       this.isLoading = false;
-      setState(() {
-        _messages.insertAll(_messages.length, history);
-      });
+      // setState(() {
+      //   this.isLoading = false;
+      // });
     } else {
       setState(() {
         this.isLoading = false;

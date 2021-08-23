@@ -56,6 +56,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
+    this.isLoading = true;
     loadFromLocalStorage();
     _loadHistory();
     _textController.addListener(_getLatestValue);
@@ -310,7 +311,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   void _loadHistory() async {
-    this.isLoading = true;
     final historyResponse =
     await ChatRepository().getMyChatMessages(widget.match.id, null);
     if (historyResponse['messages'].length > 0) {
@@ -347,6 +347,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       this._messages.clear();
       this._messages.insertAll(0, history);
       messagesStreamController.sink.add(this._messages);
+      setState(() {
+        this.isLoading = false;
+      });
     } else {
       setState(() {
         this.isLoading = false;

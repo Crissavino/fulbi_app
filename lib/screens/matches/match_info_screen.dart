@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -48,8 +49,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
   bool isLoading = false;
+  bool isLoadingAlert = false;
   bool isFreeMatch = false;
   bool isFull = false;
+
+  @override
+  void setState(fn) {
+    if(mounted) {
+      super.setState(fn);
+    }
+  }
 
   Future<void> _createDynamicLinkToNewPlayer(bool short) async {
     setState(() {
@@ -59,8 +68,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     Uri url = await CreateDynamicLink.createLinkWithQuery(
         'invite-new-player',
         'userWhoInvite=${widget.match.ownerId}&matchId=${widget.match.id}',
-        short
-    );
+        short);
 
     setState(() {
       _linkMessage = url.toString();
@@ -76,8 +84,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     Uri url = await CreateDynamicLink.createLinkWithQuery(
         'invite-existing-player',
         'userWhoInvite=${widget.match.ownerId}&matchId=${widget.match.id}',
-        short
-    );
+        short);
 
     setState(() {
       _linkMessage = url.toString();
@@ -92,8 +99,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         title: translations[localeName]!['match.info.inviteNewPlayer']!,
         // text: 'Example share text',
         linkUrl: _linkMessage,
-        chooserTitle: translations[localeName]!['match.info.inviteNewPlayer']!
-    );
+        chooserTitle: translations[localeName]!['match.info.inviteNewPlayer']!);
   }
 
   Future<void> shareToExistingPlayer() async {
@@ -103,8 +109,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         title: translations[localeName]!['match.info.inviteExistPlayer']!,
         // text: 'Example share text',
         linkUrl: _linkMessage,
-        chooserTitle: translations[localeName]!['match.info.inviteExistPlayer']!
-    );
+        chooserTitle:
+            translations[localeName]!['match.info.inviteExistPlayer']!);
   }
 
   Future<void> shareFile() async {
@@ -126,8 +132,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       List<User?> participants = response['match'].participants!;
       User myUser = response['myUser'];
       if (participants.isNotEmpty) {
-        User? me = participants.firstWhereOrNull(
-                (user) => user!.id == myUser.id);
+        User? me =
+            participants.firstWhereOrNull((user) => user!.id == myUser.id);
         setState(() {
           this.imInscribed = me != null;
         });
@@ -138,17 +144,22 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       }
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      await localStorage.setString('matchInfo.match', json.encode(json.encode(response['match'])));
-      await localStorage.setString('matchInfo.location', json.encode(json.encode(response['location'])));
-      await localStorage.setString('matchInfo.genre', json.encode(json.encode(response['genre'].toJson())));
-      await localStorage.setString('matchInfo.type', json.encode(json.encode(response['type'].toJson())));
-      await localStorage.setString('matchInfo.currency', json.encode(json.encode(response['currency'])));
-      await localStorage.setString('matchInfo.playersEnrolled', json.encode(json.encode(response['playersEnrolled'])));
+      await localStorage.setString(
+          'matchInfo.match', json.encode(json.encode(response['match'])));
+      await localStorage.setString(
+          'matchInfo.location', json.encode(json.encode(response['location'])));
+      await localStorage.setString('matchInfo.genre',
+          json.encode(json.encode(response['genre'].toJson())));
+      await localStorage.setString('matchInfo.type',
+          json.encode(json.encode(response['type'].toJson())));
+      await localStorage.setString(
+          'matchInfo.currency', json.encode(json.encode(response['currency'])));
+      await localStorage.setString('matchInfo.playersEnrolled',
+          json.encode(json.encode(response['playersEnrolled'])));
 
       Match match = response['match'];
-      if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
-          match.haveNotifications
-      );
+      if (!notificationStreamController.isClosed)
+        notificationStreamController.sink.add(match.haveNotifications);
 
       int playersEnrolled = response['playersEnrolled'];
       int spotsAvailable = match.numPlayers - playersEnrolled;
@@ -158,17 +169,15 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         });
       }
 
-      if (!matchStreamController.isClosed) matchStreamController.sink.add(
-          {
-            'match': match,
-            'location': response['location'],
-            'genre': response['genre'],
-            'type': response['type'],
-            'currency': response['currency'],
-            'playersEnrolled': response['playersEnrolled'],
-          }
-      );
-
+      if (!matchStreamController.isClosed)
+        matchStreamController.sink.add({
+          'match': match,
+          'location': response['location'],
+          'genre': response['genre'],
+          'type': response['type'],
+          'currency': response['currency'],
+          'playersEnrolled': response['playersEnrolled'],
+        });
     }
 
     return response;
@@ -177,32 +186,37 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (localStorage.containsKey('matchInfo.match')) {
-      var thisMatch = json.decode(json.decode(localStorage.getString('matchInfo.match')!));
+      var thisMatch =
+          json.decode(json.decode(localStorage.getString('matchInfo.match')!));
       Match match = Match.fromJson(thisMatch);
 
-      var thisLocation = json.decode(json.decode(localStorage.getString('matchInfo.location')!));
+      var thisLocation = json
+          .decode(json.decode(localStorage.getString('matchInfo.location')!));
       Location location = Location.fromJson(thisLocation);
 
-      var thisGenre = json.decode(json.decode(localStorage.getString('matchInfo.genre')!));
+      var thisGenre =
+          json.decode(json.decode(localStorage.getString('matchInfo.genre')!));
       Genre genre = Genre.fromJson(thisGenre);
 
-      var thisType = json.decode(json.decode(localStorage.getString('matchInfo.type')!));
+      var thisType =
+          json.decode(json.decode(localStorage.getString('matchInfo.type')!));
       Type type = Type.fromJson(thisType);
 
-      String? currency = json.decode(json.decode(localStorage.getString('matchInfo.currency')!));
+      String? currency = json
+          .decode(json.decode(localStorage.getString('matchInfo.currency')!));
 
-      int playersEnrolled = json.decode(json.decode(localStorage.getString('matchInfo.playersEnrolled')!));
+      int playersEnrolled = json.decode(
+          json.decode(localStorage.getString('matchInfo.playersEnrolled')!));
 
-      if (!matchStreamController.isClosed) matchStreamController.sink.add(
-          {
-            'match': match,
-            'location': location,
-            'genre': genre,
-            'type': type,
-            'currency': currency,
-            'playersEnrolled': playersEnrolled,
-          }
-      );
+      if (!matchStreamController.isClosed)
+        matchStreamController.sink.add({
+          'match': match,
+          'location': location,
+          'genre': genre,
+          'type': type,
+          'currency': currency,
+          'playersEnrolled': playersEnrolled,
+        });
     }
   }
 
@@ -218,14 +232,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   void silentNotificationListener() {
     PushNotificationService.messageStream.listen((notificationData) {
       if (notificationData.containsKey('silentUpdateMatch')) {
-        if (!matchStreamController.isClosed) matchStreamController.sink.add(
+        if (!matchStreamController.isClosed)
+          matchStreamController.sink.add(
             notificationData['response'],
-        );
+          );
       }
       if (notificationData.containsKey('silentUpdateChat')) {
-        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(
+        if (!notificationStreamController.isClosed)
+          notificationStreamController.sink.add(
             true,
-        );
+          );
       }
     });
   }
@@ -261,20 +277,26 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     leading: IconButton(
                       onPressed: () {
                         if (widget.calledFromMyMatches) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (context) => MyMatchesScreen(),
+                                ),
+                              )
+                              .then((_) => setState(() {}));
                         } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (context) => MatchesScreen(),
+                                ),
+                              )
+                              .then((_) => setState(() {}));
                         }
                       },
-                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
+                      icon: Platform.isIOS
+                          ? Icon(Icons.arrow_back_ios)
+                          : Icon(Icons.arrow_back),
                       splashColor: Colors.transparent,
                     ),
                     title: Text(
@@ -304,13 +326,15 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                   ),
                                 ),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     SizedBox(height: 10.0),
                                     GestureDetector(
                                       onTap: shareToNewPlayer,
                                       child: Text(
-                                        translations[localeName]!['match.info.inviteNewPlayer']!,
+                                        translations[localeName]![
+                                            'match.info.inviteNewPlayer']!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20.0,
@@ -321,7 +345,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                     GestureDetector(
                                       onTap: shareToExistingPlayer,
                                       child: Text(
-                                        translations[localeName]!['match.info.inviteExistPlayer']!,
+                                        translations[localeName]![
+                                            'match.info.inviteExistPlayer']!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20.0,
@@ -355,42 +380,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   child: buildMatchStreamBuilder(),
                 ),
               ),
-              floatingActionButton: (this.imInscribed || this.isFull)
+              floatingActionButton: (this.imInscribed || this.isFull || this.isLoadingAlert)
                   ? null
                   : FloatingActionButton(
-                child: Icon(
-                  Icons.add_circle_outline,
-                  size: 40.0,
-                ),
-                onPressed: () {
-                  if (this.imInscribed) {
-                    showAlert(
-                        context, translations[localeName]!['error']!, translations[localeName]!['error.alreadyInscribed']!);
-                  } else {
-                    showAlertWithEvent(
-                      context,
-                      translations[localeName]!['match.join']!,
-                          () async {
-                        final response =
-                        await MatchRepository().joinMatch(widget.match.id);
-                        if (response['success']) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.pop(context);
-                          showAlert(
-                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                        }
-                      },
-                    );
-                  }
-                },
-                backgroundColor: Colors.green[800]!,
-              ),
+                      child: Icon(
+                        Icons.add_circle_outline,
+                        size: 40.0,
+                      ),
+                      onPressed: showAlertToJoinMatch,
+                      backgroundColor: Colors.green[800]!,
+                    ),
               bottomNavigationBar: _buildBottomNavigationBar(),
             ),
           )
@@ -433,11 +432,17 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   Container _buildMatchGenre(Genre genre) {
     String genreText = '';
     if (genre.id == 1) {
-      genreText = translations[localeName]!['general.for']! + ' ' + translations[localeName]!['general.genres.males']!.toLowerCase();
-    } else if(genre.id == 2) {
-      genreText = translations[localeName]!['general.for']! + ' ' + translations[localeName]!['general.genres.females']!.toLowerCase();
+      genreText = translations[localeName]!['general.for']! +
+          ' ' +
+          translations[localeName]!['general.genres.males']!.toLowerCase();
+    } else if (genre.id == 2) {
+      genreText = translations[localeName]!['general.for']! +
+          ' ' +
+          translations[localeName]!['general.genres.females']!.toLowerCase();
     } else {
-      genreText = translations[localeName]!['general.is']! + ' ' + translations[localeName]!['general.genres.mix']!.toLowerCase();
+      genreText = translations[localeName]!['general.is']! +
+          ' ' +
+          translations[localeName]!['general.genres.mix']!.toLowerCase();
     }
 
     return Container(
@@ -477,17 +482,20 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   _buildPlaysInText(location) {
     String text;
     if (location.city != null && location.province != null) {
-      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.city + ', ' + location.province;
+      text = translations[localeName]!['match.itPlayedIn']! +
+          ' ' +
+          location.city +
+          ', ' +
+          location.province;
     } else if (location.city != null && location.province == null) {
-      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.city;
+      text =
+          translations[localeName]!['match.itPlayedIn']! + ' ' + location.city;
     } else {
-      text = translations[localeName]!['match.itPlayedIn']! + ' ' + location.province;
+      text = translations[localeName]!['match.itPlayedIn']! +
+          ' ' +
+          location.province;
     }
-    return Text(
-        text,
-        style: TextStyle(),
-        overflow: TextOverflow.clip
-    );
+    return Text(text, style: TextStyle(), overflow: TextOverflow.clip);
   }
 
   Row _buildPlaysIn(Location location, double _width) {
@@ -562,7 +570,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => MatchChatScreen(
-                        match: widget.match,
+                      match: widget.match,
                       currentUser: currentUser,
                       calledFromMyMatches: widget.calledFromMyMatches,
                     ),
@@ -571,7 +579,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
               } else {
                 this.isLoading = false;
                 Navigator.pop(context);
-                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                showAlert(context, translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops']!);
               }
             },
           );
@@ -635,14 +644,24 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     return StreamBuilder(
       stream: matchStreamController.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
 
         if (!snapshot.hasData) {
-
           this.isLoading = true;
 
+          return Container(
+            width: _width,
+            height: _height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [circularLoading],
+            ),
+          );
+        }
+
+        if (this.isLoadingAlert) {
           return Container(
             width: _width,
             height: _height,
@@ -660,16 +679,14 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         Type type = snapshot.data['type'];
         String? currencySymbol = snapshot.data['currency'];
         int playersEnrolled = snapshot.data['playersEnrolled'];
-        String spotsAvailable =
-        (match.numPlayers - playersEnrolled).toString();
+        String spotsAvailable = (match.numPlayers - playersEnrolled).toString();
         this.isFreeMatch = match.isFreeMatch;
 
         this.isLoading = false;
 
         return Container(
           child: LayoutBuilder(
-            builder: (BuildContext context,
-                BoxConstraints constraints) {
+            builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -681,8 +698,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                       bottom: 20.0,
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildPlaysIn(location, _width),
                         _buildPlaysOn(match),
@@ -707,7 +723,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       initialData: widget.match.haveNotifications,
       stream: notificationStreamController.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-
         if (!this.imInscribed) {
           return Stack(
             children: [
@@ -764,6 +779,101 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  showAlertToJoinMatch() {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.join']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().joinMatch(widget.match.id);
+                if (response['success']) {
+                  await getFutureData();
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!,
+                      translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.join']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+                  await MatchRepository().joinMatch(widget.match.id);
+              if (response['success']) {
+                await getFutureData();
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

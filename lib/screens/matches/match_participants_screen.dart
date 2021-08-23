@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -41,7 +42,15 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchStreamController = StreamController.broadcast();
   bool isLoading = false;
+  bool isLoadingAlert = false;
   bool isFull = false;
+
+  @override
+  void setState(fn) {
+    if(mounted) {
+      super.setState(fn);
+    }
+  }
 
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
@@ -203,40 +212,14 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   child: buildMatchStreamBuilder(),
                 ),
               ),
-              floatingActionButton: (this.imInscribed || this.isFull)
+              floatingActionButton: (this.imInscribed || this.isFull || this.isLoadingAlert)
                   ? null
                   : FloatingActionButton(
                 child: Icon(
                   Icons.add_circle_outline,
                   size: 40.0,
                 ),
-                onPressed: () {
-                  if (this.imInscribed) {
-                    showAlert(
-                        context, translations[localeName]!['error']!, 'Ya estas inscripto en este partido');
-                  } else {
-                    showAlertWithEvent(
-                      context,
-                      translations[localeName]!['match.join']!,
-                          () async {
-                        final response =
-                        await MatchRepository().joinMatch(widget.match.id);
-                        if (response['success']) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.pop(context);
-                          showAlert(
-                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                        }
-                      },
-                    );
-                  }
-                },
+                onPressed: showAlertToJoinMatch,
                 backgroundColor: Colors.green[800]!,
               ),
               bottomNavigationBar: _buildBottomNavigationBar(),
@@ -375,6 +358,18 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
           );
         }
 
+        if (this.isLoadingAlert) {
+          return Container(
+            width: _width,
+            height: _height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [circularLoading],
+            ),
+          );
+        }
+
         Match match = snapshot.data['match'];
         List<User?> participants = match.participants!;
 
@@ -449,11 +444,16 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             leading: CircleAvatar(
               radius: 30.0,
               backgroundColor: Colors.white,
-              child: Icon(
+              child: user.profileImage == null
+                  ? Icon(
                 Icons.person,
                 color: Colors.green[700],
                 size: 40.0,
-              ),
+              )
+                  : null,
+              backgroundImage: user.profileImage == null
+                  ? null
+                  : NetworkImage(user.profileImage!),
             ),
             title: Text(
               user.name,
@@ -536,6 +536,101 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  showAlertToJoinMatch() {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.join']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().joinMatch(widget.match.id);
+                if (response['success']) {
+                  await getFutureData();
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!,
+                      translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.join']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().joinMatch(widget.match.id);
+              if (response['success']) {
+                await getFutureData();
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

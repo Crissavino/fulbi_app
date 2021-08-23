@@ -46,6 +46,13 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   bool noMoreMessages = false;
   StreamController messagesStreamController = StreamController.broadcast();
 
+  @override
+  void setState(fn) {
+    if(mounted) {
+      super.setState(fn);
+    }
+  }
+
   _getLatestValue() {
     setState(() {
       textMessage = _textController.text;
@@ -303,7 +310,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       }).toList();
 
       this._messages.insertAll(0, history);
-      messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
       setState(() {
         this.isLoading = false;
       });
@@ -346,7 +353,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
       this._messages.clear();
       this._messages.insertAll(0, history);
-      messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
       setState(() {
         this.isLoading = false;
       });
@@ -389,7 +396,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       });
 
       this._messages.insertAll(_messages.length, history);
-      messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
       this.isLoading = false;
       // setState(() {
       //   this.isLoading = false;

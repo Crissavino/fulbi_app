@@ -44,6 +44,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   bool isLoading = false;
   bool isLoadingAlert = false;
   bool isFull = false;
+  bool imTheCreator = false;
 
   @override
   void setState(fn) {
@@ -80,6 +81,11 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
           this.isFull = true;
         });
       }
+
+      setState(() {
+        this.imTheCreator = myUser.id == match.ownerId;
+      });
+      print(this.imTheCreator);
 
       if (participants.isNotEmpty) {
         User? me = participants.firstWhereOrNull(
@@ -252,33 +258,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         if (this.isFull) return;
         if (!this.imInscribed) {
           this.isLoading = false;
-          return showAlertWithEvent(
-            context,
-            translations[localeName]!['match.chat.join']!,
-            () async {
-              final response =
-                  await MatchRepository().joinMatch(widget.match.id);
-              if (response['success']) {
-                setState(() {
-                  widget.match = response['match'];
-                });
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MatchChatScreen(
-                        match: widget.match,
-                        currentUser: currentUser,
-                      calledFromMyMatches: widget.calledFromMyMatches,
-                    ),
-                  ),
-                );
-              } else {
-                this.isLoading = false;
-                Navigator.pop(context);
-                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-              }
-            },
-          );
+          await showAlertToJoinMatch(enterToChat: true);
         } else {
           Navigator.pushReplacement(
             context,
@@ -398,77 +378,131 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
   Widget _buildPlayerRow(User user) {
     final _width = MediaQuery.of(context).size.width;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PublicProfileScreen(
-              userId: user.id,
-              calledFromMatch: true,
-              match: widget.match,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 20.0),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.green[600]!,
-              Colors.green[500]!,
-              Colors.green[500]!,
-              Colors.green[600]!,
-            ],
-            stops: [0.1, 0.4, 0.7, 0.9],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green[100]!,
-              blurRadius: 6.0,
-              offset: Offset(0, 4),
-            ),
-          ],
-          color: Colors.green[400],
-          borderRadius: BorderRadius.all(
-            Radius.circular(30.0),
-          ),
+    return Container(
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+          color: Colors.green[100]!,
+          blurRadius: 6.0,
+          offset: Offset(0, 6),
         ),
-        width: _width,
-        height: 80.0,
-        child: Center(
-          child: ListTile(
-            leading: CircleAvatar(
-              radius: 30.0,
-              backgroundColor: Colors.white,
-              child: user.profileImage == null
-                  ? Icon(
-                Icons.person,
-                color: Colors.green[700],
-                size: 40.0,
-              )
-                  : null,
-              backgroundImage: user.profileImage == null
-                  ? null
-                  : NetworkImage(user.profileImage!),
-            ),
-            title: Text(
-              user.name,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+      ], borderRadius: BorderRadius.all(Radius.circular(30.0))),
+      margin: EdgeInsets.only(bottom: 20.0),
+      width: double.infinity,
+      height: 80.0,
+      child: Card(
+        margin: EdgeInsets.all(0),
+        elevation: 0,
+        shadowColor: null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Dismissible(
+          child: GestureDetector(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.green[600]!,
+                    Colors.green[500]!,
+                    Colors.green[500]!,
+                    Colors.green[600]!,
+                  ],
+                  stops: [0.1, 0.4, 0.7, 0.9],
+                ),
+                color: Colors.green[400],
               ),
-              textAlign: TextAlign.center,
+              child: Center(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 30.0,
+                    backgroundColor: Colors.white,
+                    child: user.profileImage == null
+                        ? Icon(
+                      Icons.person,
+                      color: Colors.green[700],
+                      size: 40.0,
+                    )
+                        : null,
+                    backgroundImage: user.profileImage == null
+                        ? null
+                        : NetworkImage(user.profileImage!),
+                  ),
+                  title: Text(
+                    user.name,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  trailing: Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Colors.white,
+                    size: 40.0,
+                  ),
+                ),
+              ),
             ),
-            trailing: Icon(
-              Icons.keyboard_arrow_right,
-              color: Colors.white,
-              size: 40.0,
-            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PublicProfileScreen(
+                    userId: user.id,
+                    calledFromMatch: true,
+                    match: widget.match,
+                  ),
+                ),
+              );
+            },
           ),
+          background: this.imTheCreator
+              ? Container(
+            padding: EdgeInsets.only(
+              right: 20.0,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.red[600]!,
+                  Colors.red[500]!,
+                  Colors.red[500]!,
+                  Colors.red[600]!,
+                ],
+                stops: [0.1, 0.4, 0.7, 0.9],
+              ),
+              borderRadius: BorderRadius.all(
+                Radius.circular(30.0),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.remove_circle,
+                  color: Colors.white,
+                  size: 30.0,
+                ),
+              ],
+            ),
+          )
+              : Container(),
+          key: UniqueKey(),
+          direction: this.imTheCreator
+              ? DismissDirection.endToStart
+              : DismissDirection.none,
+          confirmDismiss: (DismissDirection dismissDirection) async {
+            if (dismissDirection == DismissDirection.endToStart) {
+              // TODO eliminar del partido
+              await showAlertToExpelFromMatch(user.id);
+            }
+          },
         ),
       ),
     );
@@ -540,7 +574,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
     );
   }
 
-  showAlertToJoinMatch() {
+  showAlertToJoinMatch({enterToChat = false}) {
     if (Platform.isAndroid) {
       return showDialog(
         context: context,
@@ -569,6 +603,19 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                   setState(() {
                     this.isLoadingAlert = false;
                   });
+                  if (enterToChat) {
+                    User currentUser = await UserRepository.getCurrentUser();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MatchChatScreen(
+                          match: widget.match,
+                          currentUser: currentUser,
+                          calledFromMyMatches: widget.calledFromMyMatches,
+                        ),
+                      ),
+                    );
+                  }
                 } else {
                   setState(() {
                     this.isLoadingAlert = false;
@@ -616,6 +663,114 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
               Navigator.pop(context);
               final response =
               await MatchRepository().joinMatch(widget.match.id);
+              if (response['success']) {
+                await getFutureData();
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                if (enterToChat) {
+                  User currentUser = await UserRepository.getCurrentUser();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MatchChatScreen(
+                        match: widget.match,
+                        currentUser: currentUser,
+                        calledFromMyMatches: widget.calledFromMyMatches,
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showAlertToExpelFromMatch(int userToExpel) {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.expel']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().expelFromMatch(widget.match.id, userToExpel);
+                if (response['success']) {
+                  await getFutureData();
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!,
+                      translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.expel']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().expelFromMatch(widget.match.id, userToExpel);
               if (response['success']) {
                 await getFutureData();
                 setState(() {

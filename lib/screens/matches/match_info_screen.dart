@@ -552,39 +552,12 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         );
         break;
       case 2:
-        User currentUser = await UserRepository.getCurrentUser();
         if (this.isFull) return;
         if (!this.imInscribed) {
           this.isLoading = false;
-          return showAlertWithEvent(
-            context,
-            translations[localeName]!['match.chat.join']!,
-            () async {
-              final response =
-                  await MatchRepository().joinMatch(widget.match.id);
-              if (response['success']) {
-                setState(() {
-                  widget.match = response['match'];
-                });
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MatchChatScreen(
-                      match: widget.match,
-                      currentUser: currentUser,
-                      calledFromMyMatches: widget.calledFromMyMatches,
-                    ),
-                  ),
-                );
-              } else {
-                this.isLoading = false;
-                Navigator.pop(context);
-                showAlert(context, translations[localeName]!['error']!,
-                    translations[localeName]!['error.ops']!);
-              }
-            },
-          );
+          await showAlertToJoinMatch(enterToChat: true);
         } else {
+          User currentUser = await UserRepository.getCurrentUser();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -783,7 +756,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
-  showAlertToJoinMatch() {
+  showAlertToJoinMatch({enterToChat = false}) {
     if (Platform.isAndroid) {
       return showDialog(
         context: context,
@@ -812,6 +785,19 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   setState(() {
                     this.isLoadingAlert = false;
                   });
+                  if (enterToChat) {
+                    User currentUser = await UserRepository.getCurrentUser();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MatchChatScreen(
+                          match: widget.match,
+                          currentUser: currentUser,
+                          calledFromMyMatches: widget.calledFromMyMatches,
+                        ),
+                      ),
+                    );
+                  }
                 } else {
                   setState(() {
                     this.isLoadingAlert = false;
@@ -864,6 +850,19 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                 setState(() {
                   this.isLoadingAlert = false;
                 });
+                if (enterToChat) {
+                  User currentUser = await UserRepository.getCurrentUser();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MatchChatScreen(
+                        match: widget.match,
+                        currentUser: currentUser,
+                        calledFromMyMatches: widget.calledFromMyMatches,
+                      ),
+                    ),
+                  );
+                }
               } else {
                 setState(() {
                   this.isLoadingAlert = false;

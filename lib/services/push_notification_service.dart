@@ -300,6 +300,27 @@ class PushNotificationService {
       });
     }
 
+    if (message.data['notification_type'] == 'silence_player_expelled') {
+
+      final getMatchResponse =
+      await MatchRepository().getMatch(message.data['match_id']);
+      if (getMatchResponse['success']) {
+        _messageStreamController.sink.add({
+          'silentUpdateParticipants': true,
+          'match': getMatchResponse['match'],
+          'response': getMatchResponse,
+        });
+      }
+
+    }
+
+    if (message.data['notification_type'] == 'silence_im_expelled') {
+      _messageStreamController.sink.add({
+        'silentUpdateMyMatches': true,
+        'matchIdToDelete': message.data['match_id'],
+      });
+    }
+
   }
 
   static Future initializeApp() async {

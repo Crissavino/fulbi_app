@@ -1,8 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
-import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -23,6 +25,7 @@ class ShowMyCreatedMatches extends StatefulWidget {
 class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
   Future? _future;
   List<Match?> matches = [];
+  bool isLoadingAlert = false;
 
   @override
   void initState() {
@@ -76,6 +79,18 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                         dynamic response = snapshot.data;
 
                         if (!snapshot.hasData) {
+                          return Container(
+                            width: _width,
+                            height: _height,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [circularLoading],
+                            ),
+                          );
+                        }
+
+                        if (this.isLoadingAlert) {
                           return Container(
                             width: _width,
                             height: _height,
@@ -154,18 +169,6 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
 
     if (index != matches.length + 1) {
       Match match = matches[index];
-      bool isTheUserAlreadyIn;
-      if (match.participants!.isNotEmpty) {
-        isTheUserAlreadyIn = (match.participants
-            ?.firstWhereOrNull((user) => user.id == widget.userToInvite.id)) !=
-            null;
-      } else {
-        isTheUserAlreadyIn = false;
-      }
-
-      if (isTheUserAlreadyIn) {
-        return Container();
-      }
 
       bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
       if (isMatchSameSex) {
@@ -252,36 +255,14 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
     }
     bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
 
-    if (!isTheUserAlreadyIn && isMatchSameSex) {
+    if (isMatchSameSex) {
       return GestureDetector(
-        onTap: () async {
-          await showAlertWithEvent(
-            context,
-            translations[localeName]!['general.areYouGoingToInvite']! +
-                ' ${widget.userToInvite.name} ' +
-                translations[localeName]!['general.toYourMatch']!,
-            () async {
-              final response = await MatchRepository()
-                  .sendInvitationToUser(widget.userToInvite.id, match.id);
-              if (response['success']) {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyMatchesScreen(),
-                  ),
-                );
-              } else {
-                Navigator.pop(context);
-                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-              }
-            },
-          );
-        },
+        onTap: isTheUserAlreadyIn
+            ? () => showAlert(context, translations[localeName]!['attention']!, translations[localeName]!['attention.playerAlreadyInscribed']!)
+            : () async => await showAlertForInviteToMatch(match),
         child: Container(
           margin: EdgeInsets.only(bottom: 20.0),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
+          decoration: BoxDecoration(gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
@@ -299,7 +280,9 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                 offset: Offset(0, 4),
               ),
             ],
-            color: Colors.green[400],
+            color: isTheUserAlreadyIn
+                ? Colors.green[400]!.withOpacity(0.5)
+                : Colors.green[400],
             borderRadius: BorderRadius.all(
               Radius.circular(30.0),
             ),
@@ -337,5 +320,103 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
     }
 
     return Container();
+  }
+
+  Future showAlertForInviteToMatch(Match match) {
+
+    String title = translations[localeName]!['general.areYouGoingToInvite']! +
+        ' ${widget.userToInvite.name} ' +
+        translations[localeName]!['general.toYourMatch']!;
+
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(title),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response = await MatchRepository()
+                    .sendInvitationToUser(widget.userToInvite.id, match.id);
+                if (response['success']) {
+                  setState(() {
+                    this._future = getMyCreatedMatches();
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(title),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response = await MatchRepository()
+                  .sendInvitationToUser(widget.userToInvite.id, match.id);
+              if (response['success']) {
+                setState(() {
+                  this._future = getMyCreatedMatches();
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

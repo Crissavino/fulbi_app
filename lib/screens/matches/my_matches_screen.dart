@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -30,6 +31,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
   List<Match?> matches = [];
   User? myUser;
   StreamController matchesStreamController = StreamController.broadcast();
+  bool isLoadingAlert = false;
 
   @override
   void initState() {
@@ -259,6 +261,38 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           );
         }
 
+        if (this.isLoadingAlert) {
+          return Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: Padding(
+              padding: EdgeInsets.only(
+                  bottom: (MediaQuery.of(context).viewInsets.bottom)),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  padding:
+                  EdgeInsets.only(bottom: 70.0, left: 20.0, right: 20.0),
+                  margin: EdgeInsets.only(top: 70.0),
+                  width: _width,
+                  height: innerHeight - 0,
+                  child: Container(
+                    width: _width,
+                    height: _height,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [circularLoading],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
         List matches = snapshot.data;
 
         if (matches.isEmpty) {
@@ -417,13 +451,16 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
 
     if (!match.isConfirmed && !imTheCreator) {
       return Container(
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(
-            color: Colors.green[100]!,
-            blurRadius: 6.0,
-            offset: Offset(0, 6),
-          ),
-        ], borderRadius: BorderRadius.all(Radius.circular(30.0))),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green[100]!,
+              blurRadius: 6.0,
+              offset: Offset(0, 6),
+            ),
+          ],
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+        ),
         margin: EdgeInsets.only(bottom: 20.0),
         width: double.infinity,
         height: 80.0,
@@ -436,55 +473,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
           ),
           clipBehavior: Clip.antiAlias,
           child: GestureDetector(
-            onTap: () {
-              showAlertWithEventAcceptAndCancel(
-                context,
-                translations[localeName]!['match.join']!,
-                () async {
-                  final response = await MatchRepository().joinMatch(match.id);
-                  if (response['success']) {
-                    this.matches = response['matches'];
-                    if (!matchesStreamController.isClosed)
-                      matchesStreamController.sink.add(this.matches);
-
-                    SharedPreferences localStorage = await SharedPreferences.getInstance();
-                    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-                    await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
-                    setState(() {});
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MatchInfoScreen(
-                          match: match,
-                          calledFromMyMatches: true,
-                        ),
-                      ),
-                    );
-                  } else {
-                    Navigator.pop(context);
-                    showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                  }
-                },
-                () async {
-                  final response =
-                      await MatchRepository().rejectInvitationToMatch(match.id);
-                  if (response['success']) {
-                    this.matches = response['matches'];
-                    if (!matchesStreamController.isClosed)
-                      matchesStreamController.sink.add(this.matches);
-
-                    SharedPreferences localStorage = await SharedPreferences.getInstance();
-                    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-                    await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
-                    setState(() {});
-                    Navigator.pop(context);
-                  } else {
-                    Navigator.pop(context);
-                    showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                  }
-                },
-              );
-            },
+            onTap: () => showAlertToJoinOrCancelMatch(match),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -706,53 +695,9 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                 if (dismissDirection == DismissDirection.endToStart) {
                   if ((imTheCreator && imParticipating) ||
                       (!imTheCreator && imParticipating)) {
-                    final resp = await showAlertWithEvent(
-                      context,
-                      translations[localeName]!['match.leave']!,
-                      () async {
-                        final response =
-                            await MatchRepository().leaveMatch(match.id);
-                        if (response['success']) {
-                          this.matches = response['matches'];
-
-                          if (!matchesStreamController.isClosed)
-                            matchesStreamController.sink.add(this.matches);
-                          Navigator.pop(context);
-                        } else {
-                          Navigator.pop(context);
-                          showAlert(
-                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                        }
-                      },
-                    );
-
-                    if (resp == null) {
-                      setState(() {});
-                    }
+                    await showAlertToLeaveMatch(match);
                   } else if (imTheCreator && !imParticipating) {
-                    final resp = await showAlertWithEvent(
-                      context,
-                      translations[localeName]!['match.delete']!,
-                      () async {
-                        final response =
-                            await MatchRepository().deleteMatch(match.id);
-                        if (response['success']) {
-                          this.matches = response['matches'];
-
-                          if (!matchesStreamController.isClosed)
-                            matchesStreamController.sink.add(this.matches);
-                          Navigator.pop(context);
-                        } else {
-                          Navigator.pop(context);
-                          showAlert(
-                              context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
-                        }
-                      },
-                    );
-
-                    if (resp == null) {
-                      setState(() {});
-                    }
+                    await showAlertToDeleteMatch(match);
                   }
                 } else {
                   setState(() {});
@@ -794,6 +739,382 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  showAlertToLeaveMatch(Match match) {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.leave']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().leaveMatch(match.id);
+                if (response['success']) {
+                  this.matches = response['matches'];
+
+                  if (!matchesStreamController.isClosed)
+                    matchesStreamController.sink.add(this.matches);
+
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(
+                      context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.leave']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().leaveMatch(match.id);
+              if (response['success']) {
+                this.matches = response['matches'];
+
+                if (!matchesStreamController.isClosed)
+                  matchesStreamController.sink.add(this.matches);
+
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(
+                    context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showAlertToDeleteMatch(Match match) {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.delete']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().deleteMatch(match.id);
+                if (response['success']) {
+                  this.matches = response['matches'];
+
+                  if (!matchesStreamController.isClosed)
+                    matchesStreamController.sink.add(this.matches);
+
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(
+                      context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.delete']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().deleteMatch(match.id);
+              if (response['success']) {
+                this.matches = response['matches'];
+
+                if (!matchesStreamController.isClosed)
+                  matchesStreamController.sink.add(this.matches);
+
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(
+                    context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showAlertToJoinOrCancelMatch(Match match) {
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.join']!),
+          actions: [
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().rejectInvitationToMatch(match.id);
+                if (response['success']) {
+                  this.matches = response['matches'];
+                  if (!matchesStreamController.isClosed)
+                    matchesStreamController.sink.add(this.matches);
+
+                  this.isLoadingAlert = false;
+
+                  SharedPreferences localStorage = await SharedPreferences.getInstance();
+                  var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                  await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                  setState(() {});
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  Navigator.pop(context);
+                  showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response = await MatchRepository().joinMatch(match.id);
+                if (response['success']) {
+                  this.matches = response['matches'];
+                  if (!matchesStreamController.isClosed)
+                    matchesStreamController.sink.add(this.matches);
+
+                  this.isLoadingAlert = false;
+
+                  SharedPreferences localStorage = await SharedPreferences.getInstance();
+                  var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                  await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                  setState(() {});
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MatchInfoScreen(
+                        match: match,
+                        calledFromMyMatches: true,
+                      ),
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.join']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().rejectInvitationToMatch(match.id);
+              if (response['success']) {
+                this.matches = response['matches'];
+                if (!matchesStreamController.isClosed)
+                  matchesStreamController.sink.add(this.matches);
+
+                this.isLoadingAlert = false;
+
+                SharedPreferences localStorage = await SharedPreferences.getInstance();
+                var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                setState(() {});
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response = await MatchRepository().joinMatch(match.id);
+              if (response['success']) {
+                this.matches = response['matches'];
+                if (!matchesStreamController.isClosed)
+                  matchesStreamController.sink.add(this.matches);
+
+                this.isLoadingAlert = false;
+
+                SharedPreferences localStorage = await SharedPreferences.getInstance();
+                var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+                await localStorage.setString('myMatchesScreen.matches', json.encode(jsonMatches.toString()));
+                setState(() {});
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchInfoScreen(
+                      match: match,
+                      calledFromMyMatches: true,
+                    ),
+                  ),
+                );
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

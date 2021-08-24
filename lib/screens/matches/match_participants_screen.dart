@@ -55,8 +55,8 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
 
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchParticipants.match')) {
-      var thisMatch = json.decode(json.decode(localStorage.getString('matchParticipants.match')!));
+    if (localStorage.containsKey('matchParticipants.match.${widget.match.id}')) {
+      var thisMatch = json.decode(json.decode(localStorage.getString('matchParticipants.match.${widget.match.id}')!));
       dynamic matchDynamic = thisMatch;
       thisMatch = Match.fromJson(matchDynamic);
 
@@ -100,7 +100,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
       }
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      await localStorage.setString('matchParticipants.match', json.encode(json.encode(match)));
+      await localStorage.setString('matchParticipants.match.${widget.match.id}', json.encode(json.encode(match)));
 
       if (!notificationStreamController.isClosed)
         notificationStreamController.sink.add(
@@ -173,9 +173,10 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                       return Stack(
                         children: [
                           Positioned(
-                            top: 60,
-                            left: 0,
-                            right: 0,
+                            top: 60.0,
+                            left: 0.0,
+                            right: 00.0,
+                            bottom: -20.0,
                             child: Container(
                               padding:
                               EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
@@ -387,6 +388,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         }
 
         return ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
           itemCount: participants.length,
           itemBuilder: (BuildContext context, int index) {
             return _buildPlayerRow(participants[index]!);

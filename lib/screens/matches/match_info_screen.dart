@@ -145,16 +145,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       await localStorage.setString(
-          'matchInfo.match', json.encode(json.encode(response['match'])));
+          'matchInfo.match.${widget.match.id}', json.encode(json.encode(response['match'])));
       await localStorage.setString(
-          'matchInfo.location', json.encode(json.encode(response['location'])));
-      await localStorage.setString('matchInfo.genre',
+          'matchInfo.location.${widget.match.id}', json.encode(json.encode(response['location'])));
+      await localStorage.setString('matchInfo.genre.${widget.match.id}',
           json.encode(json.encode(response['genre'].toJson())));
-      await localStorage.setString('matchInfo.type',
+      await localStorage.setString('matchInfo.type.${widget.match.id}',
           json.encode(json.encode(response['type'].toJson())));
       await localStorage.setString(
-          'matchInfo.currency', json.encode(json.encode(response['currency'])));
-      await localStorage.setString('matchInfo.playersEnrolled',
+          'matchInfo.currency.${widget.match.id}', json.encode(json.encode(response['currency'])));
+      await localStorage.setString('matchInfo.playersEnrolled.${widget.match.id}',
           json.encode(json.encode(response['playersEnrolled'])));
 
       Match match = response['match'];
@@ -185,28 +185,28 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchInfo.match')) {
+    if (localStorage.containsKey('matchInfo.match.${widget.match.id}')) {
       var thisMatch =
-          json.decode(json.decode(localStorage.getString('matchInfo.match')!));
+          json.decode(json.decode(localStorage.getString('matchInfo.match.${widget.match.id}')!));
       Match match = Match.fromJson(thisMatch);
 
       var thisLocation = json
-          .decode(json.decode(localStorage.getString('matchInfo.location')!));
+          .decode(json.decode(localStorage.getString('matchInfo.location.${widget.match.id}')!));
       Location location = Location.fromJson(thisLocation);
 
       var thisGenre =
-          json.decode(json.decode(localStorage.getString('matchInfo.genre')!));
+          json.decode(json.decode(localStorage.getString('matchInfo.genre.${widget.match.id}')!));
       Genre genre = Genre.fromJson(thisGenre);
 
       var thisType =
-          json.decode(json.decode(localStorage.getString('matchInfo.type')!));
+          json.decode(json.decode(localStorage.getString('matchInfo.type.${widget.match.id}')!));
       Type type = Type.fromJson(thisType);
 
       String? currency = json
-          .decode(json.decode(localStorage.getString('matchInfo.currency')!));
+          .decode(json.decode(localStorage.getString('matchInfo.currency.${widget.match.id}')!));
 
       int playersEnrolled = json.decode(
-          json.decode(localStorage.getString('matchInfo.playersEnrolled')!));
+          json.decode(localStorage.getString('matchInfo.playersEnrolled.${widget.match.id}')!));
 
       if (!matchStreamController.isClosed)
         matchStreamController.sink.add({

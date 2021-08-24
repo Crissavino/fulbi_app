@@ -279,7 +279,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (localStorage.containsKey('matchChat.myMessages')) {
-      var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages')!));
+      var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages.${widget.match.id}')!));
 
       List messages = thisMessages;
       thisMessages = messages.map((message) => Message.fromJson(message)).toList();
@@ -331,7 +331,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       var jsonMessages = myMessages.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchChat.myMessages', json.encode(jsonMessages.toString()));
+      await localStorage.setString('matchChat.myMessages.${widget.match.id}', json.encode(jsonMessages.toString()));
 
       final history = myMessages.map((message) {
         if (message.type == Message.TYPES['text']) {

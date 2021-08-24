@@ -161,61 +161,82 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
             top: false,
             bottom: false,
             child: Scaffold(
-              appBar: new PreferredSize(
-                child: new Container(
-                  decoration: horizontalGradient,
-                  child: AppBar(
-                    backwardsCompatibility: false,
-                    systemOverlayStyle:
-                        SystemUiOverlayStyle(statusBarColor: Colors.white),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0.0,
-                    leading: IconButton(
-                      onPressed: () {
-                        if (widget.calledFromMyMatches) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
-                        }
-                      },
-                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
-                      splashColor: Colors.transparent,
-                    ),
-                    title: Text(
-                      translations[localeName]!['general.players']!,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                preferredSize: new Size(
-                  MediaQuery.of(context).size.width,
-                  70.0,
-                ),
-              ),
               resizeToAvoidBottomInset: false,
               body: AnnotatedRegion<SystemUiOverlayStyle>(
                 value: Platform.isIOS
                     ? SystemUiOverlayStyle.light
                     : SystemUiOverlayStyle.dark,
-                child: Container(
-                  padding:
-                      EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
-                  margin: EdgeInsets.only(top: 20.0),
-                  width: _width,
-                  height: _height,
-                  child: buildMatchStreamBuilder(),
+                child: Center(
+                  child: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return Stack(
+                        children: [
+                          Positioned(
+                            top: 60,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding:
+                              EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+                              margin: EdgeInsets.only(top: 20.0),
+                              width: _width,
+                              height: _height,
+                              child: buildMatchStreamBuilder(),
+                            ),
+                          ),
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: PreferredSize(
+                              child: new Container(
+                                decoration: horizontalGradient,
+                                child: AppBar(
+                                  backwardsCompatibility: false,
+                                  systemOverlayStyle:
+                                  SystemUiOverlayStyle(statusBarColor: Colors.white),
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 0.0,
+                                  leading: IconButton(
+                                    onPressed: () {
+                                      if (widget.calledFromMyMatches) {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => MyMatchesScreen(),
+                                          ),
+                                        ).then((_) => setState(() {}));
+                                      } else {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => MatchesScreen(),
+                                          ),
+                                        ).then((_) => setState(() {}));
+                                      }
+                                    },
+                                    icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
+                                    splashColor: Colors.transparent,
+                                  ),
+                                  title: Text(
+                                    translations[localeName]!['general.players']!,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              preferredSize: new Size(
+                                MediaQuery.of(context).size.width,
+                                80.0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
               floatingActionButton: (this.imInscribed || this.isFull || this.isLoadingAlert)

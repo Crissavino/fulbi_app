@@ -1,4 +1,5 @@
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/utils/translations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleSignInService {
@@ -18,7 +19,10 @@ class GoogleSignInService {
     } catch (e) {
       print('Error en Google Singin');
       print(e);
-      return null;
+      return {
+        'success': false,
+        'message': translations[localeName]!['error.ops']!,
+      };
     }
   }
 

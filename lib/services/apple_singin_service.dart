@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/utils/translations.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleSignInService {
@@ -26,9 +27,12 @@ class AppleSignInService {
         return {
           'canceled': true
         };
+      } else {
+        return {
+          'success': false,
+          'message': translations[localeName]!['error.ops']!,
+        };
       }
-
-      return error;
     }
 
   }

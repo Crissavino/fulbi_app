@@ -18,6 +18,7 @@ import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/widgets/chat_message.dart';
 import 'package:fulbito_app/widgets/header_message.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -44,6 +45,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   List _messages = [];
   bool isLoading = false;
   bool noMoreMessages = false;
+  bool isLoadingMoreMessage = false;
   StreamController messagesStreamController = StreamController.broadcast();
 
   @override
@@ -255,19 +257,22 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
         this.isLoading = false;
 
+        String? timeLastMessage;
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
             if (!isLoading &&
                 scrollInfo.metrics.pixels >=
                     (scrollInfo.metrics.maxScrollExtent/2) &&
-                this.noMoreMessages == false) {
+                this.noMoreMessages == false && !this.isLoadingMoreMessage) {
               final lastMessage = this._messages.last;
-              _loadMoreMessages(lastMessage.time!);
+              timeLastMessage = lastMessage.time!;
+              _loadMoreMessages(timeLastMessage!);
             }
             return true;
           },
-          child: ListView.builder(
+          child: ListView.separated(
               reverse: true,
+              separatorBuilder: (BuildContext _, int index,) => buildSeparator(index, messages, timeLastMessage: timeLastMessage),
               padding: EdgeInsets.only(top: 15.0),
               itemCount: messages.length,
               itemBuilder: (BuildContext context, int index) => messages[index]),
@@ -276,9 +281,102 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     );
   }
 
+  Widget buildSeparator(index, messages, {String? timeLastMessage}) {
+    if (index < messages.length - 1) {
+      dynamic message = messages[index];
+      DateTime today = DateTime.now();
+      DateTime messageDate = DateTime.parse(message.time!);
+      bool itsTodayMessage = today.day == messageDate.day;
+      bool itsYesterdayMessage = today.day - 1 == messageDate.day;
+      String messageDay = DateFormat('EEEE').format(messageDate);
+      bool itsSamePreviousMessageDay = false;
+      if (timeLastMessage != null) {
+        DateTime previousMessageDate = DateTime.parse(timeLastMessage);
+        itsSamePreviousMessageDay = previousMessageDate.day == messageDate.day;
+      }
+      if (!itsTodayMessage &&
+          !itsYesterdayMessage &&
+          !itsSamePreviousMessageDay) {
+        bool itsSameDayMessage = false;
+        dynamic nextMessage = messages[index + 1];
+        DateTime nextMessageDate = DateTime.parse(nextMessage.time!);
+        itsSameDayMessage = messageDate.day == nextMessageDate.day;
+        if (!itsSameDayMessage) {
+          AnimationController _animationController = AnimationController(
+            vsync: this,
+            duration: Duration(
+              milliseconds: 0,
+            ),
+          )..forward();
+
+          return HeaderMessage(
+            text:
+            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+            time: messageDate.toString(),
+            animationController: _animationController,
+          );
+        } else {
+          return Container();
+        }
+      } else if (!itsTodayMessage &&
+          itsYesterdayMessage &&
+          !itsSamePreviousMessageDay) {
+        bool itsSameDayMessage = false;
+        dynamic nextMessage = messages[index + 1];
+        DateTime nextMessageDate = DateTime.parse(nextMessage.time!);
+        itsSameDayMessage = messageDate.day == nextMessageDate.day;
+        if (!itsSameDayMessage) {
+          AnimationController _animationController = AnimationController(
+            vsync: this,
+            duration: Duration(
+              milliseconds: 0,
+            ),
+          )..forward();
+
+          return HeaderMessage(
+            text:
+            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+            time: messageDate.toString(),
+            animationController: _animationController,
+          );
+        } else {
+          return Container();
+        }
+      } else if (itsTodayMessage &&
+          !itsYesterdayMessage &&
+          !itsSamePreviousMessageDay) {
+        bool itsSameDayMessage = false;
+        dynamic nextMessage = messages[index + 1];
+        DateTime nextMessageDate = DateTime.parse(nextMessage.time!);
+        itsSameDayMessage = messageDate.day == nextMessageDate.day;
+        if (!itsSameDayMessage) {
+          AnimationController _animationController = AnimationController(
+            vsync: this,
+            duration: Duration(
+              milliseconds: 0,
+            ),
+          )..forward();
+
+          return HeaderMessage(
+            text:
+            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+            time: messageDate.toString(),
+            animationController: _animationController,
+          );
+        } else {
+          return Container();
+        }
+      } else {
+        return Container();
+      }
+    } else {
+      return Container();
+    }
+  }
+
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchChat.myMessages')) {
+    if (localStorage.containsKey('matchChat.myMessages.${widget.match.id}')) {
       var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages.${widget.match.id}')!));
 
       List messages = thisMessages;
@@ -365,7 +463,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   void _loadMoreMessages(String timeLastMessage) async {
-    this.isLoading = true;
+    this.isLoadingMoreMessage = true;
     final historyResponse =
     await ChatRepository().getMyChatMessages(widget.match.id, timeLastMessage);
     if (historyResponse['messages'].length > 0) {
@@ -397,13 +495,12 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
       this._messages.insertAll(_messages.length, history);
       if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-      this.isLoading = false;
-      // setState(() {
-      //   this.isLoading = false;
-      // });
+      setState(() {
+        this.isLoadingMoreMessage = false;
+      });
     } else {
       setState(() {
-        this.isLoading = false;
+        this.isLoadingMoreMessage = false;
         this.noMoreMessages = true;
       });
     }

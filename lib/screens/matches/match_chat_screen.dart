@@ -258,7 +258,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
         this.isLoading = false;
 
-        ChatRepository().readMessages(widget.match.id);
         String? timeLastMessage;
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {

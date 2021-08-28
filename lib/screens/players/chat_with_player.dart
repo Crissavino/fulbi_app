@@ -1,44 +1,38 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/message.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/chat_repository.dart';
-import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
-import 'package:fulbito_app/screens/matches/matches_screen.dart';
-import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
-import 'package:fulbito_app/services/push_notification_service.dart';
+import 'package:fulbito_app/screens/profile/public_profile_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
-import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/widgets/chat_message.dart';
 import 'package:fulbito_app/widgets/header_message.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
-class MatchChatScreen extends StatefulWidget {
-  Match match;
+class ChatWithPlayer extends StatefulWidget {
   User currentUser;
-  bool calledFromMyMatches;
+  bool calledFromMatch;
+  Match? match;
 
-  MatchChatScreen({
-    required this.match,
+  ChatWithPlayer({
     required this.currentUser,
-    required this.calledFromMyMatches,
+    required this.calledFromMatch,
+    this.match,
   });
 
   @override
-  _MatchChatScreenState createState() => _MatchChatScreenState();
+  _ChatWithPlayerState createState() => _ChatWithPlayerState();
 }
 
-class _MatchChatScreenState extends State<MatchChatScreen>
-    with TickerProviderStateMixin {
+class _ChatWithPlayerState extends State<ChatWithPlayer> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   String textMessage = '';
@@ -65,9 +59,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
-    ChatRepository().readMessages(widget.match.id);
+    // ChatRepository().readMessages(widget.match!.id);
     this.isLoading = true;
-    loadFromLocalStorage();
+    // loadFromLocalStorage();
     _loadHistory();
     _textController.addListener(_getLatestValue);
 
@@ -75,49 +69,14 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   void silentNotificationListener() {
-    PushNotificationService.messageStream.listen((notificationData) {
-      if (notificationData.containsKey('silentUpdateChat')) {
-        AnimationController _animationController = AnimationController(
-          vsync: this,
-          duration: Duration(
-            milliseconds: 0,
-          ),
-        )..forward();
 
-        final Message message = notificationData['newMessage'];
-
-        if (message.type == Message.TYPES['text']) {
-          final messageToInsert = ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-
-          this._messages.insert(0, messageToInsert);
-          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-          messageToInsert.animationController.forward();
-
-        } else if(message.type == Message.TYPES['header']) {
-          final messageToInsert = HeaderMessage(
-              text: message.text,
-              time: message.createdAt.toString(),
-              animationController: _animationController
-          );
-
-          this._messages.insert(0, messageToInsert);
-          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-        }
-      }
-    });
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    ChatRepository().readMessages(widget.match.id);
+    // ChatRepository().readMessages(widget.match!.id);
     _textController.dispose();
     messagesStreamController.close();
   }
@@ -138,22 +97,27 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   child: AppBar(
                     backwardsCompatibility: false,
                     systemOverlayStyle:
-                        SystemUiOverlayStyle(statusBarColor: Colors.white),
+                    SystemUiOverlayStyle(statusBarColor: Colors.white),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
                     leading: IconButton(
                       onPressed: () {
-                        if (widget.calledFromMyMatches) {
+                        if (widget.calledFromMatch) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
+                                  builder: (context) => MatchParticipantsScreen(
+                                    match: widget.match!,
+                                    calledFromMyMatches: false,
+                                  ),
+                                ),
                           ).then((_) => setState(() {}));
                         } else {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => MatchesScreen(),
-                            ),
+                              builder: (context) => PublicProfileScreen(
+                                    userId: widget.currentUser.id,
+                                  ),
+                                ),
                           ).then((_) => setState(() {}));
                         }
                       },
@@ -200,7 +164,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   ),
                 ),
               ),
-              bottomNavigationBar: _buildBottomNavigationBar(),
             ),
           )
         ],
@@ -216,15 +179,15 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       onTap: () => FocusScope.of(context).unfocus(),
       child: this.isLoading
           ? Container(
-              width: _width,
-              height: _height,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [circularLoading],
-              ),
-            )
-                : messageStreamBuilder(),
+        width: _width,
+        height: _height,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [circularLoading],
+        ),
+      )
+          : messageStreamBuilder(),
     );
   }
 
@@ -375,142 +338,97 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     }
   }
 
-  void loadFromLocalStorage() async {
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchChat.myMessages.${widget.match.id}')) {
-      var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages.${widget.match.id}')!));
-
-      List messages = thisMessages;
-      thisMessages = messages.map((message) => Message.fromJson(message)).toList();
-
-      AnimationController _animationController = AnimationController(
-        vsync: this,
-        duration: Duration(
-          milliseconds: 0,
-        ),
-      )..forward();
-
-      final history = thisMessages.map((message) {
-        if (message.type == Message.TYPES['text']) {
-          return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
-          return HeaderMessage(
-              text: message.text,
-              time: message.createdAt.toString(),
-              animationController: _animationController
-          );
-        }
-      }).toList();
-
-      this._messages.insertAll(0, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-      setState(() {
-        this.isLoading = false;
-      });
-    }
-  }
-
   void _loadHistory() async {
-    final historyResponse =
-    await ChatRepository().getMyChatMessages(widget.match.id, null);
-    if (historyResponse['messages'].length > 0) {
-      List<Message> myMessages = historyResponse['messages'];
-      AnimationController _animationController = AnimationController(
-        vsync: this,
-        duration: Duration(
-          milliseconds: 0,
-        ),
-      )..forward();
-
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
-      var jsonMessages = myMessages.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchChat.myMessages.${widget.match.id}', json.encode(jsonMessages.toString()));
-
-      final history = myMessages.map((message) {
-        if (message.type == Message.TYPES['text']) {
-          return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
-          return HeaderMessage(
-              text: message.text,
-              time: message.createdAt.toString(),
-              animationController: _animationController
-          );
-        }
-      }).toList();
-
-      this._messages.clear();
-      this._messages.insertAll(0, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-      setState(() {
-        this.isLoading = false;
-      });
-    } else {
-      setState(() {
-        this.isLoading = false;
-      });
-    }
+    // final historyResponse =
+    // await ChatRepository().getMyChatMessages(widget.match.id, null);
+    // if (historyResponse['messages'].length > 0) {
+    //   List<Message> myMessages = historyResponse['messages'];
+    //   AnimationController _animationController = AnimationController(
+    //     vsync: this,
+    //     duration: Duration(
+    //       milliseconds: 0,
+    //     ),
+    //   )..forward();
+    //
+    //   final history = myMessages.map((message) {
+    //     if (message.type == Message.TYPES['text']) {
+    //       return ChatMessage(
+    //         text: message.text,
+    //         sender: message.owner,
+    //         currentUser: widget.currentUser,
+    //         time: message.createdAt.toString(),
+    //         animationController: _animationController,
+    //       );
+    //     } else if(message.type == Message.TYPES['header']) {
+    //       return HeaderMessage(
+    //           text: message.text,
+    //           time: message.createdAt.toString(),
+    //           animationController: _animationController
+    //       );
+    //     }
+    //   }).toList();
+    //
+    //   this._messages.clear();
+    //   this._messages.insertAll(0, history);
+    //   if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+    //   setState(() {
+    //     this.isLoading = false;
+    //   });
+    // } else {
+    //   setState(() {
+    //     this.isLoading = false;
+    //   });
+    // }
   }
 
   void _loadMoreMessages(String timeLastMessage) async {
     this.isLoadingMoreMessage = true;
-    final historyResponse =
-    await ChatRepository().getMyChatMessages(widget.match.id, timeLastMessage);
-    if (historyResponse['messages'].length > 0) {
-      List<Message> myMessages = historyResponse['messages'];
-      AnimationController _animationController = AnimationController(
-        vsync: this,
-        duration: Duration(
-          milliseconds: 0,
-        ),
-      )..forward();
-
-      final history = myMessages.map((message) {
-        if (message.type == Message.TYPES['text']) {
-          return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
-          return HeaderMessage(
-              text: message.text,
-              time: message.createdAt.toString(),
-              animationController: _animationController
-          );
-        }
-      });
-
-      this._messages.insertAll(_messages.length, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
-      setState(() {
-        this.isLoadingMoreMessage = false;
-      });
-    } else {
-      setState(() {
-        this.isLoadingMoreMessage = false;
-        this.noMoreMessages = true;
-      });
-    }
+    // final historyResponse =
+    // await ChatRepository().getMyChatMessages(widget.match.id, timeLastMessage);
+    // if (historyResponse['messages'].length > 0) {
+    //   List<Message> myMessages = historyResponse['messages'];
+    //   AnimationController _animationController = AnimationController(
+    //     vsync: this,
+    //     duration: Duration(
+    //       milliseconds: 0,
+    //     ),
+    //   )..forward();
+    //
+    //   final history = myMessages.map((message) {
+    //     if (message.type == Message.TYPES['text']) {
+    //       return ChatMessage(
+    //         text: message.text,
+    //         sender: message.owner,
+    //         currentUser: widget.currentUser,
+    //         time: message.createdAt.toString(),
+    //         animationController: _animationController,
+    //       );
+    //     } else if(message.type == Message.TYPES['header']) {
+    //       return HeaderMessage(
+    //           text: message.text,
+    //           time: message.createdAt.toString(),
+    //           animationController: _animationController
+    //       );
+    //     }
+    //   });
+    //
+    //   this._messages.insertAll(_messages.length, history);
+    //   if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+    //   setState(() {
+    //     this.isLoadingMoreMessage = false;
+    //   });
+    // } else {
+    //   setState(() {
+    //     this.isLoadingMoreMessage = false;
+    //     this.noMoreMessages = true;
+    //   });
+    // }
   }
 
   Widget _buildMessageComposer() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 60.0,
+      height: 80.0,
       color: Colors.white,
       child: Column(
         children: [
@@ -527,29 +445,30 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               ),
               Expanded(
                 child: TextField(
+                  textInputAction: Platform.isIOS ? TextInputAction.newline : TextInputAction.newline,
                   controller: _textController,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration.collapsed(
                     hintText:
-                        translations[localeName]!['match.chat.sendMessage'],
+                    translations[localeName]!['match.chat.sendMessage'],
                   ),
                   focusNode: _focusNode,
                 ),
               ),
               Platform.isIOS
                   ? CupertinoButton(
-                      child: Text(
-                        translations[localeName]!['match.chat.send']!,
-                        style: TextStyle(color: Colors.green[400]),
-                      ),
-                      onPressed: () => _handleSubmit(),
-                    )
+                child: Text(
+                  translations[localeName]!['match.chat.send']!,
+                  style: TextStyle(color: Colors.green[400]),
+                ),
+                onPressed: () => _handleSubmit(),
+              )
                   : IconButton(
-                      icon: Icon(Icons.send),
-                      iconSize: 25.0,
-                      color: Colors.green[400],
-                      onPressed: () => _handleSubmit(),
-                    ),
+                icon: Icon(Icons.send),
+                iconSize: 25.0,
+                color: Colors.green[400],
+                onPressed: () => _handleSubmit(),
+              ),
             ],
           )
         ],
@@ -576,85 +495,14 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
     newMessage.animationController.forward();
 
-    ChatRepository().sendMessage(
-      widget.match.id,
-      newMessage.text!,
-      newMessage.currentUser!.id,
-      widget.match.chatId,
-    );
+    // ChatRepository().sendMessage(
+    //   widget.match.id,
+    //   newMessage.text!,
+    //   newMessage.currentUser!.id,
+    //   widget.match.chatId,
+    // );
 
     this._focusNode.requestFocus();
     this._textController.clear();
-  }
-
-  void _navigateToSection(index) {
-    if (this.isLoading) {
-      return;
-    }
-    this.isLoading = true;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchInfoScreen(
-              match: widget.match,
-              calledFromMyMatches: widget.calledFromMyMatches,
-            ),
-          ),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchParticipantsScreen(
-              match: widget.match,
-              calledFromMyMatches: widget.calledFromMyMatches,
-            ),
-          ),
-        );
-        break;
-      default:
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 2,
-      onTap: (index) {
-        if (index != 2) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Informacion'),
-          icon: Icon(Icons.info_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Participantes'),
-          icon: Icon(
-            Icons.group_outlined,
-          ),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          title: Text('Chat'),
-          icon: Icon(Icons.chat_bubble),
-        ),
-      ],
-    );
   }
 }

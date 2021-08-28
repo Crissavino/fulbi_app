@@ -8,6 +8,7 @@ import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
+import 'package:fulbito_app/screens/players/chat_with_player.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
@@ -169,7 +170,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                           SizedBox(height: 45.0),
                                           _buildUserPositions(innerWidth),
                                           Expanded(child: Container()),
-                                          widget.calledFromMatch ? Container() : _buildInviteButton(),
+                                          _buildActionsButtons(),
                                           SizedBox(height: 55.0),
                                         ],
                                       ),
@@ -569,6 +570,57 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     );
   }
 
+  _buildChatButton() {
+    return Container(
+      margin: EdgeInsets.only(top: 20.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green[600]!,
+            Colors.green[500]!,
+            Colors.green[500]!,
+            Colors.green[600]!,
+          ],
+          stops: [0.1, 0.4, 0.7, 0.9],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green[100]!,
+            blurRadius: 10.0,
+            offset: Offset(0, 5),
+          ),
+        ],
+        color: Colors.green[400],
+        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+      ),
+      width: MediaQuery.of(context).size.width * .40,
+      height: 50.0,
+      child: Center(
+        child: TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChatWithPlayer(
+                currentUser: this._user!,
+                calledFromMatch: widget.calledFromMatch,
+              ),
+            ),
+          ),
+          child: Text(
+            'CHAT',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   _buildInviteButton() {
     return Container(
       margin: EdgeInsets.only(top: 20.0),
@@ -625,4 +677,71 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     );
   }
 
+  _buildActionsButtons() {
+    if (widget.calledFromMatch) {
+      _buildChatButton() {
+        return Container(
+          margin: EdgeInsets.only(top: 20.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green[600]!,
+                Colors.green[500]!,
+                Colors.green[500]!,
+                Colors.green[600]!,
+              ],
+              stops: [0.1, 0.4, 0.7, 0.9],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green[100]!,
+                blurRadius: 10.0,
+                offset: Offset(0, 5),
+              ),
+            ],
+            color: Colors.green[400],
+            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+          ),
+          width: MediaQuery.of(context).size.width * .40,
+          height: 50.0,
+          child: Center(
+            child: TextButton(
+              onPressed: () async {
+                await showModalBottomSheet(
+                  backgroundColor: Colors.transparent,
+                  context: context,
+                  enableDrag: true,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return ShowMyCreatedMatches(
+                      userToInvite: this._user!,
+                    );
+                  },
+                );
+              },
+              child: Text(
+                translations[localeName]!['general.invite']!.toUpperCase(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildInviteButton(),
+          _buildChatButton()
+        ],
+      );
+    }
+  }
 }

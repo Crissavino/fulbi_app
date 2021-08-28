@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/widgets/simple_url_preview_custom.dart';
 import 'package:linkable/linkable.dart';
+import 'package:simple_url_preview/simple_url_preview.dart';
+import 'package:flutter_parsed_text/flutter_parsed_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatMessage extends StatelessWidget {
   final String? text;
@@ -44,6 +48,8 @@ class ChatMessage extends StatelessWidget {
     final messageHour = parsedTime!.hour;
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
     final messageTime = '$messageHour:$messageMinute';
+    String messageText = this.text!;
+
     return Container(
       margin: EdgeInsets.only(
         top: 8.0,
@@ -88,14 +94,7 @@ class ChatMessage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.0),
-          Linkable(
-            text: this.text!,
-            style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-            ),
-          )
+          FormattedText(messageText,)
         ],
       ),
     );
@@ -107,6 +106,8 @@ class ChatMessage extends StatelessWidget {
     final messageHour = parsedTime!.hour;
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
     final messageTime = '$messageHour:$messageMinute';
+    String messageText = this.text!;
+
     return Container(
       margin: EdgeInsets.only(
         top: 8.0,
@@ -150,16 +151,93 @@ class ChatMessage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.0),
-          Linkable(
-            text: this.text!,
-            style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-            ),
-          )
+          FormattedText(messageText,)
+          // Linkable(
+          //   text: this.text!,
+          //   style: TextStyle(
+          //     color: Colors.blueGrey,
+          //     fontSize: 16.0,
+          //     fontWeight: FontWeight.w400,
+          //   ),
+          // )
         ],
       ),
+    );
+  }
+}
+
+class FormattedText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+  final TextDirection? textDirection;
+  final TextOverflow? overflow;
+  final int? maxLines;
+
+  FormattedText(
+      this.text, {
+        Key? key,
+        this.style,
+        this.textAlign,
+        this.textDirection,
+        this.overflow,
+        this.maxLines,
+      }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    Widget showPreview({required String pattern, required String text}) {
+      return SimpleUrlPreviewCustom(
+        url: text,
+        bgColor: Colors.grey[350],
+        // isClosable: false,
+        // imageLoaderColor: Colors.white,
+        previewContainerPadding: EdgeInsets.all(0.0),
+        titleLines: 1,
+        // descriptionLines: 2,
+        titleStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600
+        ),
+        descriptionStyle: TextStyle(
+          fontSize: 12,
+        ),
+        siteNameStyle: TextStyle(
+          fontSize: 12,
+        ),
+      );
+    }
+
+    return ParsedText(
+      text: this.text,
+      style: style ?? TextStyle(
+        color: Colors.blueGrey,
+        fontSize: 16.0,
+        fontWeight: FontWeight.w400,
+      ),
+      overflow: TextOverflow.clip,
+      maxLines: maxLines ?? 15,
+      parse: [
+        MatchText(
+          renderWidget: showPreview,
+          pattern: '([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:._\+-~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:_\+.~#?&\/\/=]*))',
+          type: ParsedType.URL,
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w400,
+          ),
+          onTap: (url) async {
+            var a = await canLaunch(url);
+
+            if (a) {
+              launch(url);
+            }
+          },
+        )
+      ],
+      regexOptions: RegexOptions(caseSensitive: false),
     );
   }
 }

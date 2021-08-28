@@ -65,6 +65,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
+    ChatRepository().readMessages(widget.match.id);
     this.isLoading = true;
     loadFromLocalStorage();
     _loadHistory();
@@ -257,6 +258,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
         this.isLoading = false;
 
+        ChatRepository().readMessages(widget.match.id);
         String? timeLastMessage;
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {

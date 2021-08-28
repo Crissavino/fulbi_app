@@ -58,6 +58,8 @@ dependencies:
   package_info_plus:
   launch_review:
   sentry_flutter:
+  simple_url_preview:
+  flutter_parsed_text:
 
 dev_dependencies:
   flutter_test:

@@ -28,6 +28,7 @@ class Match {
     required this.createdAt,
     required this.updatedAt,
     required this.currencyId,
+    required this.description,
     this.participants,
   });
 
@@ -47,6 +48,7 @@ class Match {
   DateTime createdAt;
   DateTime updatedAt;
   int? currencyId;
+  String? description;
   List<User>? participants;
 
   factory Match.fromJson(Map<String, dynamic> json) => Match(
@@ -66,6 +68,7 @@ class Match {
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
     currencyId: json["currency_id"],
+    description: json["description"],
     participants: List<User>.from(json["participants"].map((x) => User.fromJson(x))),
   );
 
@@ -86,6 +89,7 @@ class Match {
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
     "currency_id": currencyId,
+    "description": description,
     "participants": List<dynamic>.from(participants!.map((x) => x.toJson())),
   };
 }

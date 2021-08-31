@@ -23,6 +23,7 @@ import 'package:fulbito_app/utils/maps_util.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/models/match.dart';
+import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -411,6 +412,89 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
+  GestureDetector _buildMatchDescription(String description) {
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
+
+    return GestureDetector(
+      child: Container(
+        width: _width / 1.5,
+        margin: EdgeInsets.only(top: 20.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6.0,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ListTile(
+          title: Container(
+            child: Text(
+              translations[localeName]!['match.create.otherInfo']!,
+              style: TextStyle(fontSize: 16.0),
+            ),
+          ),
+          trailing: Icon(
+            Icons.keyboard_arrow_up_outlined,
+            size: 40.0,
+          ),
+        ),
+      ),
+      onTap: () async {
+        await showModalBottomSheet(
+          backgroundColor: Colors.transparent,
+          context: context,
+          enableDrag: true,
+          isScrollControlled: true,
+          builder: (BuildContext context) {
+            return Container(
+              height: _height / 1.1,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30.0),
+                  topRight: Radius.circular(30.0),
+                ),
+              ),
+              child: Stack(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    margin: EdgeInsets.only(
+                      top: 100.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 30.0),
+                          child: Text(
+                            description,
+                            style: TextStyle(
+                              fontSize: 18.0,
+                            ),
+                            textAlign: TextAlign.start,
+                            overflow: TextOverflow.clip,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ModalTopBar()
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Container _buildMatchCost(String? currencySymbol, Match match) {
     return Container(
       padding: EdgeInsets.only(top: 40.0),
@@ -679,6 +763,10 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         _buildMatchGenre(genre),
                         _buildMatchCost(currencySymbol, match),
                         _buildMatchSpots(spotsAvailable),
+                        Expanded(
+                          child: Container(),
+                        ),
+                        match.description != null ? _buildMatchDescription(match.description!) : Container(),
                       ],
                     ),
                   ),

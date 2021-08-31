@@ -242,7 +242,8 @@ class MatchRepository {
     int currencyId,
     double cost,
     int playersForMatch,
-    bool isFreeMatch
+    bool isFreeMatch,
+    String? description
   ) async {
     final data = {
       "locationData": locationData,
@@ -253,6 +254,7 @@ class MatchRepository {
       "cost": cost,
       "num_players": playersForMatch,
       "is_free_match": isFreeMatch,
+      "description": description,
     };
 
     final res = await api.postData(data, '/match/create');
@@ -272,6 +274,7 @@ class MatchRepository {
       double cost,
       int playersForMatch,
       bool isFreeMatch,
+      String? description,
       ) async {
     final data = {
       "match_id": matchId,
@@ -283,6 +286,7 @@ class MatchRepository {
       "cost": cost,
       "num_players": playersForMatch,
       "is_free_match": isFreeMatch,
+      "description": description,
     };
 
     final res = await api.postData(data, '/match/edit');

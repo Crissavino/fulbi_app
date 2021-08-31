@@ -49,6 +49,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   var userLocationDetails;
   UserLocation? userLocation;
   String whenPlay = '';
+  String description = '';
   List<Genre> matchGender = Genre().genres;
   List<Type> matchType = Type().matchTypes;
   double matchCost = 0.0;
@@ -62,6 +63,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   // controllers
   final _myNumPlayersController = TextEditingController();
   final _myMatchCostController = TextEditingController();
+  final _descriptionController = TextEditingController();
   StreamController matchStreamController = StreamController.broadcast();
 
   @override
@@ -86,12 +88,16 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
 
     this._myMatchCostController.text = widget.match.cost.toString();
     this._myMatchCostController.addListener(_printLatestMatchCostValue);
+
+    this._descriptionController.text = widget.match.description == null ? '' : widget.match.description.toString();
+    this._descriptionController.addListener(_printDescriptionValue);
   }
 
   @override
   void dispose() {
     _myNumPlayersController.dispose();
     _myMatchCostController.dispose();
+    _descriptionController.dispose();
     matchStreamController.close();
     super.dispose();
   }
@@ -158,6 +164,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     } else if (widget.manualSelection != null) {
 
       Match match = widget.match;
+      this._descriptionController.text = match.description != null ? match.description! : '';
       this.isFreeMatch = widget.editedValues['isFreeMatch'];
       this.matchCost = widget.editedValues['matchCost'];
       this.matchGender = widget.editedValues['matchGender'];
@@ -284,6 +291,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                 ],
               ),
               _buildPlayerForMatch(),
+              _buildMatchDescription(),
               SizedBox(height: 30.0,),
               _buildEditMatchButton(match)
             ],
@@ -838,9 +846,9 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
         color: Colors.transparent,
       ),
       onChanged: (String? newValue) {
-        setState(() {
-          currencySelected = newValue!;
-        });
+        currencySelected = newValue!;
+        this.currencySelected = newValue;
+        setState(() {});
       },
       items: currencies.map<DropdownMenuItem<String>>((Currency currency) {
         return DropdownMenuItem<String>(
@@ -997,6 +1005,93 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
     }
   }
 
+  Widget _buildMatchDescription() {
+    final _width = MediaQuery.of(context).size.width;
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      width: _width,
+      margin: EdgeInsets.only(top: 20.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      height: 100.0,
+      child: Container(
+        margin: EdgeInsets.only(
+          left: 25.0,
+        ),
+        width: _width,
+        height: 160.0,
+        child: Container(
+          child: TextFormField(
+            controller: this._descriptionController,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            textCapitalization: TextCapitalization.sentences,
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontFamily: 'OpenSans',
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.only(top: 14.0),
+              hintText:
+              '${translations[localeName]!['match.create.otherInfo']!} (${translations[localeName]!['general.optional']!})',
+              hintStyle: kHintTextStyle,
+            ),
+            onChanged: (val) {
+              if (val.isNotEmpty) {
+                setState(() {
+                  this.description = val;
+                });
+              } else {
+                setState(() {
+                  this.description = '';
+                });
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _printDescriptionValue() {
+    if (this._descriptionController.text.isNotEmpty) {
+      this.description = this._descriptionController.text;
+
+      widget.match.description = this.description;
+      Match match = widget.match;
+
+      dynamic toStream = {
+        'match': match,
+        'matchGender': this.matchGender,
+        'matchType': this.matchType,
+        'currencySelected': this.currencySelected,
+        'userLocationDesc': this.userLocationDesc,
+        'userLocationDetails': this.userLocationDetails,
+        'userLocation': this.userLocation,
+        'whenPlay': this.whenPlay,
+        'playersForMatch': this.playersForMatch,
+      };
+
+      if (!matchStreamController.isClosed)
+        matchStreamController.sink.add(
+          toStream,
+        );
+    } else {
+      this.description = '0';
+    }
+  }
+
   Widget _buildEditMatchButton(Match match) {
     final _width = MediaQuery.of(context).size.width;
 
@@ -1096,6 +1191,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               match.cost,
               int.parse(this._myNumPlayersController.text),
               match.isFreeMatch,
+              this._descriptionController.text.isEmpty ? null : this._descriptionController.text
             );
 
             if (response['success']) {

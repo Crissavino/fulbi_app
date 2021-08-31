@@ -508,6 +508,53 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   Widget _buildMessageComposer() {
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      height: 60.0,
+      color: Colors.white,
+      child: Row(
+        children: <Widget>[
+          // IconButton(
+          //   icon: Icon(Icons.photo),
+          //   iconSize: 25.0,
+          //   color: Colors.green[400],
+          //   onPressed: () {},
+          // ),
+          SizedBox(
+            width: 25.0,
+          ),
+          Expanded(
+            child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: _textController,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration.collapsed(
+                hintText:
+                translations[localeName]!['match.chat.sendMessage'],
+              ),
+              focusNode: _focusNode,
+            ),
+          ),
+          Platform.isIOS
+              ? CupertinoButton(
+            child: Text(
+              translations[localeName]!['match.chat.send']!,
+              style: TextStyle(color: Colors.green[400]),
+            ),
+            onPressed: () => _handleSubmit(),
+          )
+              : IconButton(
+            icon: Icon(Icons.send),
+            iconSize: 25.0,
+            color: Colors.green[400],
+            onPressed: () => _handleSubmit(),
+          ),
+        ],
+      ),
+    );
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       height: 60.0,
@@ -527,6 +574,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               ),
               Expanded(
                 child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
                   controller: _textController,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration.collapsed(

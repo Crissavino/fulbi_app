@@ -29,9 +29,15 @@ class CreateMatchScreen extends StatefulWidget {
   bool? manualSelection;
   String? userLocationDesc;
   var userLocationDetails;
+  // similar to edited values from edit screen
+  var createValues;
 
-  CreateMatchScreen(
-      {this.manualSelection, this.userLocationDesc, this.userLocationDetails});
+  CreateMatchScreen({
+    this.manualSelection,
+    this.userLocationDesc,
+    this.userLocationDetails,
+    this.createValues,
+  });
 
   @override
   _CreateMatchScreenState createState() => _CreateMatchScreenState();
@@ -50,11 +56,14 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
   List<Type> matchType = Type().matchTypes;
   double matchCost = 0.0;
   int playersForMatch = 0;
+  String description = '';
   List<Currency> currencies = Currency().currencies;
   String? currencySelected;
   bool isLoading = false;
   bool isFreeMatch = false;
   final _myMatchCostController = TextEditingController();
+  final _myNumPlayersController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
   @override
   void initState() {
@@ -68,10 +77,32 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
     if (widget.manualSelection != null) {
       this.userLocationDesc = widget.userLocationDesc!;
       this.userLocationDetails = widget.userLocationDetails!;
+
+      this.isFreeMatch = widget.createValues['isFreeMatch'];
+      this.whenPlay = widget.createValues['whenPlay'];
+      this.matchGender = widget.createValues['matchGender'];
+      this.matchType = widget.createValues['matchType'];
+      this.matchCost = double.parse(widget.createValues['matchCost']);
+      this._myMatchCostController.text = this.matchCost.toString();
+      this.currencySelected = widget.createValues['currencySelected'];
+      this.playersForMatch = widget.createValues['playersForMatch'];
+      this._myNumPlayersController.text = this.playersForMatch.toString();
+      this.description = widget.createValues['description'];
+
+      this.description = widget.createValues['description'];
+    } else {
+      this._myMatchCostController.text = '0.0';
     }
 
-    this._myMatchCostController.text = '0.0';
+    this._myNumPlayersController.addListener(_printLatestPlayerForMatchValue);
     this._myMatchCostController.addListener(_printLatestMatchCostValue);
+  }
+
+  @override
+  void dispose() {
+    _myNumPlayersController.dispose();
+    _myMatchCostController.dispose();
+    super.dispose();
   }
 
   @override
@@ -157,6 +188,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                               ],
                             ),
                             _buildPlayerForMatch(),
+                            _buildMatchDescription(),
                             SizedBox(
                               height: 30.0,
                             ),
@@ -193,12 +225,24 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
           };
         }
 
+        final createValues = {
+          'isFreeMatch': this.isFreeMatch,
+          'whenPlay': this.whenPlay,
+          'matchGender': this.matchGender,
+          'matchType': this.matchType,
+          'matchCost': this.matchCost.toString(),
+          'currencySelected': this.currencySelected,
+          'playersForMatch': this.playersForMatch,
+          'description': this.description,
+        };
+
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation1, animation2) => Map(
               currentPosition: myLatLong,
               calledFromCreate: true,
+              editedValues: createValues,
             ),
             transitionDuration: Duration(seconds: 0),
           ),
@@ -643,6 +687,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
         width: _width,
         child: Container(
           child: TextFormField(
+            controller: this._myNumPlayersController,
             keyboardType: TextInputType.number,
             textCapitalization: TextCapitalization.sentences,
             style: TextStyle(
@@ -664,14 +709,70 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                   translations[localeName]!['match.create.playerForMatch']!,
               hintStyle: kHintTextStyle,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _printLatestPlayerForMatchValue() {
+    if (this._myNumPlayersController.text.isNotEmpty) {
+      this.playersForMatch = int.parse(this._myNumPlayersController.text);
+    } else {
+      this.playersForMatch = 0;
+    }
+  }
+
+  Widget _buildMatchDescription() {
+    final _width = MediaQuery.of(context).size.width;
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      width: _width,
+      margin: EdgeInsets.only(top: 20.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      height: 100.0,
+      child: Container(
+        margin: EdgeInsets.only(
+          left: 25.0,
+        ),
+        width: _width,
+        height: 160.0,
+        child: Container(
+          child: TextFormField(
+            initialValue: this.description,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            textCapitalization: TextCapitalization.sentences,
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontFamily: 'OpenSans',
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.only(top: 14.0),
+              hintText:
+              '${translations[localeName]!['match.create.otherInfo']!} (${translations[localeName]!['general.optional']!})',
+              hintStyle: kHintTextStyle,
+            ),
             onChanged: (val) {
               if (val.isNotEmpty) {
                 setState(() {
-                  this.playersForMatch = int.parse(val);
+                  this.description = val;
                 });
               } else {
                 setState(() {
-                  this.playersForMatch = 0;
+                  this.description = '';
                 });
               }
             },
@@ -782,6 +883,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                       this.matchCost,
                       this.playersForMatch,
                       this.isFreeMatch,
+                      this.description.isEmpty ? null : this.description
                   );
 
                   if (response['success']) {

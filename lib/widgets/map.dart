@@ -231,9 +231,11 @@ class _MapState extends State<Map> {
                         pageBuilder: (context, animation1, animation2) =>
                             CreateMatchScreen(
                           manualSelection: true,
-                          userLocationDesc: '${latitude.toStringAsFixed(3)} - ${longitude.toStringAsFixed(3)}',
+                          userLocationDesc:
+                              '${latitude.toStringAsFixed(3)} - ${longitude.toStringAsFixed(3)}',
                           // userLocationDesc: place.text,
                           userLocationDetails: this.userLocationDetails,
+                          createValues: widget.editedValues,
                         ),
                         transitionDuration: Duration(seconds: 0),
                       ),

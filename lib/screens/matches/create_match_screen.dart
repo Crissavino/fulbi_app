@@ -63,7 +63,6 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
   bool isFreeMatch = false;
   final _myMatchCostController = TextEditingController();
   final _myNumPlayersController = TextEditingController();
-  final _descriptionController = TextEditingController();
 
   @override
   void initState() {
@@ -85,11 +84,12 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
       this.matchCost = double.parse(widget.createValues['matchCost']);
       this._myMatchCostController.text = this.matchCost.toString();
       this.currencySelected = widget.createValues['currencySelected'];
-      this.playersForMatch = widget.createValues['playersForMatch'];
-      this._myNumPlayersController.text = this.playersForMatch.toString();
+      if (widget.createValues['playersForMatch'] != 0) {
+        this.playersForMatch = widget.createValues['playersForMatch'];
+        this._myNumPlayersController.text = this.playersForMatch.toString();
+      }
       this.description = widget.createValues['description'];
 
-      this.description = widget.createValues['description'];
     } else {
       this._myMatchCostController.text = '0.0';
     }

@@ -62,6 +62,7 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
             final Feature place = result;
             final double latitude = result.center[1].toDouble();
             final double longitude = result.center[0].toDouble();
+            final placeArray = place.placeName.split(',');
             var cityContext = place.context.firstWhereOrNull((Context con) {
               if (con.id!.contains('place')) {
                 return true;
@@ -71,16 +72,37 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
                 return false;
               }
             });
-            var city = place.placeName.split(',')[0];
+            var city = placeArray[0].trim();
             if (cityContext != null) {
               city = cityContext.text!;
             }
-            final province = place.context
-                .firstWhere((Context con) => con.id!.contains('region'))
-                .text;
-            final country = place.context
-                .firstWhere((Context con) => con.id!.contains('country'))
-                .text;
+
+            var provinceContext = place.context.firstWhereOrNull((Context con) {
+              if (con.id!.contains('region')) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            var province = '';
+            if (placeArray.length > 2) {
+              province = placeArray[1].trim();
+            }
+            if (provinceContext != null) {
+              province = provinceContext.text!;
+            }
+
+            var countryContext = place.context.firstWhereOrNull((Context con) {
+              if (con.id!.contains('country')) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            var country = placeArray[placeArray.length - 1].trim();
+            if (countryContext != null) {
+              country = countryContext.text!;
+            }
 
             this.userLocationDetails = {
               'lat': latitude,

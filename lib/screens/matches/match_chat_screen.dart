@@ -50,7 +50,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   @override
   void setState(fn) {
-    if(mounted) {
+    if (mounted) {
       super.setState(fn);
     }
   }
@@ -88,26 +88,26 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
         if (message.type == Message.TYPES['text']) {
           final messageToInsert = ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
+              text: message.text,
+              sender: message.owner,
+              currentUser: widget.currentUser,
+              time: message.createdAt.toString(),
+              animationController: _animationController,
+              matchOwnerId: widget.match.ownerId);
 
           this._messages.insert(0, messageToInsert);
-          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+          if (!messagesStreamController.isClosed)
+            messagesStreamController.sink.add(this._messages);
           messageToInsert.animationController.forward();
-
-        } else if(message.type == Message.TYPES['header']) {
+        } else if (message.type == Message.TYPES['header']) {
           final messageToInsert = HeaderMessage(
               text: message.text,
               time: message.createdAt.toString(),
-              animationController: _animationController
-          );
+              animationController: _animationController);
 
           this._messages.insert(0, messageToInsert);
-          if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+          if (!messagesStreamController.isClosed)
+            messagesStreamController.sink.add(this._messages);
         }
       }
     });
@@ -144,20 +144,26 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                     leading: IconButton(
                       onPressed: () {
                         if (widget.calledFromMyMatches) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MyMatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (context) => MyMatchesScreen(),
+                                ),
+                              )
+                              .then((_) => setState(() {}));
                         } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MatchesScreen(),
-                            ),
-                          ).then((_) => setState(() {}));
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (context) => MatchesScreen(),
+                                ),
+                              )
+                              .then((_) => setState(() {}));
                         }
                       },
-                      icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
+                      icon: Platform.isIOS
+                          ? Icon(Icons.arrow_back_ios)
+                          : Icon(Icons.arrow_back),
                       splashColor: Colors.transparent,
                     ),
                     title: Text(
@@ -224,7 +230,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                 children: [circularLoading],
               ),
             )
-                : messageStreamBuilder(),
+          : messageStreamBuilder(),
     );
   }
 
@@ -236,19 +242,15 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       initialData: this._messages,
       stream: messagesStreamController.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-
         if (!snapshot.hasData) {
-
           this.isLoading = true;
 
           return Container(
             width: _width,
             height: _height,
             child: Column(
-              mainAxisAlignment:
-              MainAxisAlignment.center,
-              crossAxisAlignment:
-              CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [circularLoading],
             ),
           );
@@ -263,8 +265,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           onNotification: (ScrollNotification scrollInfo) {
             if (!isLoading &&
                 scrollInfo.metrics.pixels >=
-                    (scrollInfo.metrics.maxScrollExtent/2) &&
-                this.noMoreMessages == false && !this.isLoadingMoreMessage) {
+                    (scrollInfo.metrics.maxScrollExtent / 2) &&
+                this.noMoreMessages == false &&
+                !this.isLoadingMoreMessage) {
               final lastMessage = this._messages.last;
               timeLastMessage = lastMessage.time!;
               _loadMoreMessages(timeLastMessage!);
@@ -273,10 +276,16 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           },
           child: ListView.separated(
               reverse: true,
-              separatorBuilder: (BuildContext _, int index,) => buildSeparator(index, messages, timeLastMessage: timeLastMessage),
+              separatorBuilder: (
+                BuildContext _,
+                int index,
+              ) =>
+                  buildSeparator(index, messages,
+                      timeLastMessage: timeLastMessage),
               padding: EdgeInsets.only(top: 15.0),
               itemCount: messages.length,
-              itemBuilder: (BuildContext context, int index) => messages[index]),
+              itemBuilder: (BuildContext context, int index) =>
+                  messages[index]),
         );
       },
     );
@@ -312,7 +321,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
           return HeaderMessage(
             text:
-            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+                '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
             time: messageDate.toString(),
             animationController: _animationController,
           );
@@ -336,7 +345,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
           return HeaderMessage(
             text:
-            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+                '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
             time: messageDate.toString(),
             animationController: _animationController,
           );
@@ -360,7 +369,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
           return HeaderMessage(
             text:
-            '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
+                '${translations[localeName]!['general.day.${messageDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(messageDate)}',
             time: messageDate.toString(),
             animationController: _animationController,
           );
@@ -378,10 +387,12 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (localStorage.containsKey('matchChat.myMessages.${widget.match.id}')) {
-      var thisMessages = json.decode(json.decode(localStorage.getString('matchChat.myMessages.${widget.match.id}')!));
+      var thisMessages = json.decode(json.decode(
+          localStorage.getString('matchChat.myMessages.${widget.match.id}')!));
 
       List messages = thisMessages;
-      thisMessages = messages.map((message) => Message.fromJson(message)).toList();
+      thisMessages =
+          messages.map((message) => Message.fromJson(message)).toList();
 
       AnimationController _animationController = AnimationController(
         vsync: this,
@@ -393,23 +404,23 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       final history = thisMessages.map((message) {
         if (message.type == Message.TYPES['text']) {
           return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
+              text: message.text,
+              sender: message.owner,
+              currentUser: widget.currentUser,
+              time: message.createdAt.toString(),
+              animationController: _animationController,
+              matchOwnerId: widget.match.ownerId);
+        } else if (message.type == Message.TYPES['header']) {
           return HeaderMessage(
               text: message.text,
               time: message.createdAt.toString(),
-              animationController: _animationController
-          );
+              animationController: _animationController);
         }
       }).toList();
 
       this._messages.insertAll(0, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed)
+        messagesStreamController.sink.add(this._messages);
       setState(() {
         this.isLoading = false;
       });
@@ -418,7 +429,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   void _loadHistory() async {
     final historyResponse =
-    await ChatRepository().getMyChatMessages(widget.match.id, null);
+        await ChatRepository().getMyChatMessages(widget.match.id, null);
     if (historyResponse['messages'].length > 0) {
       List<Message> myMessages = historyResponse['messages'];
       AnimationController _animationController = AnimationController(
@@ -430,29 +441,30 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       var jsonMessages = myMessages.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchChat.myMessages.${widget.match.id}', json.encode(jsonMessages.toString()));
+      await localStorage.setString('matchChat.myMessages.${widget.match.id}',
+          json.encode(jsonMessages.toString()));
 
       final history = myMessages.map((message) {
         if (message.type == Message.TYPES['text']) {
           return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
+              text: message.text,
+              sender: message.owner,
+              currentUser: widget.currentUser,
+              time: message.createdAt.toString(),
+              animationController: _animationController,
+              matchOwnerId: widget.match.ownerId);
+        } else if (message.type == Message.TYPES['header']) {
           return HeaderMessage(
               text: message.text,
               time: message.createdAt.toString(),
-              animationController: _animationController
-          );
+              animationController: _animationController);
         }
       }).toList();
 
       this._messages.clear();
       this._messages.insertAll(0, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed)
+        messagesStreamController.sink.add(this._messages);
       setState(() {
         this.isLoading = false;
       });
@@ -465,8 +477,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   void _loadMoreMessages(String timeLastMessage) async {
     this.isLoadingMoreMessage = true;
-    final historyResponse =
-    await ChatRepository().getMyChatMessages(widget.match.id, timeLastMessage);
+    final historyResponse = await ChatRepository()
+        .getMyChatMessages(widget.match.id, timeLastMessage);
     if (historyResponse['messages'].length > 0) {
       List<Message> myMessages = historyResponse['messages'];
       AnimationController _animationController = AnimationController(
@@ -479,23 +491,23 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       final history = myMessages.map((message) {
         if (message.type == Message.TYPES['text']) {
           return ChatMessage(
-            text: message.text,
-            sender: message.owner,
-            currentUser: widget.currentUser,
-            time: message.createdAt.toString(),
-            animationController: _animationController,
-          );
-        } else if(message.type == Message.TYPES['header']) {
+              text: message.text,
+              sender: message.owner,
+              currentUser: widget.currentUser,
+              time: message.createdAt.toString(),
+              animationController: _animationController,
+              matchOwnerId: widget.match.ownerId);
+        } else if (message.type == Message.TYPES['header']) {
           return HeaderMessage(
               text: message.text,
               time: message.createdAt.toString(),
-              animationController: _animationController
-          );
+              animationController: _animationController);
         }
       });
 
       this._messages.insertAll(_messages.length, history);
-      if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+      if (!messagesStreamController.isClosed)
+        messagesStreamController.sink.add(this._messages);
       setState(() {
         this.isLoadingMoreMessage = false;
       });
@@ -508,7 +520,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   Widget _buildMessageComposer() {
-
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       height: 60.0,
@@ -531,76 +542,25 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               controller: _textController,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration.collapsed(
-                hintText:
-                translations[localeName]!['match.chat.sendMessage'],
+                hintText: translations[localeName]!['match.chat.sendMessage'],
               ),
               focusNode: _focusNode,
             ),
           ),
           Platform.isIOS
               ? CupertinoButton(
-            child: Text(
-              translations[localeName]!['match.chat.send']!,
-              style: TextStyle(color: Colors.green[400]),
-            ),
-            onPressed: () => _handleSubmit(),
-          )
-              : IconButton(
-            icon: Icon(Icons.send),
-            iconSize: 25.0,
-            color: Colors.green[400],
-            onPressed: () => _handleSubmit(),
-          ),
-        ],
-      ),
-    );
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 60.0,
-      color: Colors.white,
-      child: Column(
-        children: [
-          Row(
-            children: <Widget>[
-              // IconButton(
-              //   icon: Icon(Icons.photo),
-              //   iconSize: 25.0,
-              //   color: Colors.green[400],
-              //   onPressed: () {},
-              // ),
-              SizedBox(
-                width: 25.0,
-              ),
-              Expanded(
-                child: TextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  controller: _textController,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration.collapsed(
-                    hintText:
-                        translations[localeName]!['match.chat.sendMessage'],
+                  child: Text(
+                    translations[localeName]!['match.chat.send']!,
+                    style: TextStyle(color: Colors.green[400]),
                   ),
-                  focusNode: _focusNode,
+                  onPressed: () => _handleSubmit(),
+                )
+              : IconButton(
+                  icon: Icon(Icons.send),
+                  iconSize: 25.0,
+                  color: Colors.green[400],
+                  onPressed: () => _handleSubmit(),
                 ),
-              ),
-              Platform.isIOS
-                  ? CupertinoButton(
-                      child: Text(
-                        translations[localeName]!['match.chat.send']!,
-                        style: TextStyle(color: Colors.green[400]),
-                      ),
-                      onPressed: () => _handleSubmit(),
-                    )
-                  : IconButton(
-                      icon: Icon(Icons.send),
-                      iconSize: 25.0,
-                      color: Colors.green[400],
-                      onPressed: () => _handleSubmit(),
-                    ),
-            ],
-          )
         ],
       ),
     );
@@ -612,17 +572,18 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     }
 
     final newMessage = ChatMessage(
-      text: this.textMessage,
-      sender: widget.currentUser,
-      currentUser: widget.currentUser,
-      time: DateTime.now().toString(),
-      animationController: AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 400),
-      ),
-    );
+        text: this.textMessage,
+        sender: widget.currentUser,
+        currentUser: widget.currentUser,
+        time: DateTime.now().toString(),
+        animationController: AnimationController(
+          vsync: this,
+          duration: Duration(milliseconds: 400),
+        ),
+        matchOwnerId: widget.match.ownerId);
     this._messages.insert(0, newMessage);
-    if (!messagesStreamController.isClosed) messagesStreamController.sink.add(this._messages);
+    if (!messagesStreamController.isClosed)
+      messagesStreamController.sink.add(this._messages);
     newMessage.animationController.forward();
 
     ChatRepository().sendMessage(

@@ -12,6 +12,7 @@ class ChatMessage extends StatelessWidget {
   final User? currentUser;
   final String? time;
   final AnimationController animationController;
+  final int matchOwnerId;
 
   const ChatMessage({
     required this.text,
@@ -19,6 +20,7 @@ class ChatMessage extends StatelessWidget {
     required this.currentUser,
     required this.time,
     required this.animationController,
+    required this.matchOwnerId
   });
 
   @override
@@ -49,59 +51,67 @@ class ChatMessage extends StatelessWidget {
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
     final messageTime = '$messageHour:$messageMinute';
     String messageText = this.text!;
+    final isMatchOwner = currentUser.id == this.matchOwnerId;
 
-    return Container(
-      margin: EdgeInsets.only(
-        top: 8.0,
-        bottom: 8.0,
-        left: 50.0,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
-      width: MediaQuery.of(context).size.width * 0.85,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(15.0),
-          bottomLeft: Radius.circular(15.0),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                currentUser.name,
-                // message.time.toString(),
-                style: TextStyle(
-                  color: Colors.blueGrey,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Container()),
+        Container(
+          margin: EdgeInsets.only(
+            top: 8.0,
+            bottom: 8.0,
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              bottomLeft: Radius.circular(15.0),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    currentUser.name,
+                    style: TextStyle(
+                      color: isMatchOwner ? Colors.blueGrey[800] : Colors.blueGrey,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    messageTime.toString(),
+                    // message.time.toString(),
+                    style: TextStyle(
+                      color: Colors.blueGrey,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              Text(
-                messageTime.toString(),
-                // message.time.toString(),
-                style: TextStyle(
-                  color: Colors.blueGrey,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              SizedBox(height: 8.0),
+              FormattedText(messageText,)
             ],
           ),
-          SizedBox(height: 8.0),
-          FormattedText(messageText,)
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _notMyMessage(BuildContext context, dynamic senderUser) {
     final userFullName = senderUser is User ? senderUser.name : senderUser['fullName'];
+    final isMatchOwner = senderUser is User
+        ? senderUser.id == this.matchOwnerId
+        : senderUser['id'] == this.matchOwnerId;
     final DateTime? parsedTime = DateTime.tryParse(this.time!)!.toLocal();
     final messageHour = parsedTime!.hour;
     final messageMinute = parsedTime.minute < 10 ? '0${parsedTime.minute}' : parsedTime.minute;
@@ -130,9 +140,8 @@ class ChatMessage extends StatelessWidget {
             children: [
               Text(
                 userFullName,
-                // message.time.toString(),
                 style: TextStyle(
-                  color: Colors.blueGrey,
+                  color: isMatchOwner ? Colors.blueGrey[800] : Colors.blueGrey,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),

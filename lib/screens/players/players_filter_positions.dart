@@ -21,6 +21,7 @@ class _PlayersFilterPositionsState extends State<PlayersFilterPositions> {
 
   @override
   Widget build(BuildContext context) {
+    final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return Container(
@@ -47,11 +48,17 @@ class _PlayersFilterPositionsState extends State<PlayersFilterPositions> {
                 Column(
                   children: [
                     ListTile(
-                      leading: Text(
-                        translations[localeName]!['filter.players.whichPositions']!,
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
+                      leading: Container(
+                        width: _width * .7,
+                        child: Text(
+                          // 'translationstranslationstranslationstranslations',
+                          translations[localeName]!['filter.players.whichPositions']!,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       trailing: IconButton(
@@ -72,6 +79,7 @@ class _PlayersFilterPositionsState extends State<PlayersFilterPositions> {
                         },
                       ),
                     ),
+                    SizedBox(height: 20.0,),
                     GFCheckboxListTile(
                       title: Center(
                         child: Text(

@@ -356,6 +356,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                     this._future = getMyCreatedMatches();
                     this.isLoadingAlert = false;
                   });
+                  Navigator.pop(context);
                 } else {
                   setState(() {
                     this.isLoadingAlert = false;
@@ -407,6 +408,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                   this._future = getMyCreatedMatches();
                   this.isLoadingAlert = false;
                 });
+                Navigator.pop(context);
               } else {
                 setState(() {
                   this.isLoadingAlert = false;

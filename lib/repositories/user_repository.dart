@@ -9,6 +9,7 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/utils/api.dart';
 import 'package:fulbito_app/utils/environment.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -68,6 +69,7 @@ class UserRepository {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       await localStorage.remove('user');
       await localStorage.remove('token');
+      Sentry.configureScope((scope) => scope.user = null);
       return true;
     } else {
       return false;
@@ -224,6 +226,11 @@ class UserRepository {
       await localStorage.setString('fcm_token', json.encode(body['fcm_token']));
       String? userStr = localStorage.getString("user");
       body['user'] = User.fromJson(jsonDecode(userStr!));
+
+      User user = User.fromJson(jsonDecode(userStr));
+      Sentry.configureScope(
+            (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+      );
     }
 
     return body;

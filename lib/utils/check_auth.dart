@@ -5,6 +5,7 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckAuth extends StatefulWidget {
@@ -36,6 +37,11 @@ class _CheckAuthState extends State<CheckAuth> {
     if (localStorage.containsKey('user')) {
       String? userStr = localStorage.getString("user");
       User user = User.fromJson(jsonDecode(userStr!));
+
+      Sentry.configureScope(
+            (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+      );
+
       if (user.isFullySet) {
         setState(() {
           isFullySet = true;

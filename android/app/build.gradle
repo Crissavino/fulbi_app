@@ -45,8 +45,8 @@ android {
         applicationId "com.crissavino.fulbito.fulbito_app"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 35
-        versionName "1.2.8"
+        versionCode 36
+        versionName "1.2.9"
     }
 
     signingConfigs {

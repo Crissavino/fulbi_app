@@ -15,6 +15,7 @@ import 'package:fulbito_app/services/google_signin_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -223,6 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res.containsKey('success') && res['success'] == true) {
       User user = res['user'];
+      Sentry.configureScope(
+            (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+      );
       if (user.isFullySet) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -308,6 +312,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 BlocProvider.of<LoginBloc>(context).add(LogInErrorEvent());
               } else if (res!.containsKey('success') && res['success'] == true) {
                 User user = res['user'];
+                Sentry.configureScope(
+                      (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+                );
                 if (user.isFullySet) {
                   Navigator.pushReplacementNamed(context, 'matches');
                 } else {
@@ -337,6 +344,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               if (res!.containsKey('success') && res['success'] == true) {
                 User user = res['user'];
+                Sentry.configureScope(
+                      (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+                );
                 if (user.isFullySet) {
                   Navigator.pushReplacementNamed(context, 'matches');
                 } else {
@@ -383,6 +393,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               if (res!.containsKey('success') && res['success'] == true) {
                 User user = res['user'];
+                Sentry.configureScope(
+                      (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
+                );
                 if (user.isFullySet) {
                   Navigator.pushReplacementNamed(context, 'matches');
                 } else {

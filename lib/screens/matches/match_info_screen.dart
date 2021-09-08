@@ -318,6 +318,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                             isScrollControlled: true,
                             builder: (BuildContext context) {
                               return Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10.0),
                                 height: _height / 4,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -337,8 +338,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                         translations[localeName]![
                                             'match.info.inviteNewPlayer']!,
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0,
+                                          fontSize: 18.0,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -349,8 +349,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                         translations[localeName]![
                                             'match.info.inviteExistPlayer']!,
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0,
+                                          fontSize: 18.0,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -400,12 +399,20 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   Container _buildMatchSpots(String spotsAvailable) {
+    String spotsText = 'There are $spotsAvailable spots available';
+    if (localeName == 'es') {
+      spotsText = 'Quedan $spotsAvailable lugares disponibles';
+    } else if (localeName == 'pt') {
+      spotsText = 'Existem $spotsAvailable vagas disponíveis';
+    } else if (localeName == 'fr') {
+      spotsText = 'Il y a $spotsAvailable places disponibles';
+    } else if (localeName == 'it') {
+      spotsText = 'Ci sono $spotsAvailable posti disponibili';
+    }
     return Container(
       padding: EdgeInsets.only(top: 40.0),
       child: Text(
-        localeName == 'es'
-            ? 'Quedan $spotsAvailable lugares disponibles'
-            : 'There are $spotsAvailable spots available',
+        spotsText,
         style: TextStyle(),
         overflow: TextOverflow.clip,
       ),
@@ -551,12 +558,21 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   Container _buildPlaysOn(Match match) {
+    String month = translations[localeName]!['general.month.${DateFormat('MMMM').format(match.whenPlay).toLowerCase()}']!;
+    String playsOnText = 'On $month ${DateFormat('d').format(match.whenPlay)}, ${DateFormat('y').format(match.whenPlay)}';
+    if (localeName == 'es') {
+      playsOnText = 'El ${DateFormat('d').format(match.whenPlay)} de $month de ${DateFormat('y').format(match.whenPlay)}';
+    } else if (localeName == 'pt') {
+      playsOnText = 'Em ${DateFormat('d').format(match.whenPlay)} de $month de ${DateFormat('y').format(match.whenPlay)}';
+    } else if (localeName == 'fr') {
+      playsOnText = 'Le ${DateFormat('d').format(match.whenPlay)} $month ${DateFormat('y').format(match.whenPlay)}';
+    } else if (localeName == 'it') {
+      playsOnText = 'Il ${DateFormat('d').format(match.whenPlay)} $month ${DateFormat('y').format(match.whenPlay)}';
+    }
     return Container(
       padding: EdgeInsets.only(top: 40.0),
       child: Text(
-        localeName == 'es'
-            ? 'El ${DateFormat('d').format(match.whenPlay)} de ${DateFormat('MMMM').format(match.whenPlay)} de ${DateFormat('y').format(match.whenPlay)}'
-            : 'On ${DateFormat('MMMM').format(match.whenPlay)} ${DateFormat('d').format(match.whenPlay)}, ${DateFormat('y').format(match.whenPlay)}',
+        playsOnText,
         style: TextStyle(),
         overflow: TextOverflow.clip,
       ),

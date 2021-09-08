@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/position_db.dart';
+import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/modal_top_bar.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
@@ -70,7 +71,7 @@ class _ShowUserPositionsState extends State<ShowUserPositions> {
                 GFCheckboxListTile(
                   title: Center(
                     child: Text(
-                      'Arquero',
+                      translations[localeName]!['general.positions.gk']!,
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
@@ -98,7 +99,7 @@ class _ShowUserPositionsState extends State<ShowUserPositions> {
                 GFCheckboxListTile(
                   title: Center(
                     child: Text(
-                      'Defensor',
+                      translations[localeName]!['general.positions.def']!,
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
@@ -126,7 +127,7 @@ class _ShowUserPositionsState extends State<ShowUserPositions> {
                 GFCheckboxListTile(
                   title: Center(
                     child: Text(
-                      'Mediocampista',
+                      translations[localeName]!['general.positions.mid']!,
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
@@ -154,7 +155,7 @@ class _ShowUserPositionsState extends State<ShowUserPositions> {
                 GFCheckboxListTile(
                   title: Center(
                     child: Text(
-                      'Delantero',
+                      translations[localeName]!['general.positions.for']!,
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),

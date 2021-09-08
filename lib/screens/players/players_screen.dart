@@ -149,7 +149,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   Icons.search,
                   color: Colors.grey,
                 ),
-                hintText: 'Buscar',
+                hintText: translations[localeName]!['search']!,
                 hintStyle: kHintTextStyle,
               ),
               onChanged: (val) async {

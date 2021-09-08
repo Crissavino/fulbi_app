@@ -273,7 +273,9 @@ class UserRepository {
 
     if (body.containsKey('success') && body['success'] == true) {
       await localStorage.setString('user', json.encode(body['user']));
-      await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      if (body['user']['player']['location'] != null) {
+        await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      }
     }
 
     return body;

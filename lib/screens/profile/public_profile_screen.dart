@@ -7,6 +7,7 @@ import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/position_db.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
+import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
@@ -18,11 +19,13 @@ import 'package:fulbito_app/widgets/show_user_positions.dart';
 class PublicProfileScreen extends StatefulWidget {
   int userId;
   bool calledFromMatch;
+  bool? calledFromMatchInfo;
   Match? match;
 
   PublicProfileScreen({
     required this.userId,
     this.calledFromMatch = false,
+    this.calledFromMatchInfo = false,
     this.match,
   });
 
@@ -89,6 +92,15 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     PageRouteBuilder(
                                       pageBuilder: (context, animation1, animation2) =>
                                           MatchParticipantsScreen(match: widget.match!, calledFromMyMatches: true),
+                                      transitionDuration: Duration(seconds: 0),
+                                    ),
+                                  );
+                                } else if(widget.calledFromMatchInfo!) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation1, animation2) =>
+                                          MatchInfoScreen(match: widget.match!, calledFromMyMatches: true),
                                       transitionDuration: Duration(seconds: 0),
                                     ),
                                   );

@@ -4,13 +4,8 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
-import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/message.dart';
-import 'package:fulbito_app/models/type.dart';
-import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
-import 'package:fulbito_app/repositories/user_repository.dart';
-import 'package:collection/collection.dart';
 
 // B2:AA:58:CA:75:9C:1C:D8:76:C8:61:15:34:FC:9E:8B:48:FE:A1:1C
 // P8 - Key ID:QDLXV987Q6
@@ -82,6 +77,14 @@ class PushNotificationService {
         'inApp': false,
       });
     }
+    if (message.data['notification_type'] == 'open_social') {
+      _messageStreamController.sink.add({
+        'openSocial': true,
+        'inApp': false,
+        'url': message.data['url'],
+        'socialNetwork': message.data['social_network'],
+      });
+    }
 
     // silence
     await handleSilenceNotification(message);
@@ -146,6 +149,15 @@ class PushNotificationService {
       _messageStreamController.sink.add({
         'goToMatchesScreen': true,
         'inApp': false,
+      });
+    }
+
+    if (message.data['notification_type'] == 'open_social') {
+      _messageStreamController.sink.add({
+        'openSocial': true,
+        'inApp': false,
+        'url': message.data['url'],
+        'socialNetwork': message.data['social_network'],
       });
     }
     // silence
@@ -218,6 +230,15 @@ class PushNotificationService {
         'goToMatchesScreen': true,
         'title': message.notification?.title ?? '',
         'inApp': true,
+      });
+    }
+    if (message.data['notification_type'] == 'open_social') {
+      _messageStreamController.sink.add({
+        'openSocial': true,
+        'title': message.notification?.title ?? '',
+        'inApp': true,
+        'url': message.data['url'],
+        'socialNetwork': message.data['social_network'],
       });
     }
 

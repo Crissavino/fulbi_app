@@ -10,7 +10,10 @@ class LocationRepository {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      // Future.error('Location services are disabled.');
+      return {
+        'denied': true
+      };
     }
 
     permission = await Geolocator.checkPermission();

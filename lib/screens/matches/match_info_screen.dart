@@ -16,6 +16,7 @@ import 'package:fulbito_app/screens/matches/match_chat_screen.dart';
 import 'package:fulbito_app/screens/matches/match_participants_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
+import 'package:fulbito_app/screens/profile/public_profile_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/create_dynamic_link.dart';
@@ -148,6 +149,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       await localStorage.setString(
           'matchInfo.match.${widget.match.id}', json.encode(json.encode(response['match'])));
       await localStorage.setString(
+          'matchInfo.owner.${widget.match.id}', json.encode(json.encode(response['owner'])));
+      await localStorage.setString(
           'matchInfo.location.${widget.match.id}', json.encode(json.encode(response['location'])));
       await localStorage.setString('matchInfo.genre.${widget.match.id}',
           json.encode(json.encode(response['genre'].toJson())));
@@ -173,6 +176,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       if (!matchStreamController.isClosed)
         matchStreamController.sink.add({
           'match': match,
+          'owner': response['owner'],
           'location': response['location'],
           'genre': response['genre'],
           'type': response['type'],
@@ -186,10 +190,14 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchInfo.match.${widget.match.id}')) {
+    if (localStorage.containsKey('matchInfo.owner.${widget.match.id}')) {
       var thisMatch =
           json.decode(json.decode(localStorage.getString('matchInfo.match.${widget.match.id}')!));
       Match match = Match.fromJson(thisMatch);
+
+      var thisMatchOwner =
+      json.decode(json.decode(localStorage.getString('matchInfo.owner.${widget.match.id}')!));
+      User owner = User.fromJson(thisMatchOwner);
 
       var thisLocation = json
           .decode(json.decode(localStorage.getString('matchInfo.location.${widget.match.id}')!));
@@ -212,6 +220,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       if (!matchStreamController.isClosed)
         matchStreamController.sink.add({
           'match': match,
+          'owner': owner,
           'location': location,
           'genre': genre,
           'type': type,
@@ -415,6 +424,43 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         spotsText,
         style: TextStyle(),
         overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  _buildOwnerName(User matchOwner) {
+
+    return Container(
+      padding: EdgeInsets.only(top: 40.0),
+      child: Row(
+        children: [
+          Text(
+            '${translations[localeName]!['match.create.owner']!} ',
+            style: TextStyle(),
+            overflow: TextOverflow.clip,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PublicProfileScreen(
+                    userId: matchOwner.id,
+                    calledFromMatchInfo: true,
+                    match: widget.match,
+                  ),
+                ),
+              );
+            },
+            child: Text(
+              matchOwner.name,
+              style: TextStyle(
+                fontWeight: FontWeight.bold
+              ),
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -747,6 +793,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
         }
 
         Match match = snapshot.data['match'];
+        User matchOwner = snapshot.data['owner'];
         Location location = snapshot.data['location'];
         Genre genre = snapshot.data['genre'];
         Type type = snapshot.data['type'];
@@ -779,6 +826,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         _buildMatchGenre(genre),
                         _buildMatchCost(currencySymbol, match),
                         _buildMatchSpots(spotsAvailable),
+                        _buildOwnerName(matchOwner),
                         Expanded(
                           child: Container(),
                         ),

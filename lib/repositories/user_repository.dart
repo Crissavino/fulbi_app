@@ -32,6 +32,10 @@ class UserRepository {
     if (body['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       await localStorage.setString('user', json.encode(body['user']));
+      await localStorage.setString('userPositions', json.encode(body['user']!['player']!['positions']!));
+      if (body['user']['player']['location'] != null) {
+        await localStorage.setString('userLocation', json.encode(body['user']!['player']!['location']!));
+      }
 
       User user = User.fromJson(body['user']);
       Player player = Player.fromJson(body['user']['player']);

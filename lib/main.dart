@@ -25,6 +25,7 @@ import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'screens/matches/matches_screen.dart';
 
 void main() async {
@@ -267,6 +268,17 @@ class _MyAppState extends State<MyApp> {
               builder: (context) => MatchesScreen(),
             ),
           );
+        }
+      }
+      if (notificationData.containsKey('openSocial')) {
+        if (notificationData['inApp']) {
+          Future.delayed(Duration(seconds: 2)).then((value) {
+            launch(notificationData['url']);
+          });
+        } else {
+          Future.delayed(Duration(seconds: 2)).then((value) {
+            launch(notificationData['url']);
+          });
         }
       }
     });

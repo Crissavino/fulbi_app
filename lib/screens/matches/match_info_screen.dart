@@ -740,19 +740,17 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       items: [
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Informacion'),
+          label: 'Informacion',
           icon: Icon(Icons.info),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Participantes'),
-          icon: Icon(
-            Icons.group_outlined,
-          ),
+          label: 'Participantes',
+          icon: Icon(Icons.group_outlined),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Chat'),
+          label: 'Chat',
           icon: buildNotificationStreamBuilder(),
         ),
       ],

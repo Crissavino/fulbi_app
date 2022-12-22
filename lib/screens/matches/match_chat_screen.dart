@@ -649,19 +649,17 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       items: [
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Informacion'),
+          label: 'Informacion',
           icon: Icon(Icons.info_outlined),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Participantes'),
-          icon: Icon(
-            Icons.group_outlined,
-          ),
+          label: 'Participantes',
+          icon: Icon(Icons.group_outlined),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Chat'),
+          label: 'Chat',
           icon: Icon(Icons.chat_bubble),
         ),
       ],

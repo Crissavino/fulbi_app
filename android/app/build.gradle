@@ -34,7 +34,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -45,8 +45,8 @@ android {
         applicationId "com.crissavino.fulbito.fulbito_app"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 38
-        versionName "1.2.11"
+        versionCode 39
+        versionName "1.2.12"
     }
 
     signingConfigs {

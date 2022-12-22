@@ -318,19 +318,17 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
       items: [
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Informacion'),
+          label: 'Información',
           icon: Icon(Icons.info_outline),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Participantes'),
-          icon: Icon(
-            Icons.group,
-          ),
+          label: 'Participantes',
+          icon: Icon(Icons.group),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Chat'),
+          label: 'Chat',
           icon: buildNotificationStreamBuilder(),
         ),
       ],
@@ -388,7 +386,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
         }
 
         return ListView.builder(
-          physics: AlwaysScrollableScrollPhysics(),
+          // physics: AlwaysScrollableScrollPhysics(),
           itemCount: participants.length,
           itemBuilder: (BuildContext context, int index) {
             return _buildPlayerRow(participants[index]!);

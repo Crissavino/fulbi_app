@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 showAlert(BuildContext context, String title, String subTitle) {
+  subTitle = subTitle == '' ? ' ' : subTitle;
   if (Platform.isAndroid) {
     return showDialog(
       context: context,

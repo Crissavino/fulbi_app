@@ -753,19 +753,19 @@ class _MatchesState extends State<MatchesScreen> {
       items: [
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Jugadores'),
+          label: 'Jugadores',
           icon: Icon(Icons.groups_outlined),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Partidos'),
+          label: 'Partidos',
           icon: Icon(
             Icons.sports_soccer,
           ),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use
-          title: Text('Perfil'),
+          label: 'Perfil',
           icon: Icon(Icons.person_outline),
         ),
       ],

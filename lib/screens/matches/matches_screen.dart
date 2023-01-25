@@ -506,7 +506,27 @@ class _MatchesState extends State<MatchesScreen> {
                   if (index == 0) {
                     return Container();
                   } else {
-                    return _buildMatchRow(matches[index - 1]);
+                    return FutureBuilder(
+                        builder: (BuildContext _, AsyncSnapshot futureSnapshot) {
+                          if (
+                            futureSnapshot.connectionState != ConnectionState.done && !futureSnapshot.hasData ||
+                            futureSnapshot.connectionState == ConnectionState.waiting
+                          ) {
+                            return Container(
+                              width: _width,
+                              height: _height/2,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [circularLoading],
+                              ),
+                            );
+                          }
+
+                          return _buildMatchRow(futureSnapshot.data);
+                      },
+                        future: MatchRepository().getMatch(matches[index - 1].id)
+                    );
                   }
                 },
               ),
@@ -630,7 +650,193 @@ class _MatchesState extends State<MatchesScreen> {
     );
   }
 
-  Widget _buildMatchRow(Match match) {
+  Widget _buildMatchRow(dynamic parsedMatch) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MatchInfoScreen(
+              match: parsedMatch['match'],
+              calledFromMyMatches: false,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green[100]!,
+                  blurRadius: 6.0,
+                  offset: Offset(0, 8),
+                ),
+              ],
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10.0),
+                topRight: Radius.circular(10.0),
+              ),
+            ),
+            width: MediaQuery.of(context).size.width,
+            height: 85.0,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.green[600]!,
+                  Colors.green[500]!,
+                ],
+                stops: [0.1, 0.9],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green[100]!,
+                  blurRadius: 6.0,
+                  offset: Offset(0, 8),
+                ),
+              ],
+              color: Colors.green[400],
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0),
+              ),
+            ),
+            width: MediaQuery.of(context).size.width,
+            height: 115.0,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // create a row that at the start have the location of the match and at the end the match type
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Rock & Gol' ?? parsedMatch['location'].city,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 5.0,
+                          ),
+                          Text(
+                            'Av. 520 y 19',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 2.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20.0),
+                          ),
+                        ),
+                        child: Text(
+                          '5 vs 5',
+                          style: TextStyle(
+                            // add a RGB color #8B9586
+                            color: Color(0xFF8B9586),
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '14:00 hs',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '25 de enero',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Anotados',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '7',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 4.0),
+                                Icon(
+                                  Icons.group_outlined,
+                                  color: Colors.white,
+                                  size: 21.0,
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchRow__Old(Match match) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -762,6 +968,11 @@ class _MatchesState extends State<MatchesScreen> {
           icon: Icon(
             Icons.sports_soccer,
           ),
+        ),
+        BottomNavigationBarItem(
+          // ignore: deprecated_member_use
+          label: 'Reservas',
+          icon: Icon(Icons.calendar_month_outlined),
         ),
         BottomNavigationBarItem(
           // ignore: deprecated_member_use

@@ -355,28 +355,31 @@ class PushNotificationService {
       print('error $error');
     }
 
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    if (
-    settings.authorizationStatus == AuthorizationStatus.authorized ||
-        settings.authorizationStatus == AuthorizationStatus.provisional
-    ) {
-      // handlers
-      FirebaseMessaging.onBackgroundMessage(_onBackgroundHandler);
-      FirebaseMessaging.onMessage.listen(_onMessageHandler);
-      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedHandler);
-    } else {
-      print('User declined or has not accepted permission');
-    }
-
+    print('NotificationSettings');
+    // NotificationSettings settings = await messaging.requestPermission(
+    //   alert: true,
+    //   announcement: false,
+    //   badge: true,
+    //   carPlay: false,
+    //   criticalAlert: false,
+    //   provisional: false,
+    //   sound: true,
+    // );
+    // print(settings);
+    //
+    // if (
+    // settings.authorizationStatus == AuthorizationStatus.authorized ||
+    //     settings.authorizationStatus == AuthorizationStatus.provisional
+    // ) {
+    //   // handlers
+    //   FirebaseMessaging.onBackgroundMessage(_onBackgroundHandler);
+    //   FirebaseMessaging.onMessage.listen(_onMessageHandler);
+    //   FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedHandler);
+    // } else {
+    //   print('User declined or has not accepted permission');
+    // }
+    //
+    // print('entra');
     // local notif
 
   }

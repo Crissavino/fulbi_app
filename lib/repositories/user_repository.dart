@@ -71,8 +71,7 @@ class UserRepository {
 
     if (body['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      await localStorage.remove('user');
-      await localStorage.remove('token');
+      await localStorage.clear();
       Sentry.configureScope((scope) => scope.user = null);
       return true;
     } else {

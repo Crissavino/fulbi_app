@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:fulbito_app/models/booking.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -40,6 +41,7 @@ class MatchRepository {
         'success': true,
         'myUser': User.fromJson(jsonDecode(localStorage.getString('user')!)),
         'match': Match.fromJson(body['match']),
+        'booking': Booking.fromJson(body['booking']),
         'owner': User.fromJson(body['owner']),
         'location': Location.fromJson(body['location']),
         'genre': Genre(id: body['genre']['id'], name: translations[localeName]![body['genre']['name_key']]!),

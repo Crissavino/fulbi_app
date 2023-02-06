@@ -176,8 +176,8 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Column(
                           children: [
-                            _buildWherePlay(),
                             _buildWhenPlay(),
+                            _buildWherePlay(),
                             _buildMatchSex(),
                             _buildMatchType(),
                             Row(

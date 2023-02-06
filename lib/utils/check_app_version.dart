@@ -58,9 +58,11 @@ class _CheckAppVersionState extends State<CheckAppVersion> {
             return CheckAuth();
           }
 
-          if (this.versionMajor == versionMajor &&
+          var isUpdated = this.versionMajor == versionMajor &&
               this.versionMinor == versionMinor &&
-              this.versionPatch >= versionPatch) {
+              this.versionPatch >= versionPatch;
+
+          if (isUpdated) {
             return CheckAuth();
           } else {
             return GestureDetector(

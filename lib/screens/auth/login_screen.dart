@@ -9,6 +9,7 @@ import 'package:fulbito_app/bloc/login/login_bloc.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/user_repository.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
+import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/services/apple_singin_service.dart';
 import 'package:fulbito_app/services/google_signin_service.dart';
@@ -230,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user.isFullySet) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => MatchesScreen()),
+          MaterialPageRoute(builder: (context) => BookingsScreen()),
               (Route<dynamic> route) => false,
         );
       } else {
@@ -316,7 +317,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
                 );
                 if (user.isFullySet) {
-                  Navigator.pushReplacementNamed(context, 'matches');
+                  // Navigator.pushReplacementNamed(context, 'matches');
+                  Navigator.pushReplacementNamed(context, 'bookings');
                 } else {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
@@ -348,7 +350,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
                 );
                 if (user.isFullySet) {
-                  Navigator.pushReplacementNamed(context, 'matches');
+                  Navigator.pushReplacementNamed(context, 'bookings');
+                  // Navigator.pushReplacementNamed(context, 'matches');
                 } else {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }
@@ -397,7 +400,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       (scope) => scope.user = SentryUser(id: user.id.toString(), email: user.email),
                 );
                 if (user.isFullySet) {
-                  Navigator.pushReplacementNamed(context, 'matches');
+                  Navigator.pushReplacementNamed(context, 'bookings');
+                  // Navigator.pushReplacementNamed(context, 'matches');
                 } else {
                   Navigator.pushReplacementNamed(context, 'complete_profile');
                 }

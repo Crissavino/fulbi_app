@@ -17,6 +17,7 @@ import 'package:fulbito_app/screens/profile/public_profile_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/user_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayersScreen extends StatefulWidget {
@@ -273,7 +274,23 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ),
                 ),
               ),
-              bottomNavigationBar: _buildBottomNavigationBarRounded(),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  // allow the user to create a math o book a field
+                },
+                child: Icon(
+                  Icons.add,
+                  size: 30.0,
+                ),
+                backgroundColor: Colors.green[500],
+                foregroundColor: Colors.white,
+              ),
+              floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+              bottomNavigationBar: UserMenu(
+                isLoading: this.isLoading,
+                currentIndex: 2,
+              ),
             ),
           )
         ],
@@ -461,70 +478,4 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
-  void _navigateToSection(index) {
-    if (this.isLoading) {
-      return;
-    }
-    switch (index) {
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => MatchesScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) =>
-                PrivateProfileScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      default:
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBarRounded() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 0,
-      onTap: (index) {
-        if (index != 0) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Jugadores',
-          icon: Icon(Icons.groups_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Partidos',
-          icon: Icon(
-            Icons.sports_soccer,
-          ),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Perfil',
-          icon: Icon(Icons.person_outline),
-        ),
-      ],
-    );
-  }
 }

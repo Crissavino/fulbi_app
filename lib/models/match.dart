@@ -4,33 +4,16 @@
 
 import 'dart:convert';
 
+import 'package:fulbito_app/models/booking.dart';
+import 'package:fulbito_app/models/location.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/models/type.dart';
 
 Match matchFromJson(String str) => Match.fromJson(json.decode(str));
 
 String matchToJson(Match data) => json.encode(data.toJson());
 
 class Match {
-  Match({
-    required this.id,
-    required this.locationId,
-    required this.whenPlay,
-    required this.genreId,
-    required this.typeId,
-    required this.numPlayers,
-    required this.isFreeMatch,
-    required this.cost,
-    required this.chatId,
-    required this.ownerId,
-    required this.haveNotifications,
-    required this.isConfirmed,
-    required this.deletedAt,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.currencyId,
-    required this.description,
-    this.participants,
-  });
 
   int id;
   int locationId;
@@ -50,6 +33,33 @@ class Match {
   int? currencyId;
   String? description;
   List<User>? participants;
+  Booking? booking;
+  Type type;
+  Location? location;
+
+  Match({
+    required this.id,
+    required this.locationId,
+    required this.whenPlay,
+    required this.genreId,
+    required this.typeId,
+    required this.numPlayers,
+    required this.isFreeMatch,
+    required this.cost,
+    required this.chatId,
+    required this.ownerId,
+    required this.haveNotifications,
+    required this.isConfirmed,
+    required this.deletedAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.currencyId,
+    required this.description,
+    this.participants,
+    this.booking,
+    required this.type,
+    required this.location
+  });
 
   factory Match.fromJson(Map<String, dynamic> json) => Match(
     id: json["id"],
@@ -70,6 +80,9 @@ class Match {
     currencyId: json["currency_id"],
     description: json["description"],
     participants: List<User>.from(json["participants"].map((x) => User.fromJson(x))),
+    booking: (json["booking"] != null) ? Booking.fromJson(json["booking"]) : null,
+    type: Type().matchTypes.where((element) => element.id == json["type_id"]).first,
+    location: (json["location"] != null) ? Location.fromJson(json["location"]) : null
   );
 
   Map<String, dynamic> toJson() => {

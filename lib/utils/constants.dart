@@ -42,8 +42,8 @@ const textInputDecoration = InputDecoration(
 );
 
 final screenBorders = BorderRadius.only(
-  topLeft: Radius.circular(30.0),
-  topRight: Radius.circular(30.0),
+  topLeft: Radius.circular(20.0),
+  topRight: Radius.circular(20.0),
 );
 
 final horizontalGradient = BoxDecoration(

@@ -78,7 +78,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                       child: new Container(
                         decoration: horizontalGradient,
                         child: AppBar(
-                          backwardsCompatibility: false,
                           systemOverlayStyle:
                           SystemUiOverlayStyle(statusBarColor: Colors.white),
                           backgroundColor: Colors.transparent,

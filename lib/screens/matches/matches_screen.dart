@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fulbito_app/models/booking.dart';
 import 'package:fulbito_app/models/genre.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/type.dart';
@@ -20,6 +21,8 @@ import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
 import 'package:fulbito_app/services/push_notification_service.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/custom_floating_action_button.dart';
+import 'package:fulbito_app/widgets/user_menu.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,15 +37,18 @@ class _MatchesState extends State<MatchesScreen> {
   List<Type> _searchedMatchType = Type().matchTypes;
   Map<String, double> _searchedRange = {'distance': 20.0};
   List<Match?> matches = [];
+  List<Match?> myMatches = [];
   bool areNotifications = false;
   StreamController notificationStreamController = StreamController.broadcast();
   StreamController matchesStreamController = StreamController.broadcast();
+  StreamController myMatchesStreamController = StreamController.broadcast();
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     loadFromLocalStorage();
+    getMyMatches();
     getMatchesOffers(
       _searchedRange['distance']!.toInt(),
       _searchedGender.first,
@@ -75,6 +81,19 @@ class _MatchesState extends State<MatchesScreen> {
         );
     }
 
+    if (localStorage.containsKey('matchesScreen.myMatches')) {
+      var thisMatches = json.decode(json.decode(localStorage.getString('matchesScreen.myMatches')!));
+
+      List matches = thisMatches;
+      thisMatches = matches.map((match) => Match.fromJson(match)).toList();
+
+      this.myMatches = thisMatches;
+
+      if (!myMatchesStreamController.isClosed)
+        myMatchesStreamController.sink.add(
+          this.myMatches,
+        );
+    }
   }
 
   void silentNotificationListener() {
@@ -86,12 +105,26 @@ class _MatchesState extends State<MatchesScreen> {
       if (notificationData.containsKey('silentUpdateMatch')) {
         if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
         final Match? editedMatch = notificationData['match'];
+
+        // match offer
         final Match? editedMatchToReplace = this.matches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
         if (editedMatchToReplace != null) {
           var index = this.matches.indexOf(editedMatchToReplace);
           this.matches.replaceRange(index, index + 1, [editedMatch]);
           if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
           await saveVariablesInLocalStorage();
+        }
+
+        //my match
+        final Match? editedMyMatchToReplace =
+        this.myMatches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
+        if (editedMyMatchToReplace != null) {
+          var index = this.myMatches.indexOf(editedMatchToReplace);
+          this.myMatches.replaceRange(index, index + 1, [editedMatch]);
+          if (!myMatchesStreamController.isClosed)
+            myMatchesStreamController.sink.add(this.myMatches);
+
+          await saveVariablesInLocalStorage(isMyMatch: true);
         }
       }
       if (notificationData.containsKey('silentCreatedMatch')) {
@@ -109,13 +142,27 @@ class _MatchesState extends State<MatchesScreen> {
           matchesStreamController.sink.add(this.matches);
         await saveVariablesInLocalStorage();
       }
+
+      if (notificationData.containsKey('silentUpdateMyMatches')) {
+        final int? matchIdToDelete = int.tryParse(notificationData['matchIdToDelete']);
+        this.myMatches.removeWhere((match) => match!.id == matchIdToDelete!);
+        if (!myMatchesStreamController.isClosed)
+          myMatchesStreamController.sink.add(this.myMatches);
+
+        await saveVariablesInLocalStorage(isMyMatch: true);
+      }
     });
   }
 
-  Future<void> saveVariablesInLocalStorage() async {
+  Future<void> saveVariablesInLocalStorage({bool isMyMatch = false}) async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-    await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+    if (isMyMatch) {
+      var jsonMyMatches = this.myMatches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('matchesScreen.myMatches', json.encode(jsonMyMatches.toString()));
+    } else {
+      var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+    }
     await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
   }
 
@@ -178,32 +225,27 @@ class _MatchesState extends State<MatchesScreen> {
     return response;
   }
 
+  Future getMyMatches() async {
+    final response = await MatchRepository().getMyMatches();
+    if (response['success']) {
+      setState(() {
+        this.myMatches = response['matches'];
+      });
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var jsonMatches = this.myMatches.map((e) => json.encode(e)).toList();
+      await localStorage.setString('matchesScreen.myMatches', json.encode(jsonMatches.toString()));
+
+      if (!myMatchesStreamController.isClosed)
+        myMatchesStreamController.sink.add(this.myMatches);
+
+      return this.myMatches;
+    }
+
+    return response;
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    Positioned _buildNotification() {
-      return Positioned(
-        top: 6.0,
-        right: 5.0,
-        child: Container(
-          width: 15.0,
-          height: 15.0,
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.all(
-              Radius.circular(50.0),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10.0,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 
     StreamBuilder<dynamic> buildNotificationStreamBuilder() {
       return StreamBuilder(
@@ -214,9 +256,9 @@ class _MatchesState extends State<MatchesScreen> {
             return Container();
           }
 
-          bool areNotis = snapshot.data;
+          bool areNotifications = snapshot.data;
 
-          if (!areNotis) {
+          if (!areNotifications) {
             return Container();
           }
 
@@ -225,129 +267,138 @@ class _MatchesState extends State<MatchesScreen> {
       );
     }
 
-    Widget _buildMatchesMenu() {
-
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Container(
-            child: IconButton(
-              icon: Icon(Icons.add_circle_outline),
-              iconSize: 30.0,
-              color: Colors.white,
-              onPressed: () {
-                Navigator.push(context, PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) =>
-                      CreateMatchScreen(),
-                  transitionDuration: Duration(seconds: 0),
-                ),);
-              },
-            ),
-          ),
-          Stack(
-            children: [
-              Container(
-                child: IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  iconSize: 30.0,
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(context, PageRouteBuilder(
-                      pageBuilder: (context, animation1, animation2) =>
-                          MyMatchesScreen(),
-                      transitionDuration: Duration(seconds: 0),
-                    ),);
-                  },
-                ),
-              ),
-              buildNotificationStreamBuilder(),
-            ],
-          ),
-          Container(
-            child: IconButton(
-              icon: Icon(Icons.filter_list),
-              iconSize: 30.0,
-              color: Colors.white,
-              onPressed: () async {
-                List<Match?>? matches = await showModalBottomSheet(
-                  backgroundColor: Colors.transparent,
-                  context: context,
-                  enableDrag: true,
-                  isScrollControlled: true,
-                  builder: (BuildContext context) {
-                    return MatchesFilter(
-                      searchedGender: this._searchedGender,
-                      searchedRange: this._searchedRange,
-                      searchedMatchType: this._searchedMatchType,
-                    );
-                  },
-                );
-
-                if (matches != null) {
-                  this.matches = matches;
-                  if (!matchesStreamController.isClosed)
-                    matchesStreamController.sink.add(
-                      this.matches,
-                    );
-                }
-              },
-            ),
-          ),
-        ],
-      );
-    }
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Stack(
-        children: [
-          SafeArea(
-            top: false,
-            bottom: false,
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: Platform.isIOS
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark,
-                child: Center(
-                  child: Container(
-                    decoration: horizontalGradient,
-                    child: LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        return Stack(
-                          children: [
-                            buildMatchesStreamBuilder(),
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                decoration: horizontalGradient,
-                                padding: EdgeInsets.only(left: 10.0, top: 40.0),
-                                alignment: Alignment.center,
-                                child: _buildMatchesMenu(),
-                              ),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: Platform.isIOS
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
+            child: Center(
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(
+                        top: 50.0,
+                        left: 20.0,
+                        right: 20.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Mis partidos',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        );
-                      },
+                          )
+                        ],
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 10.0),
+                    buildMyMatchesStreamBuilder(),
+                    Container(
+                      margin: EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Proximos partidos',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          _buildFilterButton(context)
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    buildMatchesStreamBuilder(),
+                  ],
                 ),
               ),
-              bottomNavigationBar: _buildBottomNavigationBarRounded(),
             ),
-          )
-        ],
+          ),
+          floatingActionButton: CustomFloatingActionButton(),
+          floatingActionButtonLocation:
+          FloatingActionButtonLocation.centerDocked,
+          bottomNavigationBar: UserMenu(
+            isLoading: this.isLoading,
+            currentIndex: 1,
+          ),
+        ),
       ),
     );
   }
 
-  buildMatchesStreamBuilder() {
+  Container _buildFilterButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6.0,
+            offset: Offset(2, 6),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 20.0,
+        backgroundColor: Colors.white,
+        child: IconButton(
+          icon: Icon(Icons.filter_list),
+          iconSize: 24.0,
+          color: Colors.black,
+          onPressed: () async {
+            List<Match?>? matches = await showModalBottomSheet(
+              backgroundColor: Colors.transparent,
+              context: context,
+              enableDrag: true,
+              isScrollControlled: true,
+              builder: (BuildContext context) {
+                return MatchesFilter(
+                  searchedGender: this._searchedGender,
+                  searchedRange: this._searchedRange,
+                  searchedMatchType: this._searchedMatchType,
+                );
+              },
+            );
+
+            if (matches != null) {
+              this.matches = matches;
+              if (!matchesStreamController.isClosed)
+                matchesStreamController.sink.add(
+                  this.matches,
+                );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  buildMyMatchesStreamBuilder() {
     return StreamBuilder(
-      stream: matchesStreamController.stream,
+      stream: myMatchesStreamController.stream,
+      // stream: matchesStreamController.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
@@ -358,23 +409,10 @@ class _MatchesState extends State<MatchesScreen> {
 
           this.isLoading = true;
 
-          return Positioned(
-            top: 80.0,
-            left: 0.0,
-            right: 0.0,
-            bottom: -20.0,
+          return Container(
+            width: _width,
+            height: 100.0,
             child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6.0,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-                color: Colors.white,
-                borderRadius: screenBorders,
-              ),
               padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
               margin: EdgeInsets.only(top: 20.0),
               width: _width,
@@ -398,23 +436,10 @@ class _MatchesState extends State<MatchesScreen> {
         if (snapshot.connectionState ==
             ConnectionState.done &&
             !snapshot.hasData) {
-          return Positioned(
-            top: 80.0,
-            left: 0.0,
-            right: 0.0,
-            bottom: -20.0,
+          return Container(
+            width: _width,
+            height: 100.0,
             child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6.0,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-                color: Colors.white,
-                borderRadius: screenBorders,
-              ),
               padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
               margin: EdgeInsets.only(top: 20.0),
               width: _width,
@@ -432,102 +457,144 @@ class _MatchesState extends State<MatchesScreen> {
         List matches = snapshot.data;
 
         if (matches.isEmpty) {
-          return Positioned(
-            top: 80.0,
-            left: 0.0,
-            right: 0.0,
-            bottom: -20.0,
+          return Container(
+            width: 260.0,
+            height: 100.0,
+            margin: EdgeInsets.only(left: 20.0),
+            child: _buildMyMatchCardPlaceHolder(),
+          );
+        }
+
+        return Container(
+          width: _width,
+          margin: EdgeInsets.only(left: 20.0),
+          height: 100.0,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: matches.length,
+            itemBuilder: (BuildContext _, int index) {
+              return _buildMyMatchCard(matches[index]);
+            },
+          ),
+        );
+
+      },
+    );
+  }
+
+  buildMatchesStreamBuilder() {
+    return StreamBuilder(
+      stream: matchesStreamController.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        final _width = MediaQuery.of(context).size.width;
+        final _height = MediaQuery.of(context).size.height;
+
+        if (snapshot.connectionState !=
+            ConnectionState.done &&
+            !snapshot.hasData) {
+
+          this.isLoading = true;
+
+          return Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6.0,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-                color: Colors.white,
-                borderRadius: screenBorders,
-              ),
               padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
               margin: EdgeInsets.only(top: 20.0),
-              width: _width,
               child: Container(
                 width: _width,
                 height: _height,
-                child: Center(
-                    child:
-                        Text(translations[localeName]!['general.noMatches']!)),
+                child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.center,
+                  children: [circularLoading],
+                ),
               ),
             ),
           );
         }
 
-        return Positioned(
-          top: 80.0,
-          left: 0.0,
-          right: 0.0,
-          bottom: -20.0,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6.0,
-                  offset: Offset(0, -2),
-                ),
-              ],
-              color: Colors.white,
-              borderRadius: screenBorders,
+        this.isLoading = false;
+
+        if (snapshot.connectionState ==
+            ConnectionState.done &&
+            !snapshot.hasData) {
+          return Expanded(
+            child: Container(
+              padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+              margin: EdgeInsets.only(top: 20.0),
+              width: _width,
+              height: _height,
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Center(
+                    child:
+                    Text(translations[localeName]!['general.noMatches']!)),
+              ),
             ),
-            padding: EdgeInsets.only(
-                bottom: 20.0, left: 20.0, right: 20.0),
-            margin: EdgeInsets.only(top: 20.0),
+          );
+        }
+
+        List matches = snapshot.data;
+
+        if (matches.isEmpty) {
+          return Expanded(
+            child: Container(
+              padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+              margin: EdgeInsets.only(top: 20.0),
+              width: _width,
+              height: _height,
+              child: Container(
+                width: _width,
+                height: _height,
+                child: Center(
+                    child:
+                    Text(translations[localeName]!['general.noMatches']!)),
+              ),
+            ),
+          );
+        }
+
+        return Expanded(
+          child: Container(
+            margin: EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+            ),
             width: _width,
             child: RefreshIndicator(
               onRefresh: () => this.getRefreshData(
-                this
-                    ._searchedRange['distance']!
-                    .toInt(),
-                this._searchedGender.first,
-                this
-                    ._searchedMatchType
-                    .map((Type type) => type.id)
-                    .toList(),
-                true
+                  this
+                      ._searchedRange['distance']!
+                      .toInt(),
+                  this._searchedGender.first,
+                  this
+                      ._searchedMatchType
+                      .map((Type type) => type.id)
+                      .toList(),
+                  true
               ),
-              child: ListView.separated(
-                itemCount: matches.length + 1,
-                separatorBuilder: (BuildContext _, int index,) => buildSeparator(index, matches),
-                itemBuilder: (
-                    BuildContext _,
-                    int index,
-                    ) {
-                  if (index == 0) {
-                    return Container();
-                  } else {
-                    return FutureBuilder(
-                        builder: (BuildContext _, AsyncSnapshot futureSnapshot) {
-                          if (
-                            futureSnapshot.connectionState != ConnectionState.done && !futureSnapshot.hasData ||
-                            futureSnapshot.connectionState == ConnectionState.waiting
-                          ) {
-                            return Container(
-                              width: _width,
-                              height: _height/2,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [circularLoading],
-                              ),
-                            );
-                          }
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: matches.length,
+                itemBuilder: (BuildContext _, int index) {
 
-                          return _buildMatchRow(futureSnapshot.data);
-                      },
-                        future: MatchRepository().getMatch(matches[index - 1].id)
-                    );
-                  }
+                  return _buildMatchRow(matches[index]);
+
+                  // return FutureBuilder(
+                  //     builder: (BuildContext _, AsyncSnapshot futureSnapshot) {
+                  //
+                  //       if (futureSnapshot.connectionState !=
+                  //           ConnectionState.done &&
+                  //           !futureSnapshot.hasData) {
+                  //         return Text('loading...');
+                  //       }
+                  //
+                  //       return _buildMatchRow(futureSnapshot.data);
+                  //     },
+                  //     future: MatchRepository().getMatch(matches[index].id)
+                  // );
                 },
               ),
             ),
@@ -535,57 +602,6 @@ class _MatchesState extends State<MatchesScreen> {
         );
       },
     );
-  }
-
-  Widget buildSeparator(index, matches) {
-    if (index != matches.length + 1) {
-      Match match = matches[index];
-      DateTime today = DateTime.now();
-      bool itsPlayToday = today.day == match.whenPlay.day;
-      bool itsPlayTomorrow = today.day + 1 == match.whenPlay.day;
-      String gameDay = DateFormat('EEEE').format(match.whenPlay);
-      if (itsPlayToday) {
-        if (index != 0) {
-          Match previousMatch = matches[index - 1];
-          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
-          if (itsPlaySameDay) {
-            return Container();
-          } else {
-            return dayDivider(translations[localeName]!['general.today']!);
-          }
-        }
-        return dayDivider(translations[localeName]!['general.today']!);
-      } else if(itsPlayTomorrow) {
-        if (index != 0) {
-          Match previousMatch = matches[index - 1];
-          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
-          if (itsPlaySameDay) {
-            return Container();
-          } else {
-            return dayDivider(translations[localeName]!['general.tomorrow']!);
-          }
-        }
-        return dayDivider(translations[localeName]!['general.tomorrow']!);
-      } else {
-        if (index != 0) {
-          Match previousMatch = matches[index - 1];
-          bool itsPlaySameDay = match.whenPlay.day == previousMatch.whenPlay.day;
-          if (itsPlaySameDay) {
-            return Container();
-          } else {
-            return dayDivider(
-              '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
-            );
-          }
-        }
-        return dayDivider(
-          '${translations[localeName]!['general.day.${gameDay.toLowerCase()}']!} ${DateFormat('dd/MM').format(match.whenPlay)}',
-        );
-      }
-
-    } else {
-      return Container();
-    }
   }
 
   Future<void> getRefreshData(
@@ -628,36 +644,17 @@ class _MatchesState extends State<MatchesScreen> {
     }
   }
 
-  Widget dayDivider (String day) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 5.0, right: 10.0,),
-            child: Text(day, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Divider(
-                  color: Colors.black
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
+  Widget _buildMatchRow(Match match) {
+    // check if match have a booking or is only a match
+    Booking? booking = match.booking;
 
-  Widget _buildMatchRow(dynamic parsedMatch) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
-              match: parsedMatch['match'],
+              match: match,
               calledFromMyMatches: false,
             ),
           ),
@@ -665,26 +662,51 @@ class _MatchesState extends State<MatchesScreen> {
       },
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/cancha-futbol-5.jpeg'),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green[100]!,
-                  blurRadius: 6.0,
-                  offset: Offset(0, 8),
+          Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: (booking?.field!.image != null)
+                        ? AssetImage(booking!.field!.image)
+                        : AssetImage('assets/cancha-futbol-5.jpeg'),
+                    fit: BoxFit.cover,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green[100]!,
+                      blurRadius: 6.0,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                  ),
                 ),
-              ],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
+                width: MediaQuery.of(context).size.width,
+                height: 85.0,
               ),
-            ),
-            width: MediaQuery.of(context).size.width,
-            height: 85.0,
+              Positioned(
+                top: 6,
+                right: 6,
+                // add a container child with a star icon if match has a booking
+                child: (booking != null)
+                    ? Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          Icons.star,
+                          color: Colors.yellow[700],
+                        ),
+                      )
+                    : Container(),
+              ),
+            ],
           ),
           Container(
             decoration: BoxDecoration(
@@ -700,8 +722,8 @@ class _MatchesState extends State<MatchesScreen> {
               boxShadow: [
                 BoxShadow(
                   color: Colors.green[100]!,
-                  blurRadius: 6.0,
-                  offset: Offset(0, 8),
+                  blurRadius: 8.0,
+                  offset: Offset(3, 4),
                 ),
               ],
               color: Colors.green[400],
@@ -717,14 +739,15 @@ class _MatchesState extends State<MatchesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // create a row that at the start have the location of the match and at the end the match type
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
                           Text(
-                            'Rock & Gol' ?? parsedMatch['location'].city,
+                            (booking != null)
+                                ? booking.field!.name
+                                : "Test",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
@@ -735,7 +758,11 @@ class _MatchesState extends State<MatchesScreen> {
                             width: 5.0,
                           ),
                           Text(
-                            'Av. 520 y 19',
+                            (booking != null)
+                                ? booking.field!.address
+                                : (match.location != null)
+                                    ? match.location!.city
+                                    : "",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
@@ -756,7 +783,7 @@ class _MatchesState extends State<MatchesScreen> {
                           ),
                         ),
                         child: Text(
-                          '5 vs 5',
+                          match.type.vs!,
                           style: TextStyle(
                             // add a RGB color #8B9586
                             color: Color(0xFF8B9586),
@@ -776,7 +803,7 @@ class _MatchesState extends State<MatchesScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '14:00 hs',
+                              '${DateFormat('HH:mm').format(match.whenPlay)} hs',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24.0,
@@ -784,7 +811,7 @@ class _MatchesState extends State<MatchesScreen> {
                               ),
                             ),
                             Text(
-                              '25 de enero',
+                              '${DateFormat('MMMMd').format(match.whenPlay)}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12.0,
@@ -797,7 +824,7 @@ class _MatchesState extends State<MatchesScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Anotados',
+                              translations[localeName]!['match.missing']!,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12.0,
@@ -807,7 +834,7 @@ class _MatchesState extends State<MatchesScreen> {
                             Row(
                               children: [
                                 Text(
-                                  '7',
+                                  (match.numPlayers - match.participants!.length).toString(),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18.0,
@@ -831,12 +858,13 @@ class _MatchesState extends State<MatchesScreen> {
               ),
             ),
           ),
+          SizedBox(height: 12.0)
         ],
       ),
     );
   }
 
-  Widget _buildMatchRow__Old(Match match) {
+  Widget _buildMyMatchCard(Match match) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -849,137 +877,161 @@ class _MatchesState extends State<MatchesScreen> {
           ),
         );
       },
+      child: Stack(
+        children: [
+          Container(
+            margin: EdgeInsets.only(
+              right: 20.0,
+              top: 5.0,
+            ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.green[600]!,
+                  Colors.green[500]!,
+                  Colors.green[500]!,
+                  Colors.green[600]!,
+                ],
+                stops: [0.1, 0.4, 0.7, 0.9],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green[100]!,
+                  blurRadius: 8.0,
+                  offset: Offset(6, 4),
+                ),
+              ],
+              color: Colors.green[400],
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+            ),
+            height: 80.0,
+            width: 260.0,
+            child: Container(
+              child: Row(
+                children: [
+                  SizedBox(width: 20.0),
+                  CircleAvatar(
+                    radius: 25.0,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.sports_soccer,
+                      color: Colors.green[700],
+                      size: 50.0,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      '${DateFormat('MMMd').format(match.whenPlay)} '
+                          '| ${DateFormat('HH:mm').format(match.whenPlay)} hs',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          match.haveNotifications ? _buildNotification() : Container(),
+        ],
+      ),
+    );
+  }
+
+  Positioned _buildNotification() {
+    return Positioned(
+      top: 0.0,
+      right: 14.0,
       child: Container(
-        margin: EdgeInsets.only(bottom: 20.0),
+        width: 30.0,
+        height: 30.0,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.all(
+            Radius.circular(50.0),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyMatchCardPlaceHolder() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) =>
+              CreateMatchScreen(),
+          transitionDuration: Duration(seconds: 0),
+        ),);
+      },
+      child: Container(
+        margin: EdgeInsets.only(
+          right: 20.0,
+          bottom: 20.0,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.green[600]!,
               Colors.green[500]!,
+              Colors.green[400]!,
+              Colors.green[400]!,
               Colors.green[500]!,
-              Colors.green[600]!,
             ],
             stops: [0.1, 0.4, 0.7, 0.9],
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.green[100]!,
-              blurRadius: 6.0,
-              offset: Offset(0, 8),
+              color: Colors.black12,
+              blurRadius: 8.0,
+              offset: Offset(10, 6),
             ),
           ],
           color: Colors.green[400],
           borderRadius: BorderRadius.all(
-            Radius.circular(30.0),
+            Radius.circular(10.0),
           ),
         ),
-        width: MediaQuery.of(context).size.width,
-        height: 80.0,
-        child: Center(
-          child: ListTile(
-            leading: CircleAvatar(
-              radius: 30.0,
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.sports_soccer,
-                color: Colors.green[700],
-                size: 50.0,
+        width: 260.0,
+        child: Container(
+          child: Row(
+            children: [
+              Expanded(
+                child: Text('Crear partido',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-            title: Text(
-              DateFormat('HH:mm').format(match.whenPlay),
-              style: TextStyle(
-                fontSize: 20.0,
+              Icon(
+                Icons.add,
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                size: 30.0,
               ),
-              textAlign: TextAlign.center,
-            ),
-            trailing: Icon(
-              Icons.keyboard_arrow_right,
-              color: Colors.white,
-              size: 40.0,
-            ),
+              SizedBox(width: 20.0),
+            ],
           ),
         ),
       ),
     );
   }
 
-  void _navigateToSection(index) {
-    if (this.isLoading) {
-      return;
-    }
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => PlayersScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) =>
-                PrivateProfileScreen(),
-            transitionDuration: Duration(seconds: 0),
-          ),
-        );
-        break;
-      default:
-        setState(() {
-          this.isLoading = false;
-        });
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBarRounded() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 1,
-      onTap: (index) {
-        if (index != 1) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Jugadores',
-          icon: Icon(Icons.groups_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Partidos',
-          icon: Icon(
-            Icons.sports_soccer,
-          ),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Reservas',
-          icon: Icon(Icons.calendar_month_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Perfil',
-          icon: Icon(Icons.person_outline),
-        ),
-      ],
-    );
-  }
 }

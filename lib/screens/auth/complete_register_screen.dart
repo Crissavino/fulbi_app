@@ -402,7 +402,8 @@ class _CompleteRegisterScreenState extends State<CompleteRegisterScreen> {
 
                               if (completeUserProfileResponse['success'] == true) {
                                 // TODO show intro sliders
-                                Navigator.pushReplacementNamed(context, 'matches');
+                                // Navigator.pushReplacementNamed(context, 'matches');
+                                Navigator.pushReplacementNamed(context, 'bookings');
                               } else {
                                 setState(() {
                                   this.isLoading = false;

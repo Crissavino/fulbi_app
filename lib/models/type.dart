@@ -3,28 +3,53 @@ import 'dart:io';
 import 'package:fulbito_app/utils/translations.dart';
 
 class Type {
+  int? id;
+  String? name;
+  String? vs;
+  double? cost;
+  bool? checked;
+
   Type({
     this.id,
     this.name,
+    this.vs,
+    this.cost,
     this.checked,
   });
 
-  int? id;
-  String? name;
-  bool? checked;
-
   List<Type> get matchTypes {
     return [
-      Type(id: 1, name: translations[localeName]!['general.types.f5']!, checked: true),
-      Type(id: 2, name: translations[localeName]!['general.types.f7']!, checked: true),
-      Type(id: 3, name: translations[localeName]!['general.types.f9']!, checked: true),
-      Type(id: 4, name: translations[localeName]!['general.types.f11']!, checked: true),
+      Type(
+        id: 1,
+        name: translations[localeName]!['general.types.f5']!,
+        vs: "5 vs 5",
+        checked: true,
+      ),
+      Type(
+        id: 2,
+        name: translations[localeName]!['general.types.f7']!,
+        vs: "7 vs 7",
+        checked: true,
+      ),
+      Type(
+        id: 3,
+        name: translations[localeName]!['general.types.f9']!,
+        vs:  "9 vs 9",
+        checked: true,
+      ),
+      Type(
+        id: 4,
+        name: translations[localeName]!['general.types.f11']!,
+        vs: "11 vs 11",
+        checked: true,
+      ),
     ];
   }
 
   factory Type.fromJson(Map<String, dynamic> json) => Type(
     id: json["id"],
     name: json["name"],
+    cost: json["cost"] != null ? double.tryParse(json["cost"]) : null,
     checked: json["checked"],
   );
 

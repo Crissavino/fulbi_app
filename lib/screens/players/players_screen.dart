@@ -18,6 +18,7 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/show_alert.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/user_menu.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayersScreen extends StatefulWidget {
@@ -128,7 +129,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
             width: width * 0.82,
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(10.0),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
@@ -331,15 +332,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
             width: _width,
             height: _height,
             child: Center(
-                child: Text(
-                    translations[localeName]![
-                    'general.noPlayers']!)),
+              child: Text(
+                translations[localeName]!['general.noPlayers']!,
+              ),
+            ),
           );
         }
 
         List players = snapshot.data;
 
-        if (players != null && players.isEmpty) {
+        if (players.isEmpty) {
           return Container(
             width: _width,
             height: _height,
@@ -364,8 +366,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 BuildContext context,
                 int index,
                 ) {
-              return _buildPlayerRow(
-                  players[index]!);
+              return _buildPlayerRowNew(players[index]!);
             },
             itemCount: players.length,
           ),
@@ -399,6 +400,91 @@ class _PlayersScreenState extends State<PlayersScreen> {
           this.players,
         );
     }
+  }
+
+  Widget _buildPlayerRowNew(User user) {
+    final _width = MediaQuery.of(context).size.width;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PublicProfileScreen(
+              userId: user.id,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.grey[200]!,
+              Colors.grey[100]!,
+              Colors.grey[100]!,
+              Colors.grey[200]!,
+            ],
+            stops: [0.1, 0.4, 0.7, 0.9],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey[400]!,
+              blurRadius: 4.0,
+              offset: Offset(0, 4),
+            ),
+          ],
+          // color: Colors.white,
+          borderRadius: BorderRadius.all(
+            Radius.circular(10.0),
+          ),
+          border: Border.all(
+            color: Colors.green[500]!,
+            width: 3.0,
+          ),
+        ),
+        width: _width,
+        height: 80.0,
+        child: Center(
+          child: ListTile(
+            leading: CircleAvatar(
+              radius: 30.0,
+              backgroundColor: Colors.green[300],
+              child: CircleAvatar(
+                radius: 24.0,
+                backgroundColor: Colors.white,
+                child: user.profileImage == null
+                    ? Icon(
+                        Icons.person,
+                        color: Colors.green[700],
+                        size: 40.0,
+                      )
+                    : null,
+                backgroundImage: user.profileImage == null
+                    ? null
+                    : NetworkImage(user.profileImage!),
+              ),
+            ),
+            title: Text(
+              user.name,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            trailing: Icon(
+              Icons.keyboard_arrow_right,
+              color: Colors.transparent,
+              size: 40.0,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildPlayerRow(User user) {
@@ -438,7 +524,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
           ],
           color: Colors.green[400],
           borderRadius: BorderRadius.all(
-            Radius.circular(30.0),
+            Radius.circular(10.0),
           ),
         ),
         width: _width,
@@ -448,16 +534,20 @@ class _PlayersScreenState extends State<PlayersScreen> {
             leading: CircleAvatar(
               radius: 30.0,
               backgroundColor: Colors.white,
-              child: user.profileImage == null
-                  ? Icon(
-                      Icons.person,
-                      color: Colors.green[700],
-                      size: 40.0,
-                    )
-                  : null,
-              backgroundImage: user.profileImage == null
-                  ? null
-                  : NetworkImage(user.profileImage!),
+              child: CircleAvatar(
+                radius: 24.0,
+                backgroundColor: Colors.white,
+                child: user.profileImage == null
+                    ? Icon(
+                        Icons.person,
+                        color: Colors.green[700],
+                        size: 40.0,
+                      )
+                    : null,
+                backgroundImage: user.profileImage == null
+                    ? null
+                    : NetworkImage(user.profileImage!),
+              ),
             ),
             title: Text(
               user.name,
@@ -469,7 +559,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
             ),
             trailing: Icon(
               Icons.keyboard_arrow_right,
-              color: Colors.white,
+              color: Colors.transparent,
               size: 40.0,
             ),
           ),

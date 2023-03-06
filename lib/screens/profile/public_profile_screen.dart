@@ -14,6 +14,10 @@ import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/utils/translations.dart';
 import 'package:fulbito_app/widgets/show_my_created_matches.dart';
 import 'package:fulbito_app/widgets/show_user_positions.dart';
+import 'package:getwidget/components/avatar/gf_avatar.dart';
+import 'package:getwidget/components/checkbox_list_tile/gf_checkbox_list_tile.dart';
+import 'package:getwidget/components/list_tile/gf_list_tile.dart';
+import 'package:getwidget/types/gf_checkbox_type.dart';
 
 // ignore: must_be_immutable
 class PublicProfileScreen extends StatefulWidget {
@@ -168,22 +172,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                           ),
                                         ],
                                       ),
-                                      child: Column(
-                                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          SizedBox(height: 75.0),
-                                          _buildUserNickname(innerWidth),
-                                          // SizedBox(height: 15.0),
-                                          // _buildUserReviews(innerWidth),
-                                          SizedBox(height: 45.0),
-                                          _buildUserLocation(innerWidth),
-                                          SizedBox(height: 45.0),
-                                          _buildUserPositions(innerWidth),
-                                          Expanded(child: Container()),
-                                          widget.calledFromMatch ? Container() : _buildInviteButton(),
-                                          SizedBox(height: 55.0),
-                                        ],
-                                      ),
+                                      child: _userInformationNew(innerWidth, innerHeight),
                                     ),
                                   ),
                                   Positioned(
@@ -193,21 +182,29 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     child: Center(
                                       child: this.profileImagePath == ''
                                           ? CircleAvatar(
-                                        backgroundColor: Colors.white,
+                                        backgroundColor: Colors.green[300],
                                         radius: 60,
+                                            child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 54,
                                         child: Icon(
-                                          Icons.person,
-                                          color: Colors.green[700],
-                                          size: 100.0,
-                                        ),
-                                      )
-                                          : CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        radius: 60,
-                                        backgroundImage: NetworkImage(
-                                          this.profileImagePath,
+                                            Icons.person,
+                                            color: Colors.green[700],
+                                            size: 100.0,
                                         ),
                                       ),
+                                          )
+                                          : CircleAvatar(
+                                        backgroundColor: Colors.green[300],
+                                        radius: 60,
+                                            child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 54,
+                                        backgroundImage: NetworkImage(
+                                            this.profileImagePath,
+                                        ),
+                                      ),
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -581,33 +578,33 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   }
 
   _buildInviteButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 20.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.green[600]!,
-            Colors.green[500]!,
-            Colors.green[500]!,
-            Colors.green[600]!,
-          ],
-          stops: [0.1, 0.4, 0.7, 0.9],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green[100]!,
-            blurRadius: 10.0,
-            offset: Offset(0, 5),
+    return Center(
+      child: Container(
+        margin: EdgeInsets.only(top: 20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.green[600]!,
+              Colors.green[500]!,
+              Colors.green[500]!,
+              Colors.green[600]!,
+            ],
+            stops: [0.1, 0.4, 0.7, 0.9],
           ),
-        ],
-        color: Colors.green[400],
-        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      ),
-      width: MediaQuery.of(context).size.width * .40,
-      height: 50.0,
-      child: Center(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green[100]!,
+              blurRadius: 10.0,
+              offset: Offset(0, 5),
+            ),
+          ],
+          color: Colors.green[400],
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+        ),
+        width: MediaQuery.of(context).size.width * .40,
+        height: 50.0,
         child: TextButton(
           onPressed: () async {
             await showModalBottomSheet(
@@ -633,6 +630,263 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  _userInformation(double innerWidth) {
+    return Column(
+      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        SizedBox(height: 75.0),
+        _buildUserNickname(innerWidth),
+        // SizedBox(height: 15.0),
+        // _buildUserReviews(innerWidth),
+        SizedBox(height: 45.0),
+        _buildUserLocation(innerWidth),
+        SizedBox(height: 45.0),
+        _buildUserPositions(innerWidth),
+        Expanded(child: Container()),
+        widget.calledFromMatch ? Container() : _buildInviteButton(),
+        SizedBox(height: 55.0),
+      ],
+    );
+  }
+
+  _userInformationNew(double innerWidth, double innerHeight) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 75.0),
+        Container(
+          height: 25.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 20.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            translations[localeName]!['profile.nickname']!,
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        Container(
+          height: 8.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 30.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            '@${this._user!.nickname}',
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Container(
+          height: 25.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 20.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            translations[localeName]!['profile.usuallyPlay']!,
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        Container(
+          height: 8.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 30.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            this._userLocation!.formattedAddress,
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Container(
+          height: 25.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 20.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            translations[localeName]!['general.positions']!,
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        // go throw this._userPositions and build a row with each position
+        Container(
+          height: 8.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 20.0,),
+          padding: EdgeInsets.only(left: 30.0,),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var position in this._userPositions!)
+                Text(
+                  position.id == 1
+                      ? translations[localeName]!['general.positions.gk']!
+                      : position.id == 2
+                      ? translations[localeName]!['general.positions.def']!
+                      : position.id == 3
+                      ? translations[localeName]![
+                  'general.positions.mid']!
+                      : translations[localeName]![
+                  'general.positions.for']!,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+            ],
+          ),
+        ),
+        Container(
+          height: 25.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: Container()),
+        widget.calledFromMatch ? Container() : _buildInviteButton(),
+        SizedBox(height: 55.0),
+      ],
     );
   }
 

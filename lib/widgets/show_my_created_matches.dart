@@ -262,7 +262,8 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
             : () async => await showAlertForInviteToMatch(match),
         child: Container(
           margin: EdgeInsets.only(bottom: 20.0),
-          decoration: BoxDecoration(gradient: LinearGradient(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
@@ -281,10 +282,10 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
               ),
             ],
             color: isTheUserAlreadyIn
-                ? Colors.green[400]!.withOpacity(0.5)
+                ? Colors.green[400]!.withOpacity(0.4)
                 : Colors.green[400],
             borderRadius: BorderRadius.all(
-              Radius.circular(30.0),
+              Radius.circular(10.0),
             ),
           ),
           width: MediaQuery.of(context).size.width,
@@ -292,7 +293,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
           child: Center(
             child: ListTile(
               leading: CircleAvatar(
-                radius: 30.0,
+                radius: 25.0,
                 backgroundColor: Colors.white,
                 child: Icon(
                   Icons.sports_soccer,
@@ -303,6 +304,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
               title: Text(
                 DateFormat('dd/MM HH:mm').format(match.whenPlay),
                 style: TextStyle(
+                  fontSize: 20.0,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -311,7 +313,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
               trailing: Icon(
                 Icons.add_circle_outline,
                 color: Colors.white,
-                size: 40.0,
+                size: 30.0,
               ),
             ),
           ),

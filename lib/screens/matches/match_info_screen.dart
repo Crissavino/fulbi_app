@@ -550,7 +550,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildJoinButton("Join"),
-                          _buildOutlinedButton("Invite")
+                          _buildOutlinedButton(translations[localeName]!['general.invite']!)
                         ],
                       ),
                       SizedBox(

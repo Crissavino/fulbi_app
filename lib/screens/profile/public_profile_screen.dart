@@ -90,7 +90,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     context,
                                     PageRouteBuilder(
                                       pageBuilder: (context, animation1, animation2) =>
-                                          MatchParticipantsScreen(match: widget.match!, calledFromMyMatches: true),
+                                          MatchParticipantsScreen(match: widget.match!, calledFromMyMatches: false),
                                       transitionDuration: Duration(seconds: 0),
                                     ),
                                   );
@@ -99,7 +99,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                                     context,
                                     PageRouteBuilder(
                                       pageBuilder: (context, animation1, animation2) =>
-                                          MatchInfoScreen(match: widget.match!, calledFromMyMatches: true),
+                                          MatchInfoScreen(match: widget.match!, calledFromMatchInfo: false),
                                       transitionDuration: Duration(seconds: 0),
                                     ),
                                   );

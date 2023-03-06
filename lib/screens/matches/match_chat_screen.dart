@@ -25,12 +25,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MatchChatScreen extends StatefulWidget {
   Match match;
   User currentUser;
-  bool calledFromMyMatches;
+  bool calledFromMatchInfo;
 
   MatchChatScreen({
     required this.match,
     required this.currentUser,
-    required this.calledFromMyMatches,
+    required this.calledFromMatchInfo,
   });
 
   @override
@@ -131,82 +131,87 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           SafeArea(
             top: false,
             bottom: false,
-            child: Scaffold(
-              appBar: new PreferredSize(
-                child: new Container(
-                  decoration: horizontalGradient,
-                  child: AppBar(
-                    backwardsCompatibility: false,
-                    systemOverlayStyle:
-                        SystemUiOverlayStyle(statusBarColor: Colors.white),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0.0,
-                    leading: IconButton(
-                      onPressed: () {
-                        if (widget.calledFromMyMatches) {
-                          Navigator.of(context)
-                              .push(
-                                MaterialPageRoute(
-                                  builder: (context) => MyMatchesScreen(),
-                                ),
-                              )
-                              .then((_) => setState(() {}));
-                        } else {
-                          Navigator.of(context)
-                              .push(
-                                MaterialPageRoute(
-                                  builder: (context) => MatchesScreen(),
-                                ),
-                              )
-                              .then((_) => setState(() {}));
-                        }
-                      },
-                      icon: Platform.isIOS
-                          ? Icon(Icons.arrow_back_ios)
-                          : Icon(Icons.arrow_back),
-                      splashColor: Colors.transparent,
-                    ),
-                    title: Text(
-                      'Chat',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+            child: Hero(
+              tag: 'matchChat',
+              child: Scaffold(
+                appBar: new PreferredSize(
+                  child: new Container(
+                    decoration: horizontalGradient,
+                    child: AppBar(
+                      backwardsCompatibility: false,
+                      systemOverlayStyle:
+                          SystemUiOverlayStyle(statusBarColor: Colors.white),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0.0,
+                      leading: IconButton(
+                        onPressed: () {
+                          if (widget.calledFromMatchInfo) {
+                            Navigator.of(context)
+                                .push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MatchInfoScreen(
+                                      match: widget.match,
+                                      calledFromMatchInfo: widget.calledFromMatchInfo,
+                                    ),
+                                  ),
+                                )
+                                .then((_) => setState(() {}));
+                          } else {
+                            Navigator.of(context)
+                                .push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MatchesScreen(),
+                                  ),
+                                )
+                                .then((_) => setState(() {}));
+                          }
+                        },
+                        icon: Platform.isIOS
+                            ? Icon(Icons.arrow_back_ios)
+                            : Icon(Icons.arrow_back),
+                        splashColor: Colors.transparent,
                       ),
-                      textAlign: TextAlign.center,
+                      title: Text(
+                        'Chat',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
+                  preferredSize: new Size(
+                    MediaQuery.of(context).size.width,
+                    70.0,
+                  ),
                 ),
-                preferredSize: new Size(
-                  MediaQuery.of(context).size.width,
-                  70.0,
-                ),
-              ),
-              resizeToAvoidBottomInset: true,
-              body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: Platform.isIOS
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark,
-                child: Center(
-                  child: Column(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: screenBorders,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: screenBorders,
-                            child: _buildMessagesScreen(),
+                resizeToAvoidBottomInset: true,
+                body: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: Platform.isIOS
+                      ? SystemUiOverlayStyle.light
+                      : SystemUiOverlayStyle.dark,
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: screenBorders,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: screenBorders,
+                              child: _buildMessagesScreen(),
+                            ),
                           ),
                         ),
-                      ),
-                      _buildMessageComposer(),
-                    ],
+                        _buildMessageComposer(),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              bottomNavigationBar: _buildBottomNavigationBar(),
             ),
           )
         ],
@@ -595,74 +600,5 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
     this._focusNode.requestFocus();
     this._textController.clear();
-  }
-
-  void _navigateToSection(index) {
-    if (this.isLoading) {
-      return;
-    }
-    this.isLoading = true;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchInfoScreen(
-              match: widget.match,
-              calledFromMyMatches: widget.calledFromMyMatches,
-            ),
-          ),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchParticipantsScreen(
-              match: widget.match,
-              calledFromMyMatches: widget.calledFromMyMatches,
-            ),
-          ),
-        );
-        break;
-      default:
-        return;
-    }
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      elevation: 0.0,
-      iconSize: 30,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.green[400],
-      unselectedItemColor: Colors.green[900],
-      backgroundColor: Colors.white,
-      currentIndex: 2,
-      onTap: (index) {
-        if (index != 2) {
-          _navigateToSection(index);
-        }
-      },
-      items: [
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Informacion',
-          icon: Icon(Icons.info_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Participantes',
-          icon: Icon(Icons.group_outlined),
-        ),
-        BottomNavigationBarItem(
-          // ignore: deprecated_member_use
-          label: 'Chat',
-          icon: Icon(Icons.chat_bubble),
-        ),
-      ],
-    );
   }
 }

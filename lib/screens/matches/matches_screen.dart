@@ -61,9 +61,12 @@ class _MatchesState extends State<MatchesScreen> {
 
   void loadFromLocalStorage() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
-    if (localStorage.containsKey('matchesScreen.matches') && localStorage.containsKey('matchesScreen.areNotifications')) {
-      var thisAreNotifications = json.decode(json.decode(localStorage.getString('matchesScreen.areNotifications')!));
-      var thisMatches = json.decode(json.decode(localStorage.getString('matchesScreen.matches')!));
+    if (localStorage.containsKey('matchesScreen.matches') &&
+        localStorage.containsKey('matchesScreen.areNotifications')) {
+      var thisAreNotifications = json.decode(json
+          .decode(localStorage.getString('matchesScreen.areNotifications')!));
+      var thisMatches = json.decode(
+          json.decode(localStorage.getString('matchesScreen.matches')!));
 
       List matches = thisMatches;
       thisMatches = matches.map((match) => Match.fromJson(match)).toList();
@@ -82,7 +85,8 @@ class _MatchesState extends State<MatchesScreen> {
     }
 
     if (localStorage.containsKey('matchesScreen.myMatches')) {
-      var thisMatches = json.decode(json.decode(localStorage.getString('matchesScreen.myMatches')!));
+      var thisMatches = json.decode(
+          json.decode(localStorage.getString('matchesScreen.myMatches')!));
 
       List matches = thisMatches;
       thisMatches = matches.map((match) => Match.fromJson(match)).toList();
@@ -99,25 +103,31 @@ class _MatchesState extends State<MatchesScreen> {
   void silentNotificationListener() {
     PushNotificationService.messageStream.listen((notificationData) async {
       if (notificationData.containsKey('silentUpdateChat')) {
-        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
+        if (!notificationStreamController.isClosed)
+          notificationStreamController.sink.add(true);
         await saveVariablesInLocalStorage();
       }
       if (notificationData.containsKey('silentUpdateMatch')) {
-        if (!notificationStreamController.isClosed) notificationStreamController.sink.add(true);
+        if (!notificationStreamController.isClosed)
+          notificationStreamController.sink.add(true);
         final Match? editedMatch = notificationData['match'];
 
         // match offer
-        final Match? editedMatchToReplace = this.matches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
+        final Match? editedMatchToReplace = this
+            .matches
+            .firstWhereOrNull((match) => match!.id == editedMatch!.id);
         if (editedMatchToReplace != null) {
           var index = this.matches.indexOf(editedMatchToReplace);
           this.matches.replaceRange(index, index + 1, [editedMatch]);
-          if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+          if (!matchesStreamController.isClosed)
+            matchesStreamController.sink.add(this.matches);
           await saveVariablesInLocalStorage();
         }
 
         //my match
-        final Match? editedMyMatchToReplace =
-        this.myMatches.firstWhereOrNull((match) => match!.id == editedMatch!.id);
+        final Match? editedMyMatchToReplace = this
+            .myMatches
+            .firstWhereOrNull((match) => match!.id == editedMatch!.id);
         if (editedMyMatchToReplace != null) {
           var index = this.myMatches.indexOf(editedMatchToReplace);
           this.myMatches.replaceRange(index, index + 1, [editedMatch]);
@@ -130,13 +140,15 @@ class _MatchesState extends State<MatchesScreen> {
       if (notificationData.containsKey('silentCreatedMatch')) {
         final Match? editedMatch = notificationData['match'];
         this.matches.add(editedMatch);
-        this.matches.sort((a,b) => a!.whenPlay.compareTo(b!.whenPlay));
-        if (!matchesStreamController.isClosed) matchesStreamController.sink.add(this.matches);
+        this.matches.sort((a, b) => a!.whenPlay.compareTo(b!.whenPlay));
+        if (!matchesStreamController.isClosed)
+          matchesStreamController.sink.add(this.matches);
         await saveVariablesInLocalStorage();
       }
 
       if (notificationData.containsKey('silentUpdateMatches')) {
-        final int? matchIdToDelete = int.tryParse(notificationData['matchIdToDelete']);
+        final int? matchIdToDelete =
+            int.tryParse(notificationData['matchIdToDelete']);
         this.matches.removeWhere((match) => match!.id == matchIdToDelete!);
         if (!matchesStreamController.isClosed)
           matchesStreamController.sink.add(this.matches);
@@ -144,7 +156,8 @@ class _MatchesState extends State<MatchesScreen> {
       }
 
       if (notificationData.containsKey('silentUpdateMyMatches')) {
-        final int? matchIdToDelete = int.tryParse(notificationData['matchIdToDelete']);
+        final int? matchIdToDelete =
+            int.tryParse(notificationData['matchIdToDelete']);
         this.myMatches.removeWhere((match) => match!.id == matchIdToDelete!);
         if (!myMatchesStreamController.isClosed)
           myMatchesStreamController.sink.add(this.myMatches);
@@ -158,12 +171,15 @@ class _MatchesState extends State<MatchesScreen> {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (isMyMatch) {
       var jsonMyMatches = this.myMatches.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchesScreen.myMatches', json.encode(jsonMyMatches.toString()));
+      await localStorage.setString(
+          'matchesScreen.myMatches', json.encode(jsonMyMatches.toString()));
     } else {
       var jsonMatches = this.matches.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchesScreen.matches', json.encode(jsonMatches.toString()));
+      await localStorage.setString(
+          'matchesScreen.matches', json.encode(jsonMatches.toString()));
     }
-    await localStorage.setString('matchesScreen.areNotifications', json.encode(this.areNotifications.toString()));
+    await localStorage.setString('matchesScreen.areNotifications',
+        json.encode(this.areNotifications.toString()));
   }
 
   @override
@@ -173,16 +189,22 @@ class _MatchesState extends State<MatchesScreen> {
     matchesStreamController.close();
   }
 
-  Future getMatchesOffers(int range, Genre genre, List<int?> types, calledFromInitState) async {
+  Future getMatchesOffers(
+      int range, Genre genre, List<int?> types, calledFromInitState) async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (calledFromInitState && localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
-      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
+      Genre? userGenre = this
+          ._searchedGender
+          .firstWhereOrNull((genre) => user.genreId == genre.id);
       this._searchedGender = this._searchedGender.map((Genre genre) {
         genre.checked = false;
         return genre;
       }).toList();
-      this._searchedGender.firstWhere((Genre genre) => genre.id == userGenre!.id).checked = true;
+      this
+          ._searchedGender
+          .firstWhere((Genre genre) => genre.id == userGenre!.id)
+          .checked = true;
       if (userGenre != null) {
         genre = userGenre;
       }
@@ -198,14 +220,14 @@ class _MatchesState extends State<MatchesScreen> {
       return Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     }
 
     if (response['success']) {
       List<Match> myMatches = responseMyMatches['matches'];
       this.areNotifications = myMatches
-          .firstWhereOrNull((match) => match.haveNotifications == true) !=
+              .firstWhereOrNull((match) => match.haveNotifications == true) !=
           null;
       this.matches = response['matches'];
 
@@ -233,7 +255,8 @@ class _MatchesState extends State<MatchesScreen> {
       });
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       var jsonMatches = this.myMatches.map((e) => json.encode(e)).toList();
-      await localStorage.setString('matchesScreen.myMatches', json.encode(jsonMatches.toString()));
+      await localStorage.setString(
+          'matchesScreen.myMatches', json.encode(jsonMatches.toString()));
 
       if (!myMatchesStreamController.isClosed)
         myMatchesStreamController.sink.add(this.myMatches);
@@ -246,7 +269,6 @@ class _MatchesState extends State<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     StreamBuilder<dynamic> buildNotificationStreamBuilder() {
       return StreamBuilder(
         initialData: this.areNotifications,
@@ -337,7 +359,7 @@ class _MatchesState extends State<MatchesScreen> {
           ),
           floatingActionButton: CustomFloatingActionButton(),
           floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
+              FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: UserMenu(
             isLoading: this.isLoading,
             currentIndex: 1,
@@ -403,10 +425,8 @@ class _MatchesState extends State<MatchesScreen> {
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
 
-        if (snapshot.connectionState !=
-            ConnectionState.done &&
+        if (snapshot.connectionState != ConnectionState.done &&
             !snapshot.hasData) {
-
           this.isLoading = true;
 
           return Container(
@@ -420,10 +440,8 @@ class _MatchesState extends State<MatchesScreen> {
                 width: _width,
                 height: _height,
                 child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
-                  crossAxisAlignment:
-                  CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [circularLoading],
                 ),
               ),
@@ -433,8 +451,7 @@ class _MatchesState extends State<MatchesScreen> {
 
         this.isLoading = false;
 
-        if (snapshot.connectionState ==
-            ConnectionState.done &&
+        if (snapshot.connectionState == ConnectionState.done &&
             !snapshot.hasData) {
           return Container(
             width: _width,
@@ -448,7 +465,7 @@ class _MatchesState extends State<MatchesScreen> {
                 height: _height,
                 child: Center(
                     child:
-                    Text(translations[localeName]!['general.noMatches']!)),
+                        Text(translations[localeName]!['general.noMatches']!)),
               ),
             ),
           );
@@ -477,7 +494,6 @@ class _MatchesState extends State<MatchesScreen> {
             },
           ),
         );
-
       },
     );
   }
@@ -489,10 +505,8 @@ class _MatchesState extends State<MatchesScreen> {
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
 
-        if (snapshot.connectionState !=
-            ConnectionState.done &&
+        if (snapshot.connectionState != ConnectionState.done &&
             !snapshot.hasData) {
-
           this.isLoading = true;
 
           return Expanded(
@@ -503,10 +517,8 @@ class _MatchesState extends State<MatchesScreen> {
                 width: _width,
                 height: _height,
                 child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
-                  crossAxisAlignment:
-                  CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [circularLoading],
                 ),
               ),
@@ -516,8 +528,7 @@ class _MatchesState extends State<MatchesScreen> {
 
         this.isLoading = false;
 
-        if (snapshot.connectionState ==
-            ConnectionState.done &&
+        if (snapshot.connectionState == ConnectionState.done &&
             !snapshot.hasData) {
           return Expanded(
             child: Container(
@@ -530,7 +541,7 @@ class _MatchesState extends State<MatchesScreen> {
                 height: _height,
                 child: Center(
                     child:
-                    Text(translations[localeName]!['general.noMatches']!)),
+                        Text(translations[localeName]!['general.noMatches']!)),
               ),
             ),
           );
@@ -550,7 +561,7 @@ class _MatchesState extends State<MatchesScreen> {
                 height: _height,
                 child: Center(
                     child:
-                    Text(translations[localeName]!['general.noMatches']!)),
+                        Text(translations[localeName]!['general.noMatches']!)),
               ),
             ),
           );
@@ -565,36 +576,15 @@ class _MatchesState extends State<MatchesScreen> {
             width: _width,
             child: RefreshIndicator(
               onRefresh: () => this.getRefreshData(
-                  this
-                      ._searchedRange['distance']!
-                      .toInt(),
+                  this._searchedRange['distance']!.toInt(),
                   this._searchedGender.first,
-                  this
-                      ._searchedMatchType
-                      .map((Type type) => type.id)
-                      .toList(),
-                  true
-              ),
+                  this._searchedMatchType.map((Type type) => type.id).toList(),
+                  true),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: matches.length,
                 itemBuilder: (BuildContext _, int index) {
-
                   return _buildMatchRow(matches[index]);
-
-                  // return FutureBuilder(
-                  //     builder: (BuildContext _, AsyncSnapshot futureSnapshot) {
-                  //
-                  //       if (futureSnapshot.connectionState !=
-                  //           ConnectionState.done &&
-                  //           !futureSnapshot.hasData) {
-                  //         return Text('loading...');
-                  //       }
-                  //
-                  //       return _buildMatchRow(futureSnapshot.data);
-                  //     },
-                  //     future: MatchRepository().getMatch(matches[index].id)
-                  // );
                 },
               ),
             ),
@@ -604,18 +594,14 @@ class _MatchesState extends State<MatchesScreen> {
     );
   }
 
-  Future<void> getRefreshData(
-      range,
-      genre,
-      types,
-      calledFromInitState
-      ) async {
-
+  Future<void> getRefreshData(range, genre, types, calledFromInitState) async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     if (localStorage.containsKey('user')) {
       User user = await UserRepository.getCurrentUser();
       // Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => user.genreId == genre.id);
-      Genre? userGenre = this._searchedGender.firstWhereOrNull((genre) => genre.checked == true);
+      Genre? userGenre = this
+          ._searchedGender
+          .firstWhereOrNull((genre) => genre.checked == true);
       if (userGenre != null) {
         genre = userGenre;
       }
@@ -630,7 +616,7 @@ class _MatchesState extends State<MatchesScreen> {
     if (response['success']) {
       List<Match> myMatches = responseMyMatches['matches'];
       this.areNotifications = myMatches
-          .firstWhereOrNull((match) => match.haveNotifications == true) !=
+              .firstWhereOrNull((match) => match.haveNotifications == true) !=
           null;
       this.matches = response['matches'];
       if (!notificationStreamController.isClosed)
@@ -647,6 +633,43 @@ class _MatchesState extends State<MatchesScreen> {
   Widget _buildMatchRow(Match match) {
     // check if match have a booking or is only a match
     Booking? booking = match.booking;
+    BoxDecoration boxDecoration = BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage('assets/cancha-futbol-5.jpeg'),
+        fit: BoxFit.cover,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.green[100]!,
+          blurRadius: 6.0,
+          offset: Offset(0, 8),
+        ),
+      ],
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10.0),
+        topRight: Radius.circular(10.0),
+      ),
+    );
+    String? imageUrl = booking?.field!.image;
+    if (imageUrl != null) {
+      boxDecoration = BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green[100]!,
+            blurRadius: 6.0,
+            offset: Offset(0, 8),
+          ),
+        ],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
+        ),
+      );
+    }
 
     return GestureDetector(
       onTap: () {
@@ -655,7 +678,7 @@ class _MatchesState extends State<MatchesScreen> {
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: match,
-              calledFromMyMatches: false,
+              calledFromMatchInfo: false,
             ),
           ),
         );
@@ -665,25 +688,7 @@ class _MatchesState extends State<MatchesScreen> {
           Stack(
             children: [
               Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: (booking?.field!.image != null)
-                        ? AssetImage(booking!.field!.image)
-                        : AssetImage('assets/cancha-futbol-5.jpeg'),
-                    fit: BoxFit.cover,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green[100]!,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0),
-                  ),
-                ),
+                decoration: boxDecoration,
                 width: MediaQuery.of(context).size.width,
                 height: 85.0,
               ),
@@ -700,7 +705,8 @@ class _MatchesState extends State<MatchesScreen> {
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Icon(
-                          Icons.star,
+                          Icons.calendar_month_outlined,
+                          size: 20.0,
                           color: Colors.yellow[700],
                         ),
                       )
@@ -745,9 +751,7 @@ class _MatchesState extends State<MatchesScreen> {
                       Row(
                         children: [
                           Text(
-                            (booking != null)
-                                ? booking.field!.name
-                                : "Test",
+                            (booking != null) ? booking.field!.name : "Test",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
@@ -834,7 +838,9 @@ class _MatchesState extends State<MatchesScreen> {
                             Row(
                               children: [
                                 Text(
-                                  (match.numPlayers - match.participants!.length).toString(),
+                                  (match.numPlayers -
+                                          match.participants!.length)
+                                      .toString(),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18.0,
@@ -872,7 +878,7 @@ class _MatchesState extends State<MatchesScreen> {
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: match,
-              calledFromMyMatches: false,
+              calledFromMatchInfo: false,
             ),
           ),
         );
@@ -926,7 +932,7 @@ class _MatchesState extends State<MatchesScreen> {
                   Expanded(
                     child: Text(
                       '${DateFormat('MMMd').format(match.whenPlay)} '
-                          '| ${DateFormat('HH:mm').format(match.whenPlay)} hs',
+                      '| ${DateFormat('HH:mm').format(match.whenPlay)} hs',
                       style: TextStyle(
                         fontSize: 20.0,
                         color: Colors.white,
@@ -972,11 +978,14 @@ class _MatchesState extends State<MatchesScreen> {
   Widget _buildMyMatchCardPlaceHolder() {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, PageRouteBuilder(
-          pageBuilder: (context, animation1, animation2) =>
-              CreateMatchScreen(),
-          transitionDuration: Duration(seconds: 0),
-        ),);
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) =>
+                CreateMatchScreen(),
+            transitionDuration: Duration(seconds: 0),
+          ),
+        );
       },
       child: Container(
         margin: EdgeInsets.only(
@@ -1012,7 +1021,8 @@ class _MatchesState extends State<MatchesScreen> {
           child: Row(
             children: [
               Expanded(
-                child: Text('Crear partido',
+                child: Text(
+                  'Crear partido',
                   style: TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
@@ -1033,5 +1043,4 @@ class _MatchesState extends State<MatchesScreen> {
       ),
     );
   }
-
 }

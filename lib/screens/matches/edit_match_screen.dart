@@ -343,17 +343,20 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
                 value: Platform.isIOS
                     ? SystemUiOverlayStyle.light
                     : SystemUiOverlayStyle.dark,
-                child: Center(
-                  child: Container(
-                    width: _width,
-                    height: _height,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: (MediaQuery.of(context).viewInsets.bottom),
-                        left: 15.0,
-                        right: 15.0,
+                child: Hero(
+                  tag: 'editMatch',
+                  child: Center(
+                    child: Container(
+                      width: _width,
+                      height: _height,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: (MediaQuery.of(context).viewInsets.bottom),
+                          left: 15.0,
+                          right: 15.0,
+                        ),
+                        child: buildMatchStreamBuilder(),
                       ),
-                      child: buildMatchStreamBuilder(),
                     ),
                   ),
                 ),

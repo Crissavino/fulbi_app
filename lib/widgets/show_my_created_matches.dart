@@ -334,16 +334,14 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
         builder: (_) => AlertDialog(
           title: Text(title),
           actions: [
-            MaterialButton(
+            TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 translations[localeName]!['general.cancel']!,
                 style: TextStyle(fontWeight: FontWeight.normal),
               ),
-              color: Colors.blue,
-              elevation: 5,
             ),
-            MaterialButton(
+            TextButton(
               onPressed: this.isLoadingAlert ? null : () async {
                 setState(() {
                   this.isLoadingAlert = true;
@@ -368,8 +366,6 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                 translations[localeName]!['general.accept']!,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              color: Colors.blue,
-              elevation: 5,
             ),
           ],
         ),

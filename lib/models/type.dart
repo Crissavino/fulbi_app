@@ -5,6 +5,7 @@ import 'package:fulbito_app/utils/translations.dart';
 class Type {
   int? id;
   String? name;
+  int? number;
   String? vs;
   double? cost;
   bool? checked;
@@ -12,6 +13,7 @@ class Type {
   Type({
     this.id,
     this.name,
+    this.number,
     this.vs,
     this.cost,
     this.checked,
@@ -49,7 +51,8 @@ class Type {
   factory Type.fromJson(Map<String, dynamic> json) => Type(
     id: json["id"],
     name: json["name"],
-    cost: json["cost"] != null ? double.tryParse(json["cost"]) : null,
+    cost: json['pivot'] != null ? (json["pivot"]["cost"] != null ? double.parse(json["pivot"]["cost"].toString()) : null) : null,
+    number: json['pivot'] != null ? (json["pivot"]["number"] != null ? json["pivot"]["number"] : null) : null,
     checked: json["checked"],
   );
 

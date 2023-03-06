@@ -10,6 +10,7 @@ class Field {
   final int currencyId;
   final double cost;
   final String image;
+  final bool advertising;
   List<Type> types;
   Location? location;
   dynamic currency;
@@ -22,6 +23,7 @@ class Field {
     required this.description,
     required this.currencyId,
     required this.cost,
+    required this.advertising,
     required this.image,
     required this.types,
     required this.location,
@@ -38,6 +40,7 @@ class Field {
       currencyId: json['currency_id'],
       cost: json['cost'],
       image: json['image'],
+      advertising: ((json["advertising"] == 1) || json["advertising"] == true) ? true : false,
       types: json['types'] != null ? (json['types'] as List).map((i) => Type.fromJson(i)).toList() : [],
       location: json['location'] != null ? Location.fromJson(json['location']) : null,
       currency: json['currency'] != null ? json['currency']['symbol'] : null,

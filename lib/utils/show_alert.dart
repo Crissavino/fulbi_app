@@ -12,11 +12,9 @@ showAlert(BuildContext context, String title, String subTitle) {
         title: Text(title),
         content: Text(subTitle),
         actions: [
-          MaterialButton(
+          TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Ok'),
-            color: Colors.blue,
-            elevation: 5,
           ),
         ],
       ),

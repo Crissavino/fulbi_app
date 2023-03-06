@@ -49,9 +49,8 @@ class _UserMenuState extends State<UserMenu> {
 
   }
 
-  MaterialButton _buildButton(screen, icon, index, menuText) {
-    return MaterialButton(
-        minWidth: 40,
+  TextButton _buildButton(screen, icon, index, menuText) {
+    return TextButton(
         onPressed: () {
           if (widget.currentIndex == index) return;
           Navigator.pushReplacement(

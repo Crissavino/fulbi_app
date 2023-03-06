@@ -44,9 +44,9 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.crissavino.fulbito.fulbito_app"
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 39
-        versionName "1.2.12"
+        targetSdkVersion 32
+        versionCode 40
+        versionName "1.2.13"
     }
 
     signingConfigs {

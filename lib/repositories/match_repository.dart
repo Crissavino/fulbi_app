@@ -41,7 +41,7 @@ class MatchRepository {
         'success': true,
         'myUser': User.fromJson(jsonDecode(localStorage.getString('user')!)),
         'match': Match.fromJson(body['match']),
-        'booking': Booking.fromJson(body['booking']),
+        'booking': body['booking'] == null ? null : Booking.fromJson(body['booking']),
         'owner': User.fromJson(body['owner']),
         'location': Location.fromJson(body['location']),
         'genre': Genre(id: body['genre']['id'], name: translations[localeName]![body['genre']['name_key']]!),

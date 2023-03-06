@@ -370,6 +370,7 @@ class _BookingsState extends State<BookingsScreen> {
             _searchedMatchType.forEach((Type searchedType) {
               if (searchedType.id == type.id) {
                 searchedType.cost = type.cost;
+                searchedType.number = type.number;
                 fieldWithType.add(searchedType);
               }
             });
@@ -377,7 +378,6 @@ class _BookingsState extends State<BookingsScreen> {
             fieldsWithType.add(fieldWithType);
           });
         });
-
 
         return Expanded(
           child: Container(
@@ -431,6 +431,18 @@ class _BookingsState extends State<BookingsScreen> {
   }
 
   Widget _buildFieldRow(Field field, Type type) {
+
+    DecorationImage decorationImage = DecorationImage(
+      image: AssetImage('assets/cancha-futbol-5.jpeg'),
+      fit: BoxFit.cover,
+    );
+    if (field.image.isNotEmpty) {
+      decorationImage = DecorationImage(
+        image: NetworkImage(field.image),
+        fit: BoxFit.cover,
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -444,28 +456,47 @@ class _BookingsState extends State<BookingsScreen> {
       },
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: field.image != null
-                    ? AssetImage(field.image)
-                    : AssetImage('assets/cancha-futbol-5.jpeg'),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green[100]!,
-                  blurRadius: 6.0,
-                  offset: Offset(0, 8),
+          Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  image: decorationImage,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green[100]!,
+                      blurRadius: 6.0,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                  ),
                 ),
-              ],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
+                width: MediaQuery.of(context).size.width,
+                height: 85.0,
               ),
-            ),
-            width: MediaQuery.of(context).size.width,
-            height: 85.0,
+              Positioned(
+                top: 6,
+                right: 6,
+                // add a container child with a star icon if match has a booking
+                child: (field.advertising)
+                    ? Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    Icons.star,
+                    size: 20.0,
+                    color: Colors.yellow[700],
+                  ),
+                )
+                    : Container(),
+              ),
+            ],
           ),
           Container(
             decoration: BoxDecoration(
@@ -507,7 +538,7 @@ class _BookingsState extends State<BookingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              (field.name != null) ? field.name : 'Cancha 1',
+                              field.name,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24.0,
@@ -515,7 +546,7 @@ class _BookingsState extends State<BookingsScreen> {
                               ),
                             ),
                             Text(
-                              (field.address != null) ? field.address : 'Calle false 123',
+                              field.address,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12.0,
@@ -524,26 +555,39 @@ class _BookingsState extends State<BookingsScreen> {
                             ),
                           ],
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 2.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(20.0),
+                        Column(
+                          children: [
+                            Text(
+                              'Cancha ${type.number}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            type.vs!,
-                            style: TextStyle(
-                              // add a RGB color #8B9586
-                              color: Color(0xFF8B9586),
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
+                            SizedBox(height: 4.0),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                                vertical: 2.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(20.0),
+                                ),
+                              ),
+                              child: Text(
+                                type.vs!,
+                                style: TextStyle(
+                                  // add a RGB color #8B9586
+                                  color: Color(0xFF8B9586),
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

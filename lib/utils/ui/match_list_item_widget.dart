@@ -25,7 +25,7 @@ class MatchListItemWidget extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: match,
-              calledFromMyMatches: false,
+              calledFromMatchInfo: true,
             ),
           ),
         );

@@ -270,7 +270,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
           MaterialPageRoute(
             builder: (context) => MatchInfoScreen(
               match: widget.match,
-              calledFromMyMatches: widget.calledFromMyMatches,
+              calledFromMatchInfo: widget.calledFromMyMatches,
             ),
           ),
         );
@@ -288,7 +288,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
               builder: (context) => MatchChatScreen(
                 match: widget.match,
                 currentUser: currentUser,
-                calledFromMyMatches: widget.calledFromMyMatches,
+                calledFromMatchInfo: widget.calledFromMyMatches,
               ),
             ),
           );
@@ -632,7 +632,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                         builder: (context) => MatchChatScreen(
                           match: widget.match,
                           currentUser: currentUser,
-                          calledFromMyMatches: widget.calledFromMyMatches,
+                          calledFromMatchInfo: widget.calledFromMyMatches,
                         ),
                       ),
                     );
@@ -697,7 +697,7 @@ class _MatchParticipantsScreenState extends State<MatchParticipantsScreen> {
                       builder: (context) => MatchChatScreen(
                         match: widget.match,
                         currentUser: currentUser,
-                        calledFromMyMatches: widget.calledFromMyMatches,
+                        calledFromMatchInfo: widget.calledFromMyMatches,
                       ),
                     ),
                   );

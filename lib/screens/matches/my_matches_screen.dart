@@ -604,7 +604,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                     MaterialPageRoute(
                       builder: (context) => MatchInfoScreen(
                         match: match,
-                        calledFromMyMatches: true,
+                        calledFromMatchInfo: false,
                       ),
                     ),
                   );
@@ -1013,7 +1013,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                     MaterialPageRoute(
                       builder: (context) => MatchInfoScreen(
                         match: match,
-                        calledFromMyMatches: true,
+                        calledFromMatchInfo: false,
                       ),
                     ),
                   );
@@ -1102,7 +1102,7 @@ class _MyMatchesScreenState extends State<MyMatchesScreen> {
                   MaterialPageRoute(
                     builder: (context) => MatchInfoScreen(
                       match: match,
-                      calledFromMyMatches: true,
+                      calledFromMatchInfo: false,
                     ),
                   ),
                 );

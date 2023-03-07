@@ -789,6 +789,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             ),
           ),
         ),
+
         Container(
           height: 25.0,
           margin: EdgeInsets.symmetric(
@@ -820,7 +821,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             textAlign: TextAlign.left,
           ),
         ),
-        // go throw this._userPositions and build a row with each position
         Container(
           height: 8.0,
           margin: EdgeInsets.symmetric(

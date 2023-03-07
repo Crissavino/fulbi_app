@@ -211,9 +211,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                 child: Scaffold(
                   resizeToAvoidBottomInset: false,
                   body: AnnotatedRegion<SystemUiOverlayStyle>(
-                    value: Platform.isIOS
-                        ? SystemUiOverlayStyle.light
-                        : SystemUiOverlayStyle.dark,
+                    value: SystemUiOverlayStyle.dark,
                     child: Center(
                       child: Container(
                         height: _height,
@@ -285,6 +283,9 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                       ),
                     ),
                   ),
+                  floatingActionButton: _buildUserSettings(double.maxFinite, context, this._currentUser),
+                  floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
                   bottomNavigationBar: UserMenu(
                     isLoading: this.isLoading,
                     currentIndex: 3,
@@ -344,21 +345,234 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      SizedBox(height: 55.0),
+                                      SizedBox(height: 30.0),
                                       _buildUserName(currentUser),
-                                      SizedBox(height: 5.0),
-                                      // _buildUserReviews(innerWidth),
+                                      SizedBox(height: 25.0),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 20.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  translations[localeName]!['profile.nickname']!,
+                                                  overflow: TextOverflow.clip,
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.blue,
+                                                    size: 15.0,
+                                                  ),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 30.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '@${this._currentUser!.nickname}',
+                                              overflow: TextOverflow.clip,
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+
+                                          Container(
+                                            height: 10.0,
+                                            margin: EdgeInsets.symmetric(
+                                              horizontal: 20.0,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 20.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  translations[localeName]!['profile.usuallyPlay']!,
+                                                  overflow: TextOverflow.clip,
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.blue,
+                                                    size: 15.0,
+                                                  ),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 30.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              this._userLocation!.formattedAddress,
+                                              overflow: TextOverflow.clip,
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+
+                                          Container(
+                                            height: 10.0,
+                                            margin: EdgeInsets.symmetric(
+                                              horizontal: 20.0,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 20.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  translations[localeName]!['general.positions']!,
+                                                  overflow: TextOverflow.clip,
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.blue,
+                                                    size: 15.0,
+                                                  ),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
+                                            padding: EdgeInsets.only(left: 30.0,),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                for (var position in this._userPositions!)
+                                                  Text(
+                                                    position.id == 1
+                                                        ? translations[localeName]!['general.positions.gk']!
+                                                        : position.id == 2
+                                                        ? translations[localeName]!['general.positions.def']!
+                                                        : position.id == 3
+                                                        ? translations[localeName]![
+                                                    'general.positions.mid']!
+                                                        : translations[localeName]![
+                                                    'general.positions.for']!,
+                                                    style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 10.0,
+                                            margin: EdgeInsets.symmetric(
+                                              horizontal: 20.0,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                left: BorderSide(
+                                                  width: 2.0,
+                                                  color: Colors.green[600]!,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
                                       // SizedBox(height: 5.0),
-                                      _buildUserPositions(innerWidth, context, userPositions),
+                                      // // _buildUserReviews(innerWidth),
+                                      // // SizedBox(height: 5.0),
+                                      // _buildUserPositions(innerWidth, context, userPositions),
+                                      // // SizedBox(height: 5.0),
                                       // SizedBox(height: 5.0),
-                                      // _buildUserSettings(innerWidth),
+                                      // _buildUserLocation(innerWidth, context, userLocation),
                                       SizedBox(height: 5.0),
-                                      _buildUserLocation(innerWidth, context, userLocation),
-                                      SizedBox(height: 5.0),
-                                      _buildUserSettings(innerWidth, context, currentUser),
-                                      SizedBox(height: 10.0),
                                       _buildLogOutButton(context, currentUser),
-                                      SizedBox(height: 10.0),
+                                      SizedBox(height: 30.0),
                                     ],
                                   ),
                                 ),
@@ -372,20 +586,28 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                   child: Center(
                                     child: profileImagePath == ''
                                         ? CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      radius: 60,
-                                      child: Icon(
-                                        Icons.person,
-                                        color: Colors.green[700],
-                                        size: 100.0,
-                                      ),
-                                    )
+                                            radius: 60,
+                                            backgroundColor: Colors.green[300],
+                                            child: CircleAvatar(
+                                              backgroundColor: Colors.white,
+                                              radius: 60,
+                                              child: Icon(
+                                                Icons.person,
+                                                color: Colors.green[700],
+                                                size: 100.0,
+                                              ),
+                                            ),
+                                          )
                                         : CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      radius: 60,
-                                      child: this.loadingProfileImage ? circularLoading : null,
+                                            radius: 60,
+                                            backgroundColor: Colors.green[300],
+                                            child: CircleAvatar(
+                                              backgroundColor: Colors.white,
+                                              radius: 54,
+                                              child: this.loadingProfileImage ? circularLoading : null,
                                       backgroundImage: this.loadingProfileImage ? null : NetworkImage(profileImagePath!),
                                     ),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -413,6 +635,9 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                     ),
                   ),
                 ),
+                floatingActionButton: _buildUserSettings(double.maxFinite, context, this._currentUser),
+                floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
                 bottomNavigationBar: UserMenu(
                   isLoading: this.isLoading,
                   currentIndex: 3,
@@ -739,6 +964,48 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   }
 
   _buildUserSettings(innerWidth, BuildContext context, User? currentUser) {
+
+    return FloatingActionButton(
+      onPressed: () async {
+        final user = await showModalBottomSheet(
+          backgroundColor: Colors.transparent,
+          context: context,
+          enableDrag: true,
+          isScrollControlled: true,
+          builder: (BuildContext context) {
+            return YourSettings(
+                user: currentUser
+            );
+          },
+        );
+
+        if (user != null) {
+          this._currentUser = user;
+          SharedPreferences localStorage = await SharedPreferences.getInstance();
+          await localStorage.setString('privateProfileScreen.currentUser', json.encode(this._currentUser!.toJson()));
+
+          var streamData = {
+            'currentUser': this._currentUser,
+            'userPositions': this._userPositions,
+            'userLocation': this._userLocation,
+            'profileImagePath': this.profileImagePath
+          };
+          if (!userStreamController.isClosed)
+            userStreamController.sink.add(
+              streamData,
+            );
+        }
+      },
+      child: Icon(
+        Icons.settings,
+        color: Colors.black,
+        size: 30.0,
+      ),
+      mini: false,
+      backgroundColor: Colors.white,
+      splashColor: Colors.transparent,
+    );
+
     return GestureDetector(
       child: Container(
         width: innerWidth * .95,

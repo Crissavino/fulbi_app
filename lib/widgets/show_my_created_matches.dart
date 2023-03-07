@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fulbito_app/models/booking.dart';
 import 'package:fulbito_app/models/match.dart';
 import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
@@ -69,7 +70,7 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
                 builder: (BuildContext context, BoxConstraints constraints) {
                   return Container(
                     padding:
-                        EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+                        EdgeInsets.only(left: 20.0, right: 20.0),
                     margin: EdgeInsets.only(top: 20.0),
                     width: _width,
                     child: FutureBuilder(
@@ -256,6 +257,250 @@ class _ShowMyCreatedMatchesState extends State<ShowMyCreatedMatches> {
     bool isMatchSameSex = (widget.userToInvite.genreId == match.genreId || match.genreId == 3);
 
     if (isMatchSameSex) {
+      Booking? booking = match.booking;
+      BoxDecoration boxDecoration = BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/cancha-futbol-5.jpeg'),
+          fit: BoxFit.cover,
+          opacity: isTheUserAlreadyIn ? 0.6 : 1.0
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green[100]!,
+            blurRadius: 6.0,
+            offset: Offset(0, 8),
+          ),
+        ],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
+        ),
+      );
+      String? imageUrl = booking?.field!.image;
+      if (imageUrl != null) {
+        boxDecoration = BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(imageUrl),
+            fit: BoxFit.cover,
+            opacity: isTheUserAlreadyIn ? 0.6 : 1.0
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green[100]!,
+              blurRadius: 6.0,
+              offset: Offset(0, 8),
+            ),
+          ],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10.0),
+            topRight: Radius.circular(10.0),
+          ),
+        );
+      }
+
+      return GestureDetector(
+        onTap: isTheUserAlreadyIn
+            ? () => showAlert(context, translations[localeName]!['attention']!, translations[localeName]!['attention.playerAlreadyInscribed']!)
+            : () async => await showAlertForInviteToMatch(match),
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  decoration: boxDecoration,
+                  width: MediaQuery.of(context).size.width,
+                  height: 85.0,
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  // add a container child with a star icon if match has a booking
+                  child: (booking != null)
+                      ? Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Icon(
+                      Icons.calendar_month_outlined,
+                      size: 20.0,
+                      color: Colors.yellow[700],
+                    ),
+                  )
+                      : Container(),
+                ),
+              ],
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: isTheUserAlreadyIn
+                      ? [
+                          Colors.green[100]!,
+                          Colors.green[200]!,
+                        ]
+                      : [
+                          Colors.green[600]!,
+                          Colors.green[500]!,
+                        ],
+                  stops: [0.1, 0.9],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green[100]!,
+                    blurRadius: 8.0,
+                    offset: Offset(3, 4),
+                  ),
+                ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10.0),
+                  bottomRight: Radius.circular(10.0),
+                ),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: 115.0,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        (booking != null) ? Row(
+                          children: [
+                            Text(
+                              booking.field!.name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Text(
+                                booking.field!.address,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                            ),
+                          ],
+                        ) : Row(
+                          children: [
+                            Text(
+                              (match.location != null)
+                                  ? match.location!.city
+                                  : "",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 2.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(20.0),
+                            ),
+                          ),
+                          child: Text(
+                            match.type.vs!,
+                            style: TextStyle(
+                              // add a RGB color #8B9586
+                              color: Color(0xFF8B9586),
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${DateFormat('HH:mm').format(match.whenPlay)} hs',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${DateFormat('MMMMd').format(match.whenPlay)}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                translations[localeName]!['match.missing']!,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    (match.numPlayers -
+                                        match.participants!.length)
+                                        .toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4.0),
+                                  Icon(
+                                    Icons.group_outlined,
+                                    color: Colors.white,
+                                    size: 21.0,
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 12.0),
+          ],
+        ),
+      );
+
       return GestureDetector(
         onTap: isTheUserAlreadyIn
             ? () => showAlert(context, translations[localeName]!['attention']!, translations[localeName]!['attention.playerAlreadyInscribed']!)

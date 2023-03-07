@@ -420,7 +420,6 @@ class _MatchesState extends State<MatchesScreen> {
   buildMyMatchesStreamBuilder() {
     return StreamBuilder(
       stream: myMatchesStreamController.stream,
-      // stream: matchesStreamController.stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
@@ -748,10 +747,10 @@ class _MatchesState extends State<MatchesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      (booking != null) ? Row(
                         children: [
                           Text(
-                            (booking != null) ? booking.field!.name : "Test",
+                            booking.field!.name,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
@@ -762,15 +761,24 @@ class _MatchesState extends State<MatchesScreen> {
                             width: 5.0,
                           ),
                           Text(
-                            (booking != null)
-                                ? booking.field!.address
-                                : (match.location != null)
-                                    ? match.location!.city
-                                    : "",
+                            booking.field!.address,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
                               fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ) : Row(
+                        children: [
+                          Text(
+                            (match.location != null)
+                                ? match.location!.city
+                                : "",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],

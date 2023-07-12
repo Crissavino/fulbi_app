@@ -746,23 +746,14 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   GestureDetector _buildMatchDescription(String description) {
-    final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       child: Container(
-        width: _width / 1.5,
         margin: EdgeInsets.only(top: 20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6.0,
-              offset: Offset(0, 2),
-            ),
-          ],
+          color: Colors.grey[200],
         ),
         child: ListTile(
           title: Container(
@@ -785,7 +776,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
           isScrollControlled: true,
           builder: (BuildContext context) {
             return Container(
-              height: _height / 1.1,
+              height: _height / 1.3,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -1126,6 +1117,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     ),
                   ],
                 ),
+                match.description != null ? _buildMatchDescription(match.description!) : Container(),
                 SizedBox(height: 20.0),
                 Text(
                   'Players enrolled',

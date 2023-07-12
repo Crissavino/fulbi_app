@@ -424,57 +424,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                                           FloatingActionButton(
                                             heroTag: 'deleteMatchButton',
                                             key: Key('deleteMatchButton'),
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: Text(
-                                                      "Delete Match",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 20.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    content: Text(
-                                                      "Are you sure you want to delete this match?",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 16.0,
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: Text(
-                                                          "Cancel",
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 16.0,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {},
-                                                        child: Text(
-                                                          "Delete",
-                                                          style: TextStyle(
-                                                            color: Colors.red,
-                                                            fontSize: 16.0,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
+                                            onPressed: showAlertToDeleteMatch,
                                             child: Icon(
                                               Icons.delete,
                                               color: Colors.white,
@@ -784,33 +734,37 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                   topRight: Radius.circular(30.0),
                 ),
               ),
-              child: Stack(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(
-                      top: 100.0,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 30.0),
-                          child: Text(
-                            description,
-                            style: TextStyle(
-                              fontSize: 18.0,
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(
+                        top: 30.0,
+                        bottom: 50.0,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 30.0),
+                            child: Text(
+                              description,
+                              style: TextStyle(
+                                fontSize: 18.0,
+                              ),
+                              textAlign: TextAlign.start,
+                              overflow: TextOverflow.clip,
                             ),
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  ModalTopBar()
-                ],
+                    ModalTopBar(),
+                  ],
+                ),
               ),
             );
           },
@@ -1321,7 +1275,8 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
-  showAlertToDeleteMatch(Match match) {
+  showAlertToDeleteMatch() {
+    Match match = widget.match;
     if (Platform.isAndroid) {
       return showDialog(
         context: context,

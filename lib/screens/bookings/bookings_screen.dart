@@ -83,7 +83,7 @@ class _BookingsState extends State<BookingsScreen> {
 
   Future getMyBookings() async {
     final response = await BookingRepository().getMyBookings();
-    if (response['success']) {
+    if (response['success'] && this.mounted) {
       setState(() {
         this.myBookings = response['bookings'];
       });
@@ -233,7 +233,7 @@ class _BookingsState extends State<BookingsScreen> {
           FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: UserMenu(
             isLoading: this.isLoading,
-            currentIndex: 0,
+            currentIndex: 1,
           ),
         ),
       ),

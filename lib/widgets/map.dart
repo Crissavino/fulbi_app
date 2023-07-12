@@ -204,8 +204,10 @@ class _MapState extends State<Map> {
                       .firstWhere((Context con) => con.id!.contains('place'))
                       .text;
                   final province = place.context
-                      .firstWhere((Context con) => con.id!.contains('region'))
+                      .firstWhere((Context con) => con.id!.contains('region'),
+                          orElse: () => Context(id: null, text: null))
                       .text;
+
                   final country = place.context
                       .firstWhere((Context con) => con.id!.contains('country'))
                       .text;

@@ -5,6 +5,7 @@ import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
+import 'package:fulbito_app/screens/home/home_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,8 +58,9 @@ class _CheckAuthState extends State<CheckAuth> {
     if (isAuth && !isFullySet) {
       child = CompleteRegisterScreen();
     } else if (isAuth && isFullySet) {
+      child = HomeScreen();
       // child = MatchesScreen();
-      child = BookingsScreen();
+      // child = BookingsScreen();
     } else {
       child = LoginScreen();
     }

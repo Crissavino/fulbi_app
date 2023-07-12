@@ -98,7 +98,6 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   }
 
   Future<void> shareToNewPlayer() async {
-    Navigator.pop(context);
     await _createDynamicLinkToNewPlayer(true);
     await FlutterShare.share(
         title: translations[localeName]!['match.info.inviteNewPlayer']!,
@@ -549,7 +548,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildJoinButton("Join"),
+                          imInscribed ? _buildLeaveButton("Leave") : _buildJoinButton("Join"),
                           _buildOutlinedButton(translations[localeName]!['general.invite']!)
                         ],
                       ),
@@ -613,6 +612,51 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
+  Widget _buildLeaveButton(String text) {
+    final _width = MediaQuery.of(context).size.width;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green[600]!,
+            Colors.green[500]!,
+            Colors.green[500]!,
+            Colors.green[600]!,
+          ],
+          stops: [0.1, 0.4, 0.7, 0.9],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green[100]!,
+            blurRadius: 10.0,
+            offset: Offset(0, 5),
+          ),
+        ],
+        color: Colors.green[400],
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      ),
+      width: _width * .45,
+      height: 50.0,
+      child: Center(
+        child: TextButton(
+          onPressed: showAlertToLeaveMatch,
+          child: Text(
+            text.toUpperCase(),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildOutlinedButton(String text) {
     final _width = MediaQuery.of(context).size.width;
 
@@ -632,7 +676,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       height: 50.0,
       child: Center(
         child: TextButton(
-          onPressed: () {},
+          onPressed: shareToNewPlayer,
           child: Text(
             text.toUpperCase(),
             style: TextStyle(
@@ -839,7 +883,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
     );
   }
 
-  Container _buildPlaysOn(Match match) {
+   _buildPlaysOn(Match match) {
     String month = translations[localeName]![
         'general.month.${DateFormat('MMMM').format(match.whenPlay).toLowerCase()}']!;
     String playsOnText =
@@ -857,11 +901,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       playsOnText =
           'Il ${DateFormat('d').format(match.whenPlay)} $month ${DateFormat('y').format(match.whenPlay)}';
     }
-    return Container(
-      child: Text(
-        playsOnText,
-        style: TextStyle(),
-        overflow: TextOverflow.clip,
+
+    // open calendar
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        child: Text(
+          playsOnText,
+          style: TextStyle(),
+          overflow: TextOverflow.clip,
+        ),
       ),
     );
   }
@@ -869,19 +918,28 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
   _buildPlaysInText(location) {
     String text;
     if (location.city != null && location.province != null) {
-      text = translations[localeName]!['match.itPlayedIn']! +
-          ' ' +
-          location.city +
-          ', ' +
-          location.province;
+      text = location.city + ', ' + location.province;
     } else if (location.city != null && location.province == null) {
-      text =
-          translations[localeName]!['match.itPlayedIn']! + ' ' + location.city;
+      text = location.city;
     } else {
-      text = translations[localeName]!['match.itPlayedIn']! +
-          ' ' +
-          location.province;
+      text = location.province;
     }
+
+    return Row(
+        children: [
+          Text(translations[localeName]!['match.itPlayedIn']! + ' ', style: TextStyle(), overflow: TextOverflow.clip),
+          Text(
+              text,
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+              overflow: TextOverflow.clip,
+          ),
+        ]
+    );
+
     return Text(text, style: TextStyle(), overflow: TextOverflow.clip);
   }
 
@@ -1348,6 +1406,104 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
               if (!response['success']) {
                 showAlert(
                     context, translations[localeName]!['error']!, translations[localeName]!['error.ops']!);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showAlertToLeaveMatch() {
+    Match match = widget.match;
+    if (Platform.isAndroid) {
+      return showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(translations[localeName]!['match.leave']!),
+          actions: [
+            MaterialButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                translations[localeName]!['general.cancel']!,
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+            MaterialButton(
+              onPressed: this.isLoadingAlert ? null : () async {
+                setState(() {
+                  this.isLoadingAlert = true;
+                });
+                Navigator.pop(context);
+                final response =
+                await MatchRepository().leaveMatch(match.id);
+
+                if (response['success']) {
+                  await getFutureData();
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                } else {
+                  setState(() {
+                    this.isLoadingAlert = false;
+                  });
+                  showAlert(context, translations[localeName]!['error']!,
+                      translations[localeName]!['error.ops']!);
+                }
+              },
+              child: Text(
+                translations[localeName]!['general.accept']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              color: Colors.blue,
+              elevation: 5,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(translations[localeName]!['match.leave']!),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.cancel']!,
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            textStyle: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          CupertinoDialogAction(
+            child: Text(
+              translations[localeName]!['general.accept']!,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            isDefaultAction: false,
+            onPressed: this.isLoadingAlert ? null : () async {
+              setState(() {
+                this.isLoadingAlert = true;
+              });
+              Navigator.pop(context);
+              final response =
+              await MatchRepository().leaveMatch(match.id);
+
+              if (response['success']) {
+                await getFutureData();
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+              } else {
+                setState(() {
+                  this.isLoadingAlert = false;
+                });
+                showAlert(context, translations[localeName]!['error']!,
+                    translations[localeName]!['error.ops']!);
               }
             },
           ),

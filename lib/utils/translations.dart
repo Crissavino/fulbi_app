@@ -180,6 +180,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'menu.matches': 'Matches',
     'menu.players': 'Players',
     'menu.profile': 'Profile',
+    'menu.home': 'Home',
   },
   'es': {
     'attention': 'Atención!',
@@ -352,6 +353,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'menu.matches': 'Partidos',
     'menu.players': 'Jugadores',
     'menu.profile': 'Perfil',
+    'menu.home': 'Home',
   },
   'pt': {
     'attention': 'Atenção!',
@@ -524,6 +526,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'menu.matches': 'Jogos',
     'menu.players': 'Jogadores',
     'menu.profile': 'Perfil',
+    'menu.home': 'Home',
   },
   'fr': {
     'attention': 'Attention!',
@@ -696,6 +699,7 @@ const Map<String?, Map<String?, String?>> translations = {
     'menu.matches': 'Matchs',
     'menu.players': 'Joueurs',
     'menu.profile': 'Profil',
+    'menu.home': 'Home',
   },
   'it': {
     'attention': 'Attenzione!',
@@ -868,5 +872,6 @@ const Map<String?, Map<String?, String?>> translations = {
     'menu.matches': 'Partite',
     'menu.players': 'Giocatori',
     'menu.profile': 'Profilo',
+    'menu.home': 'Home',
   },
 };

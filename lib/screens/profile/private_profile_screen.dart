@@ -442,7 +442,37 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                                     color: Colors.blue,
                                                     size: 15.0,
                                                   ),
-                                                  onPressed: () {},
+                                                  onPressed: () async {
+                                                    final wasSavedData = await showModalBottomSheet(
+                                                      backgroundColor: Colors.transparent,
+                                                      context: context,
+                                                      enableDrag: true,
+                                                      isScrollControlled: true,
+                                                      builder: (BuildContext context) {
+                                                        return YourLocation(
+                                                          userLocation: userLocation,
+                                                        );
+                                                      },
+                                                    );
+
+                                                    if (wasSavedData == true) {
+                                                      this._userLocation = await UserRepository.getUserLocation();
+                                                      SharedPreferences localStorage = await SharedPreferences.getInstance();
+                                                      await localStorage.setString('privateProfileScreen.userLocation', json.encode(this._userLocation!.toJson()));
+                                                      await localStorage.setString('userLocation', json.encode(this._userLocation!.toJson()));
+
+                                                      var streamData = {
+                                                        'currentUser': this._currentUser,
+                                                        'userPositions': this._userPositions,
+                                                        'userLocation': this._userLocation,
+                                                        'profileImagePath': this.profileImagePath
+                                                      };
+                                                      if (!userStreamController.isClosed)
+                                                        userStreamController.sink.add(
+                                                          streamData,
+                                                        );
+                                                    }
+                                                  },
                                                 ),
                                               ],
                                             ),

@@ -290,7 +290,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
               FloatingActionButtonLocation.centerDocked,
               bottomNavigationBar: UserMenu(
                 isLoading: this.isLoading,
-                currentIndex: 2,
+                currentIndex: 0,
               ),
             ),
           )

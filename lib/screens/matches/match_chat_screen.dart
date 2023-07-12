@@ -65,7 +65,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
-    ChatRepository().readMessages(widget.match.id);
+    if (this.mounted) ChatRepository().readMessages(widget.match.id);
     this.isLoading = true;
     loadFromLocalStorage();
     _loadHistory();
@@ -117,7 +117,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    ChatRepository().readMessages(widget.match.id);
+    if (this.mounted) ChatRepository().readMessages(widget.match.id);
     _textController.dispose();
     messagesStreamController.close();
   }
@@ -207,6 +207,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                           ),
                         ),
                         _buildMessageComposer(),
+                        SizedBox(height: 30.0)
                       ],
                     ),
                   ),

@@ -250,9 +250,13 @@ class _MatchesState extends State<MatchesScreen> {
   Future getMyMatches() async {
     final response = await MatchRepository().getMyMatches();
     if (response['success']) {
-      setState(() {
-        this.myMatches = response['matches'];
-      });
+      // check if the widget is disposed
+      if (this.mounted) {
+        setState(() {
+          this.myMatches = response['matches'];
+        });
+      }
+
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       var jsonMatches = this.myMatches.map((e) => json.encode(e)).toList();
       await localStorage.setString(
@@ -362,7 +366,7 @@ class _MatchesState extends State<MatchesScreen> {
               FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: UserMenu(
             isLoading: this.isLoading,
-            currentIndex: 1,
+            currentIndex: 2,
           ),
         ),
       ),

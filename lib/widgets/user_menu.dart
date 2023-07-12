@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
+import 'package:fulbito_app/screens/home/home_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/players/players_screen.dart';
 import 'package:fulbito_app/screens/profile/private_profile_screen.dart';
@@ -34,14 +35,11 @@ class _UserMenuState extends State<UserMenu> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            _buildButton(
-                BookingsScreen(), Icons.calendar_month_outlined, 0, translations[localeName]!['menu.bookings']!),
-            _buildButton(MatchesScreen(), Icons.sports_soccer, 1, translations[localeName]!['menu.matches']!),
+            _buildButton(HomeScreen(), Icons.home_outlined, 0, translations[localeName]!['menu.home']!),
+            _buildButton(BookingsScreen(), Icons.calendar_month_outlined, 1, translations[localeName]!['menu.bookings']!),
             SizedBox(width: 40.0),
-            _buildButton(
-                PlayersScreen(), Icons.groups_outlined, 2, translations[localeName]!['menu.players']!),
-            _buildButton(
-                PrivateProfileScreen(), Icons.person_outline, 3, translations[localeName]!['menu.profile']!),
+            _buildButton(MatchesScreen(), Icons.sports_soccer, 2, translations[localeName]!['menu.matches']!),
+            _buildButton(PrivateProfileScreen(), Icons.person_outline, 3, translations[localeName]!['menu.profile']!),
           ],
         ),
       ),

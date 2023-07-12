@@ -355,7 +355,6 @@ class PushNotificationService {
       print('error $error');
     }
 
-    print('NotificationSettings');
     // NotificationSettings settings = await messaging.requestPermission(
     //   alert: true,
     //   announcement: false,

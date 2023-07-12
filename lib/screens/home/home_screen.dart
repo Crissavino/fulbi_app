@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
+import 'package:fulbito_app/screens/home/news_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -197,51 +198,62 @@ class _HomeScreenState extends State<HomeScreen> {
               scrollDirection: Axis.horizontal,
               itemCount: 5,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  margin: EdgeInsets.only(right: 10.0),
-                  width: 200.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    image: DecorationImage(
-                      image: AssetImage('assets/cancha-futbol-5.jpeg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) => NewsScreen(),
+                        transitionDuration: Duration(seconds: 0),
+                      ),
+                    );
+                  },
                   child: Container(
-                    padding: EdgeInsets.all(10.0),
+                    margin: EdgeInsets.only(right: 10.0),
+                    width: 200.0,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.8),
-                          Colors.transparent,
-                        ],
+                      image: DecorationImage(
+                        image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam luctus, nisl nisl aliquet nisl, euismod.',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14.0,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.8),
+                            Colors.transparent,
+                          ],
                         ),
-                        SizedBox(height: 10.0),
-                        Text(
-                          '12/12/2021',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.0,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam luctus, nisl nisl aliquet nisl, euismod.',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.0,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 10.0),
+                          Text(
+                            '12/12/2021',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

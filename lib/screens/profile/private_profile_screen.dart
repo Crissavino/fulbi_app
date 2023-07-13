@@ -41,6 +41,8 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
   bool isLoading = false;
   bool loadingProfileImage = false;
   StreamController userStreamController = StreamController.broadcast();
+  bool isEditNicknameClicked = false;
+  final _nicknameController = TextEditingController();
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     super.initState();
     loadFromLocalStorage();
     getUserData();
+    this._nicknameController.addListener(() {setState(() {});});
   }
 
   @override
@@ -56,6 +59,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     // TODO: implement dispose
     super.dispose();
     userStreamController.close();
+    this._nicknameController.dispose();
   }
 
   void loadFromLocalStorage() async {
@@ -66,6 +70,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
         localStorage.containsKey('privateProfileScreen.profileImagePath')) {
 
       this._currentUser = User.fromJson(json.decode(localStorage.getString('privateProfileScreen.currentUser')!));
+      this._nicknameController.text = this._currentUser!.nickname;
 
       var posDB = json.decode(json.decode(localStorage.getString('privateProfileScreen.userPositions')!));
       List pos = posDB;
@@ -104,6 +109,8 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
 
       this._currentUser = response['user'];
       await localStorage.setString('privateProfileScreen.currentUser', json.encode(this._currentUser!.toJson()));
+
+      this._nicknameController.text = this._currentUser!.nickname;
 
       this._userPositions = response['positions'];
       var userPosition = this._userPositions!.map((e) => json.encode(e)).toList();
@@ -351,58 +358,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 20.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  translations[localeName]!['profile.nickname']!,
-                                                  overflow: TextOverflow.clip,
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(
-                                                    Icons.edit,
-                                                    color: Colors.blue,
-                                                    size: 15.0,
-                                                  ),
-                                                  onPressed: () {},
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 30.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              '@${this._currentUser!.nickname}',
-                                              overflow: TextOverflow.clip,
-                                              textAlign: TextAlign.left,
-                                              style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-
+                                          buildNicknameSection(),
                                           Container(
                                             height: 10.0,
                                             margin: EdgeInsets.symmetric(
@@ -417,88 +373,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 20.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  translations[localeName]!['profile.usuallyPlay']!,
-                                                  overflow: TextOverflow.clip,
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(
-                                                    Icons.edit,
-                                                    color: Colors.blue,
-                                                    size: 15.0,
-                                                  ),
-                                                  onPressed: () async {
-                                                    final wasSavedData = await showModalBottomSheet(
-                                                      backgroundColor: Colors.transparent,
-                                                      context: context,
-                                                      enableDrag: true,
-                                                      isScrollControlled: true,
-                                                      builder: (BuildContext context) {
-                                                        return YourLocation(
-                                                          userLocation: userLocation,
-                                                        );
-                                                      },
-                                                    );
-
-                                                    if (wasSavedData == true) {
-                                                      this._userLocation = await UserRepository.getUserLocation();
-                                                      SharedPreferences localStorage = await SharedPreferences.getInstance();
-                                                      await localStorage.setString('privateProfileScreen.userLocation', json.encode(this._userLocation!.toJson()));
-                                                      await localStorage.setString('userLocation', json.encode(this._userLocation!.toJson()));
-
-                                                      var streamData = {
-                                                        'currentUser': this._currentUser,
-                                                        'userPositions': this._userPositions,
-                                                        'userLocation': this._userLocation,
-                                                        'profileImagePath': this.profileImagePath
-                                                      };
-                                                      if (!userStreamController.isClosed)
-                                                        userStreamController.sink.add(
-                                                          streamData,
-                                                        );
-                                                    }
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 30.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              this._userLocation!.formattedAddress,
-                                              overflow: TextOverflow.clip,
-                                              textAlign: TextAlign.left,
-                                              style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-
+                                          buildUserLocationSection(context, userLocation),
                                           Container(
                                             height: 10.0,
                                             margin: EdgeInsets.symmetric(
@@ -513,69 +388,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 20.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  translations[localeName]!['general.positions']!,
-                                                  overflow: TextOverflow.clip,
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(
-                                                    Icons.edit,
-                                                    color: Colors.blue,
-                                                    size: 15.0,
-                                                  ),
-                                                  onPressed: () {},
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(horizontal: 20.0,),
-                                            padding: EdgeInsets.only(left: 30.0,),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                left: BorderSide(
-                                                  width: 2.0,
-                                                  color: Colors.green[600]!,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                for (var position in this._userPositions!)
-                                                  Text(
-                                                    position.id == 1
-                                                        ? translations[localeName]!['general.positions.gk']!
-                                                        : position.id == 2
-                                                        ? translations[localeName]!['general.positions.def']!
-                                                        : position.id == 3
-                                                        ? translations[localeName]![
-                                                    'general.positions.mid']!
-                                                        : translations[localeName]![
-                                                    'general.positions.for']!,
-                                                    style: TextStyle(
-                                                      fontSize: 16.0,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
+                                          buildUserPositionsSection(),
                                           Container(
                                             height: 10.0,
                                             margin: EdgeInsets.symmetric(
@@ -675,6 +488,381 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+
+  Column buildUserPositionsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                translations[localeName]!['general.positions']!,
+                overflow: TextOverflow.clip,
+                textAlign: TextAlign.left,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.blue,
+                  size: 15.0,
+                ),
+                onPressed: () async {
+                  final wasSavedData = await showModalBottomSheet(
+                    backgroundColor: Colors.transparent,
+                    context: this.context,
+                    enableDrag: true,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return YourPositions(
+                        userPositions: this._userPositions,
+                      );
+                    },
+                  );
+
+                  if (wasSavedData == true) {
+                    this._userPositions = await UserRepository.getUserPositions();
+                    SharedPreferences localStorage = await SharedPreferences.getInstance();
+                    var userPosition = this._userPositions!.map((e) => json.encode(e)).toList();
+                    await localStorage.setString('privateProfileScreen.userPositions', json.encode(userPosition.toString()));
+
+                    var streamData = {
+                      'currentUser': this._currentUser,
+                      'userPositions': this._userPositions,
+                      'userLocation': this._userLocation,
+                      'profileImagePath': this.profileImagePath
+                    };
+                    if (!userStreamController.isClosed)
+                      userStreamController.sink.add(
+                        streamData,
+                      );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 30.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var position in this._userPositions!)
+                Text(
+                  position.id == 1
+                      ? translations[localeName]!['general.positions.gk']!
+                      : position.id == 2
+                          ? translations[localeName]!['general.positions.def']!
+                          : position.id == 3
+                              ? translations[localeName]![
+                                  'general.positions.mid']!
+                              : translations[localeName]![
+                                  'general.positions.for']!,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column buildNicknameSection() {
+
+    if (this.isEditNicknameClicked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 20.0,
+            ),
+            padding: EdgeInsets.only(
+              left: 20.0,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  width: 2.0,
+                  color: Colors.green[600]!,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  translations[localeName]!['profile.nickname']!,
+                  overflow: TextOverflow.clip,
+                  textAlign: TextAlign.left,
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.check,
+                    color: Colors.green,
+                    size: 20.0,
+                  ),
+                  onPressed: () async {
+
+                    if (this._nicknameController.text == '') {
+                      setState(() => this.isEditNicknameClicked = false);
+                      return;
+                    }
+
+                    if (this._nicknameController.text == this._currentUser!.nickname) {
+                      setState(() => this.isEditNicknameClicked = false);
+                      return;
+                    }
+
+                    final response = await UserRepository().changeNickname(
+                      this._nicknameController.text,
+                    );
+
+                    setState(() => this.isEditNicknameClicked = false);
+                    if (!response['success']) {
+                      return showAlert(
+                        this.context,
+                        translations[localeName]!['error']!,
+                        translations[localeName]![response['messageKey']]!,
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 20.0,
+            ),
+            padding: EdgeInsets.only(
+              left: 30.0,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  width: 2.0,
+                  color: Colors.green[600]!,
+                ),
+              ),
+            ),
+            child: TextField(
+              controller: this._nicknameController,
+              decoration: InputDecoration(
+                hintText: this._nicknameController.text,
+                hintStyle: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                translations[localeName]!['profile.nickname']!,
+                overflow: TextOverflow.clip,
+                textAlign: TextAlign.left,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.blue,
+                  size: 15.0,
+                ),
+                onPressed: () {
+                  setState(() {
+                    this.isEditNicknameClicked = !this.isEditNicknameClicked;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 30.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            '@${this._nicknameController.text}',
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column buildUserLocationSection(
+      BuildContext context, Location? userLocation) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 20.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                translations[localeName]!['profile.usuallyPlay']!,
+                overflow: TextOverflow.clip,
+                textAlign: TextAlign.left,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.blue,
+                  size: 15.0,
+                ),
+                onPressed: () async {
+                  final wasSavedData = await showModalBottomSheet(
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    enableDrag: true,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return YourLocation(
+                        userLocation: userLocation,
+                      );
+                    },
+                  );
+
+                  if (wasSavedData == true) {
+                    this._userLocation = await UserRepository.getUserLocation();
+                    SharedPreferences localStorage =
+                        await SharedPreferences.getInstance();
+                    await localStorage.setString(
+                        'privateProfileScreen.userLocation',
+                        json.encode(this._userLocation!.toJson()));
+                    await localStorage.setString('userLocation',
+                        json.encode(this._userLocation!.toJson()));
+
+                    var streamData = {
+                      'currentUser': this._currentUser,
+                      'userPositions': this._userPositions,
+                      'userLocation': this._userLocation,
+                      'profileImagePath': this.profileImagePath
+                    };
+                    if (!userStreamController.isClosed)
+                      userStreamController.sink.add(
+                        streamData,
+                      );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.0,
+          ),
+          padding: EdgeInsets.only(
+            left: 30.0,
+          ),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                width: 2.0,
+                color: Colors.green[600]!,
+              ),
+            ),
+          ),
+          child: Text(
+            this._userLocation!.formattedAddress,
+            overflow: TextOverflow.clip,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );

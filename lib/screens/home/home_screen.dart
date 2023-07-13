@@ -720,7 +720,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         image: DecorationImage(
-                          image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                          image: AssetImage('assets/match_info_header.png'),
                           fit: BoxFit.cover,
                           opacity: 0.5,
                         ),
@@ -770,7 +770,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10.0),
                           image: DecorationImage(
-                            image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                            image: AssetImage('assets/match_info_header.png'),
                             fit: BoxFit.cover,
                           ),
                         ),

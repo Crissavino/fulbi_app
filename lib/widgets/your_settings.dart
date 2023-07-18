@@ -54,8 +54,8 @@ class _YourSettingsState extends State<YourSettings> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        _buildNickname(),
-                        SizedBox(height: 40.0,),
+                        //_buildNickname(),
+                        //SizedBox(height: 40.0,),
                         _buildPassword(),
                       ],
                     ),

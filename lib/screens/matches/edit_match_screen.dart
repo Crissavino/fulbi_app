@@ -10,6 +10,7 @@ import 'package:fulbito_app/models/user_location.dart';
 import 'package:fulbito_app/repositories/match_repository.dart';
 import 'package:fulbito_app/screens/matches/create_match_sex_modal.dart';
 import 'package:fulbito_app/screens/matches/create_match_type_modal.dart';
+import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:fulbito_app/screens/matches/my_matches_screen.dart';
 import 'package:fulbito_app/utils/constants.dart';
 import 'package:fulbito_app/models/match.dart';
@@ -1201,7 +1202,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MyMatchesScreen(),
+                  builder: (context) => MatchesScreen(),
                 ),
               );
             } else {

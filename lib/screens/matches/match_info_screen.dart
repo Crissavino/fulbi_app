@@ -297,184 +297,200 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             child: Scaffold(
               appBar: PreferredSize(
                 child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/match_info_header.png'),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  height: 290.0,
                   margin: EdgeInsets.only(
                     top: 30.0,
                     left: 5.0,
                     right: 5.0,
                   ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .push(
-                                    MaterialPageRoute(
-                                      builder: (context) => MatchesScreen(),
-                                    ),
-                                  )
-                                  .then((_) => setState(() {}));
-                            },
-                            icon: Platform.isIOS
-                                ? Icon(
-                                    Icons.arrow_back_ios,
-                                    color: Colors.white,
-                                    size: 40.0,
-                                  )
-                                : Icon(
-                                    Icons.arrow_back,
-                                    color: Colors.white,
-                                    size: 40.0,
-                                  ),
-                            splashColor: Colors.transparent,
-                          ),
-                          this.isFull
-                              ? Container()
-                              : Container(
-                                  width: 40.0,
-                                  height: 40.0,
-                                  margin: EdgeInsets.only(
-                                    top: 10.0,
-                                    right: 10.0,
-                                  ),
-                                  child: Center(
-                                    child: buildNotificationStreamBuilder(),
-                                  ),
-                                ),
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    image: DecorationImage(
+                      image: AssetImage('assets/match_info_header.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.8),
+                          Colors.transparent,
                         ],
                       ),
-                      Expanded(
-                        child: Container(),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(
-                              left: 10.0,
-                              bottom: 10.0,
+                    ),
+                    height: 290.0,
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .push(
+                                      MaterialPageRoute(
+                                        builder: (context) => MatchesScreen(),
+                                      ),
+                                    )
+                                    .then((_) => setState(() {}));
+                              },
+                              icon: Platform.isIOS
+                                  ? Icon(
+                                      Icons.arrow_back_ios,
+                                      color: Colors.white,
+                                      size: 40.0,
+                                    )
+                                  : Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                      size: 40.0,
+                                    ),
+                              splashColor: Colors.transparent,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${DateFormat('HH:mm').format(widget.match.whenPlay)} hs',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24.0,
-                                    fontWeight: FontWeight.bold,
+                            this.isFull
+                                ? Container()
+                                : Container(
+                                    width: 40.0,
+                                    height: 40.0,
+                                    margin: EdgeInsets.only(
+                                      top: 10.0,
+                                      right: 10.0,
+                                    ),
+                                    child: Center(
+                                      child: buildNotificationStreamBuilder(),
+                                    ),
                                   ),
+                          ],
+                        ),
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                left: 10.0,
+                                bottom: 10.0,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${DateFormat('HH:mm').format(widget.match.whenPlay)} hs',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${DateFormat('MMMMd').format(widget.match.whenPlay)}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(right: 10.0),
+                                  child: this.imTheCreator
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            FloatingActionButton(
+                                              heroTag: 'editMatch',
+                                              onPressed: () {
+                                                setState(() {});
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => EditMatchScreen(
+                                                      match: widget.match,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Icon(
+                                                Icons.edit,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                              mini: true,
+                                              backgroundColor: Colors.blue,
+                                              splashColor: Colors.transparent,
+                                            ),
+                                            FloatingActionButton(
+                                              heroTag: 'deleteMatchButton',
+                                              key: Key('deleteMatchButton'),
+                                              onPressed: showAlertToDeleteMatch,
+                                              child: Icon(
+                                                Icons.delete,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                              mini: true,
+                                              backgroundColor: Colors.red,
+                                              splashColor: Colors.transparent,
+                                            ),
+                                          ],
+                                        )
+                                      : null,
                                 ),
-                                Text(
-                                  '${DateFormat('MMMMd').format(widget.match.whenPlay)}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
+                                Container(
+                                  margin: EdgeInsets.only(
+                                    right: 10.0,
+                                    bottom: 10.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10.0)),
+                                  ),
+                                  width: 100.0,
+                                  height: 40.0,
+                                  child: Center(
+                                    child: TextButton(
+                                      onPressed: null,
+                                      child: this.isFreeMatch
+                                          ? Text(
+                                              translations[localeName]![
+                                                  'match.free']!,
+                                              overflow: TextOverflow.clip,
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ))
+                                          : Text(
+                                              this.currencySymbol +
+                                                  ' ' +
+                                                  widget.match.cost.toString(),
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              overflow: TextOverflow.clip,
+                                            ),
+                                    ),
                                   ),
                                 ),
                               ],
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(
-                                  right: 10.0,
-                                ),
-                                child: this.imTheCreator
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          FloatingActionButton(
-                                            heroTag: 'editMatch',
-                                            onPressed: () {
-                                              setState(() {});
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => EditMatchScreen(
-                                                    match: widget.match,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            child: Icon(
-                                              Icons.edit,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                            mini: true,
-                                            backgroundColor: Colors.blue,
-                                            splashColor: Colors.transparent,
-                                          ),
-                                          FloatingActionButton(
-                                            heroTag: 'deleteMatchButton',
-                                            key: Key('deleteMatchButton'),
-                                            onPressed: showAlertToDeleteMatch,
-                                            child: Icon(
-                                              Icons.delete,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                            mini: true,
-                                            backgroundColor: Colors.red,
-                                            splashColor: Colors.transparent,
-                                          ),
-                                        ],
-                                      )
-                                    : null,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(
-                                  right: 10.0,
-                                  bottom: 10.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10.0)),
-                                ),
-                                width: 100.0,
-                                height: 40.0,
-                                child: Center(
-                                  child: TextButton(
-                                    onPressed: () {},
-                                    child: this.isFreeMatch
-                                        ? Text("\$\1000",
-                                            overflow: TextOverflow.clip,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.bold,
-                                            ))
-                                        : Text(
-                                            this.currencySymbol +
-                                                ' ' +
-                                                widget.match.cost.toString(),
-                                            overflow: TextOverflow.clip,
-                                          ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ],
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 preferredSize: new Size(
@@ -488,11 +504,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     ? SystemUiOverlayStyle.light
                     : SystemUiOverlayStyle.dark,
                 child: Container(
-                  margin: EdgeInsets.only(
-                    top: 20.0,
-                    left: 5.0,
-                    right: 5.0,
-                  ),
+                  margin: EdgeInsets.only(top: 20.0, left: 5.0, right: 5.0),
                   child: Column(
                     children: [
                       Row(
@@ -502,9 +514,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                           _buildOutlinedButton(translations[localeName]!['general.invite']!)
                         ],
                       ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
+                      SizedBox(height: 20.0),
                       buildMatchStreamBuilder(),
                     ],
                   ),
@@ -870,27 +880,24 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
       text = location.province;
     }
 
-    return Row(
-        children: [
-          Text(
-        translations[localeName]!['match.itPlayedIn']! + ' ',
-        style: TextStyle(),
-            // prevent overflow, add ...
-        overflow: TextOverflow.clip,
-      ),
+    return Row(children: [
       Text(
-              text,
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.underline,
-              ),
-              overflow: TextOverflow.clip,
+        translations[localeName]!['match.itPlayedIn']! + ' ',
+      ),
+      Expanded(
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+            decoration: TextDecoration.underline,
           ),
-        ]
-    );
-
-    return Text(text, style: TextStyle(), overflow: TextOverflow.clip);
+          softWrap: false,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ]);
   }
 
   GestureDetector _buildPlaysIn(Location location, double _width) {
@@ -965,12 +972,7 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
         return Expanded(
             child: Container(
-          margin: EdgeInsets.only(
-            left: 5.0,
-            right: 5.0,
-          ),
-          width: _width,
-          // create a scrollable view
+          margin: EdgeInsets.only(left: 5.0, right: 5.0),
           child: SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -1005,11 +1007,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         ),
                       ),
                       SizedBox(width: 10.0),
-                      Flexible(
-                        child: Container(
-                          child: _buildPlaysInText(location),
-                          width: _width / 1.5,
-                        ),
+                      Container(
+                        child: _buildPlaysInText(location),
+                        width: _width / 1.3,
                       ),
                     ],
                   ),
@@ -1078,7 +1078,9 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                     ),
                   ],
                 ),
-                match.description != null ? _buildMatchDescription(match.description!) : Container(),
+                match.description != null
+                    ? _buildMatchDescription(match.description!)
+                    : Container(),
                 SizedBox(height: 20.0),
                 Text(
                   'Players enrolled',

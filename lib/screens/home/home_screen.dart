@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: screenBorders,
                                 ),
                                 padding: EdgeInsets.only(
-                                    bottom: 20.0, left: 20.0, right: 20.0),
+                                    bottom: 20.0, left: 10.0),
                                 margin: EdgeInsets.only(top: 20.0),
                                 width: _width,
                                 height: _height,
@@ -462,7 +462,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.white,
                                   fontSize: 16.0,
                                 ),
-                                maxLines: 3,
+                                softWrap: false,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
@@ -472,6 +473,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontSize: 12.0,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                softWrap: false,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -655,6 +659,51 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              (booking != null)
+                                  ? Container(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      booking.field!.name,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      booking.field!.address,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
+                                  : Container(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      (this.matches[index]!.location != null)
+                                          ? this.matches[index]!.location!.city
+                                          : "",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                      ),
+                                      softWrap: false,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 5.0),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -712,51 +761,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   )
                                 ],
                               ),
-                              SizedBox(height: 10.0),
-                              (booking != null)
-                                  ? Container(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        booking.field!.name,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16.0,
-                                        ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        booking.field!.address,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                )
-                                  : Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      (this.matches[index]!.location != null)
-                                          ? this.matches[index]!.location!.city
-                                          : "",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                      ),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              )
-                              ,
                             ],
                           ),
                         ),

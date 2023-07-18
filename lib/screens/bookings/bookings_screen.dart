@@ -294,9 +294,7 @@ class _BookingsState extends State<BookingsScreen> {
         final _width = MediaQuery.of(context).size.width;
         final _height = MediaQuery.of(context).size.height;
 
-        if (snapshot.connectionState !=
-            ConnectionState.done &&
-            !snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData) {
 
           this.isLoading = true;
 
@@ -321,9 +319,7 @@ class _BookingsState extends State<BookingsScreen> {
 
         this.isLoading = false;
 
-        if (snapshot.connectionState ==
-            ConnectionState.done &&
-            !snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done && !snapshot.hasData) {
           return Expanded(
             child: Container(
               padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
@@ -381,10 +377,7 @@ class _BookingsState extends State<BookingsScreen> {
 
         return Expanded(
           child: Container(
-            margin: EdgeInsets.only(
-              left: 20.0,
-              right: 20.0,
-            ),
+            margin: EdgeInsets.only(left: 10.0, right: 10.0),
             width: _width,
             child: RefreshIndicator(
               onRefresh: () => this.getRefreshData(
@@ -454,149 +447,118 @@ class _BookingsState extends State<BookingsScreen> {
           ),
         );
       },
-      child: Column(
+      child: Stack(
         children: [
-          Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  image: decorationImage,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green[100]!,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0),
-                  ),
-                ),
-                width: MediaQuery.of(context).size.width,
-                height: 85.0,
-              ),
-              Positioned(
-                top: 6,
-                right: 6,
-                // add a container child with a star icon if match has a booking
-                child: (field.advertising)
-                    ? Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Icon(
-                    Icons.star,
-                    size: 20.0,
-                    color: Colors.yellow[700],
-                  ),
-                )
-                    : Container(),
-              ),
-            ],
-          ),
           Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.green[600]!,
-                  Colors.green[500]!,
-                ],
-                stops: [0.1, 0.9],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green[100]!,
-                  blurRadius: 8.0,
-                  offset: Offset(3, 4),
-                ),
-              ],
-              color: Colors.green[400],
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10.0),
-                bottomRight: Radius.circular(10.0),
-              ),
-            ),
+            margin: EdgeInsets.only(bottom: 16.0),
+            height: 200.0,
             width: MediaQuery.of(context).size.width,
-            height: 75.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              image: decorationImage,
+            ),
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              field.name,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              field.address,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.name,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24.0,
                         ),
-                        Column(
-                          children: [
-                            Text(
-                              'Cancha ${type.number}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 4.0),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10.0,
-                                vertical: 2.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                              ),
-                              child: Text(
-                                type.vs!,
-                                style: TextStyle(
-                                  // add a RGB color #8B9586
-                                  color: Color(0xFF8B9586),
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        field.address,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Cancha ${type.number}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 8.0),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 12.0)
+          Positioned(
+            top: 10,
+            left: 10,
+            // add a container child with a star icon if match has a booking
+            child: (field.advertising)
+                ? Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.star,
+                size: 20.0,
+                color: Colors.yellow[700],
+              ),
+            )
+                : Container(),
+          ),
+          Positioned(
+              top: 10.0,
+              right: 20.0,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 2.0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(20.0),
+                  ),
+                ),
+                child: Text(
+                  type.vs!,
+                  style: TextStyle(
+                    // add a RGB color #8B9586
+                    color: Color(0xFF8B9586),
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ))
         ],
       ),
     );
@@ -666,14 +628,14 @@ class _BookingsState extends State<BookingsScreen> {
           return Container(
             width: 260.0,
             height: 100.0,
-            margin: EdgeInsets.only(left: 20.0),
+            margin: EdgeInsets.only(left: 10.0),
             child: _buildMyBookingCardPlaceHolder(),
           );
         }
 
         return Container(
           width: _width,
-          margin: EdgeInsets.only(left: 20.0),
+          margin: EdgeInsets.only(left: 10.0),
           height: 100.0,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -769,10 +731,7 @@ class _BookingsState extends State<BookingsScreen> {
       child: Stack(
         children: [
           Container(
-            margin: EdgeInsets.only(
-              right: 20.0,
-              top: 5.0,
-            ),
+            margin: EdgeInsets.only(right: 20.0, top: 5.0),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,

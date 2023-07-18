@@ -480,14 +480,14 @@ class _MatchesState extends State<MatchesScreen> {
           return Container(
             width: 260.0,
             height: 100.0,
-            margin: EdgeInsets.only(left: 20.0),
+            margin: EdgeInsets.only(left: 10.0),
             child: _buildMyMatchCardPlaceHolder(),
           );
         }
 
         return Container(
           width: _width,
-          margin: EdgeInsets.only(left: 20.0),
+          margin: EdgeInsets.only(left: 10.0),
           height: 100.0,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -556,7 +556,7 @@ class _MatchesState extends State<MatchesScreen> {
           return Expanded(
             child: Container(
               padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
-              margin: EdgeInsets.only(top: 20.0),
+              margin: EdgeInsets.only(top: 10.0),
               width: _width,
               height: _height,
               child: Container(
@@ -572,10 +572,7 @@ class _MatchesState extends State<MatchesScreen> {
 
         return Expanded(
           child: Container(
-            margin: EdgeInsets.only(
-              left: 20.0,
-              right: 20.0,
-            ),
+            margin: EdgeInsets.only(left: 10.0, right: 10.0),
             width: _width,
             child: RefreshIndicator(
               onRefresh: () => this.getRefreshData(
@@ -637,39 +634,19 @@ class _MatchesState extends State<MatchesScreen> {
     // check if match have a booking or is only a match
     Booking? booking = match.booking;
     BoxDecoration boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(10.0),
       image: DecorationImage(
-        image: AssetImage('assets/cancha-futbol-5.jpeg'),
+        image: AssetImage('assets/match_info_header.png'),
         fit: BoxFit.cover,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.green[100]!,
-          blurRadius: 6.0,
-          offset: Offset(0, 8),
-        ),
-      ],
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(10.0),
-        topRight: Radius.circular(10.0),
       ),
     );
     String? imageUrl = booking?.field!.image;
     if (imageUrl != null) {
       boxDecoration = BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
         image: DecorationImage(
           image: NetworkImage(imageUrl),
           fit: BoxFit.cover,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green[100]!,
-            blurRadius: 6.0,
-            offset: Offset(0, 8),
-          ),
-        ],
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-          topRight: Radius.circular(10.0),
         ),
       );
     }
@@ -686,196 +663,179 @@ class _MatchesState extends State<MatchesScreen> {
           ),
         );
       },
-      child: Column(
+      child: Stack(
         children: [
-          Stack(
-            children: [
-              Container(
-                decoration: boxDecoration,
-                width: MediaQuery.of(context).size.width,
-                height: 85.0,
-              ),
-              Positioned(
-                top: 6,
-                right: 6,
-                child: (booking != null)
-                    ? Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Icon(
-                          Icons.calendar_month_outlined,
-                          size: 20.0,
-                          color: Colors.yellow[700],
-                        ),
-                      )
-                    : Container(),
-              ),
-            ],
-          ),
           Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.green[600]!,
-                  Colors.green[500]!,
-                ],
-                stops: [0.1, 0.9],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green[100]!,
-                  blurRadius: 8.0,
-                  offset: Offset(3, 4),
-                ),
-              ],
-              color: Colors.green[400],
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10.0),
-                bottomRight: Radius.circular(10.0),
-              ),
-            ),
+            margin: EdgeInsets.only(bottom: 10.0),
+            height: 200.0,
             width: MediaQuery.of(context).size.width,
-            height: 115.0,
+            decoration: boxDecoration,
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  (booking != null)
+                      ? Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          booking.field!.name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18.0,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          booking.field!.address,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                      : Container(
+                    child: (match.location != null)
+                        ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          match.location!.city,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18.0,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    )
+                        : Container(),
+                  ),
+                  SizedBox(height: 5.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      (booking != null) ? Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            booking.field!.name,
+                            '${DateFormat('HH:mm').format(match.whenPlay)} hs',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${DateFormat('MMMMd').format(match.whenPlay)}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(
-                            width: 5.0,
-                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
                           Text(
-                            booking.field!.address,
+                            translations[localeName]!['match.missing']!,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
-                        ],
-                      ) : Row(
-                        children: [
-                          Text(
-                            (match.location != null)
-                                ? match.location!.city
-                                : "",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 2.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(20.0),
-                          ),
-                        ),
-                        child: Text(
-                          match.type.vs!,
-                          style: TextStyle(
-                            // add a RGB color #8B9586
-                            color: Color(0xFF8B9586),
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${DateFormat('HH:mm').format(match.whenPlay)} hs',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '${DateFormat('MMMMd').format(match.whenPlay)}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              translations[localeName]!['match.missing']!,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  (match.numPlayers -
-                                          match.participants!.length)
-                                      .toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(width: 4.0),
-                                Icon(
-                                  Icons.group_outlined,
+                          Row(
+                            children: [
+                              Text(
+                                (match.numPlayers - match.participants!.length).toString(),
+                                style: TextStyle(
                                   color: Colors.white,
-                                  size: 21.0,
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(width: 4.0),
+                              Icon(
+                                Icons.group_outlined,
+                                color: Colors.white,
+                                size: 18.0,
+                              )
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 12.0)
+          Positioned(
+            top: 10.0,
+            right: 10.0,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 2.0,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(20.0),
+                ),
+              ),
+              child: Text(
+                match.type.vs!,
+                style: TextStyle(
+                  // add a RGB color #8B9586
+                  color: Color(0xFF8B9586),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 10,
+            left: 10,
+            child: (booking != null)
+                ? Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.calendar_month_outlined,
+                size: 20.0,
+                color: Colors.yellow[700],
+              ),
+            )
+                : Container(),
+          ),
         ],
       ),
     );

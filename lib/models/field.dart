@@ -14,6 +14,7 @@ class Field {
   List<Type> types;
   Location? location;
   dynamic currency;
+  Type? type;
 
   Field({
     required this.id,
@@ -27,6 +28,7 @@ class Field {
     required this.image,
     required this.types,
     required this.location,
+    required this.type,
     this.currency
   });
 
@@ -44,6 +46,7 @@ class Field {
       types: json['types'] != null ? (json['types'] as List).map((i) => Type.fromJson(i)).toList() : [],
       location: json['location'] != null ? Location.fromJson(json['location']) : null,
       currency: json['currency'] != null ? json['currency']['symbol'] : null,
+      type: json['type'] != null ? Type.fromJson(json['type']) : null,
     );
   }
 
@@ -57,6 +60,10 @@ class Field {
       'currency_id': currencyId,
       'cost': cost,
       'image': image,
+      'advertising': advertising,
+      'types': types,
+      'location': location != null ? location?.toJson() : null,
+      'type': type != null ? type?.toJson() : null,
     };
   }
 

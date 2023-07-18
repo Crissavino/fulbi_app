@@ -104,5 +104,8 @@ class Match {
     "currency_id": currencyId,
     "description": description,
     "participants": List<dynamic>.from(participants!.map((x) => x.toJson())),
+    "booking": booking != null ? booking?.toJson() : null,
+    "type": type.toJson(),
+    "location": location != null ? location?.toJson() : null
   };
 }

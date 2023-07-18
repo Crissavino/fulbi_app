@@ -872,8 +872,13 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
 
     return Row(
         children: [
-          Text(translations[localeName]!['match.itPlayedIn']! + ' ', style: TextStyle(), overflow: TextOverflow.clip),
           Text(
+        translations[localeName]!['match.itPlayedIn']! + ' ',
+        style: TextStyle(),
+            // prevent overflow, add ...
+        overflow: TextOverflow.clip,
+      ),
+      Text(
               text,
               style: TextStyle(
                 color: Colors.blue,
@@ -1000,9 +1005,11 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                         ),
                       ),
                       SizedBox(width: 10.0),
-                      Container(
-                        child: _buildPlaysInText(location),
-                        width: _width / 1.5,
+                      Flexible(
+                        child: Container(
+                          child: _buildPlaysInText(location),
+                          width: _width / 1.5,
+                        ),
                       ),
                     ],
                   ),

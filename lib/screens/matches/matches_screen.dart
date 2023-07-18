@@ -698,7 +698,6 @@ class _MatchesState extends State<MatchesScreen> {
               Positioned(
                 top: 6,
                 right: 6,
-                // add a container child with a star icon if match has a booking
                 child: (booking != null)
                     ? Container(
                         width: 30,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/repositories/home_repository.dart';
 import 'package:fulbito_app/screens/auth/complete_register_screen.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
@@ -58,6 +59,7 @@ class _CheckAuthState extends State<CheckAuth> {
     if (isAuth && !isFullySet) {
       child = CompleteRegisterScreen();
     } else if (isAuth && isFullySet) {
+      HomeRepository().getInfo();
       child = HomeScreen();
       // child = MatchesScreen();
       // child = BookingsScreen();

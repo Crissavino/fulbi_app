@@ -3,16 +3,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fulbito_app/models/field.dart';
+import 'package:fulbito_app/models/type.dart';
+import 'package:fulbito_app/repositories/home_repository.dart';
+import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
 import 'package:fulbito_app/screens/home/news_screen.dart';
+import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/booking.dart';
-import '../../models/user.dart';
-import '../../utils/constants.dart';
-import '../../utils/translations.dart';
-import '../../widgets/user_menu.dart';
+import 'package:fulbito_app/models/booking.dart';
+import 'package:fulbito_app/models/user.dart';
+import 'package:fulbito_app/models/match.dart';
+import 'package:fulbito_app/utils/constants.dart';
+import 'package:fulbito_app/utils/translations.dart';
+import 'package:fulbito_app/widgets/user_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -25,7 +32,62 @@ class _HomeScreenState extends State<HomeScreen> {
   dynamic search = '';
   bool isLoading = false;
   List<User?> players = [];
+  List<Match?> matches = [];
+  List<Field?> fields = [];
+  List news = [];
 
+  @override
+  void initState() {
+    super.initState();
+    getHomeInfo();
+  }
+
+  Future getHomeInfo() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    if (
+      localStorage.containsKey('homeInfo-news') &&
+      localStorage.containsKey('homeInfo-fields') &&
+      localStorage.containsKey('homeInfo-matches')
+    ) {
+
+      final _news = json.decode(localStorage.getString('homeInfo-news')!);
+
+      var thisFields = json.decode(localStorage.getString('homeInfo-fields')!);
+      List fields = thisFields;
+      thisFields = fields.map((match) => Field.fromJson(match)).toList();
+
+      var thisMatches = json.decode(localStorage.getString('homeInfo-matches')!);
+      List matches = thisMatches;
+      thisMatches = matches.map((match) => Match.fromJson(match)).toList();
+
+      setState(() {
+        this.matches = thisMatches;
+        this.fields = thisFields;
+        this.news = _news;
+      });
+
+    } else {
+      // get info from api
+      final response = await HomeRepository().getInfo();
+
+      if (response['message'] == 'Unauthenticated.') {
+        return Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+              (Route<dynamic> route) => false,
+        );
+      }
+
+      if (response['success']) {
+        setState(() {
+          this.news = response['news'];
+          this.fields = response['fields'];
+          this.matches = response['matches'];
+        });
+      }
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +348,9 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: 3,
               itemBuilder: (BuildContext context, int index) {
 
+                if (this.fields.isEmpty) {
+                  return Container();
+                }
                 // check if is the last index
                 bool isLastIndex = index == 2;
                 if (isLastIndex) {
@@ -346,6 +411,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
+                DecorationImage decorationImage = DecorationImage(
+                  image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                  fit: BoxFit.cover,
+                );
+                if (this.fields[index]!.image.isNotEmpty) {
+                  decorationImage = DecorationImage(
+                    image: NetworkImage(this.fields[index]!.image),
+                    fit: BoxFit.cover,
+                  );
+                }
+
+                Type? type = Type()
+                    .matchTypes
+                    .where(
+                        (element) => element.id == this.fields[index]!.type!.id)
+                    .first;
+
                 return GestureDetector(
                   onTap: () {},
                   child: Stack(
@@ -355,10 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 200.0,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10.0),
-                          image: DecorationImage(
-                            image: AssetImage('assets/cancha-futbol-5.jpeg'),
-                            fit: BoxFit.cover,
-                          ),
+                          image: decorationImage,
                         ),
                         child: Container(
                           padding: EdgeInsets.all(10.0),
@@ -378,8 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                // field.name,
-                                'Cancha de futbol 5',
+                                this.fields[index]!.name,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16.0,
@@ -388,8 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                // field.address,
-                                'Av. Siempre viva 123',
+                                this.fields[index]!.address,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12.0,
@@ -415,8 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             child: Text(
-                              // type.vs!,
-                              '9 vs 9',
+                              type.vs!,
                               style: TextStyle(
                                 // add a RGB color #8B9586
                                 color: Color(0xFF8B9586),
@@ -434,249 +510,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  Widget BookThisFieldsSection_old() {
-
-    DecorationImage decorationImage = DecorationImage(
-      image: AssetImage('assets/cancha-futbol-5.jpeg'),
-      fit: BoxFit.cover,
-    );
-    // if (field.image.isNotEmpty) {
-    //   decorationImage = DecorationImage(
-    //     image: NetworkImage(field.image),
-    //     fit: BoxFit.cover,
-    //   );
-    // }
-
-    return Container(
-      margin: EdgeInsets.only(top: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Book This Fields',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 10.0),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            // occupy the necessary height
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                image: decorationImage,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green[100]!,
-                                    blurRadius: 6.0,
-                                    offset: Offset(0, 8),
-                                  ),
-                                ],
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                ),
-                              ),
-                              height: 85.0,
-                            ),
-                            Positioned(
-                                top: 10.0,
-                                right: 10.0,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.0,
-                                    vertical: 2.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20.0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    // type.vs!,
-                                    '9 vs 9',
-                                    style: TextStyle(
-                                      // add a RGB color #8B9586
-                                      color: Color(0xFF8B9586),
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ))
-                          ],
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.green[600]!,
-                                Colors.green[500]!,
-                              ],
-                              stops: [0.1, 0.9],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.green[100]!,
-                                blurRadius: 8.0,
-                                offset: Offset(3, 4),
-                              ),
-                            ],
-                            color: Colors.green[400],
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(10.0),
-                              bottomRight: Radius.circular(10.0),
-                            ),
-                          ),
-                          height: 75.0,
-                          width: MediaQuery.of(context).size.width,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  // field.name,
-                                  'Cancha de futbol 5',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                image: decorationImage,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green[100]!,
-                                    blurRadius: 6.0,
-                                    offset: Offset(0, 8),
-                                  ),
-                                ],
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                ),
-                              ),
-                              height: 85.0,
-                            ),
-                            Positioned(
-                                top: 10.0,
-                                right: 10.0,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.0,
-                                    vertical: 2.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20.0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    // type.vs!,
-                                    '9 vs 9',
-                                    style: TextStyle(
-                                      // add a RGB color #8B9586
-                                      color: Color(0xFF8B9586),
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ))
-                          ],
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.green[600]!,
-                                Colors.green[500]!,
-                              ],
-                              stops: [0.1, 0.9],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.green[100]!,
-                                blurRadius: 8.0,
-                                offset: Offset(3, 4),
-                              ),
-                            ],
-                            color: Colors.green[400],
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(10.0),
-                              bottomRight: Radius.circular(10.0),
-                            ),
-                          ),
-                          height: 75.0,
-                          width: MediaQuery.of(context).size.width,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  // field.name,
-                                  'Cancha de futbol 5',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ),
-        ],
-      ),
-    );
-
   }
 
   Widget PlayThisMatchesSection() {
@@ -760,20 +593,51 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
+                if (this.matches == []) {
+                  return Container();
+                }
+
+                if (this.matches.length == 0) {
+                  return Container();
+                }
+
+                Booking? booking = this.matches[index]!.booking;
+                BoxDecoration boxDecoration = BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  image: DecorationImage(
+                    image: AssetImage('assets/match_info_header.png'),
+                    fit: BoxFit.cover,
+                  ),
+                );
+                String? imageUrl = booking?.field!.image;
+                if (imageUrl != null) {
+                  boxDecoration = BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    image: DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                }
+
                 return GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MatchInfoScreen(
+                          match: this.matches[index]!,
+                          calledFromMatchInfo: false,
+                        ),
+                      ),
+                    );
+                  },
                   child: Stack(
                     children: [
                       Container(
                         margin: EdgeInsets.only(right: 10.0),
                         width: 200.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          image: DecorationImage(
-                            image: AssetImage('assets/match_info_header.png'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                        decoration: boxDecoration,
                         child: Container(
                           padding: EdgeInsets.all(10.0),
                           decoration: BoxDecoration(
@@ -798,8 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        // '${DateFormat('HH:mm').format(match.whenPlay)} hs',
-                                        '21:00 hs',
+                                        '${DateFormat('HH:mm').format(this.matches[index]!.whenPlay)} hs',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16.0,
@@ -807,8 +670,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       Text(
-                                        // '${DateFormat('MMMMd').format(match.whenPlay)}',
-                                        'July 22',
+                                        '${DateFormat('MMMMd').format(this.matches[index]!.whenPlay)}',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 10.0,
@@ -831,8 +693,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Row(
                                         children: [
                                           Text(
-                                            '6',
-                                            // (match.numPlayers - match.participants!.length).toString(),
+                                            (this.matches[index]!.numPlayers - this.matches[index]!.participants!.length).toString(),
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 14.0,
@@ -852,25 +713,50 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               SizedBox(height: 10.0),
-                              Text(
-                                // field.name,
-                                'Cancha de futbol 5',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.0,
+                              (booking != null)
+                                  ? Container(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        booking.field!.name,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16.0,
+                                        ),
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        booking.field!.address,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                                  : Container(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      (this.matches[index]!.location != null)
+                                          ? this.matches[index]!.location!.city
+                                          : "",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                // field.address,
-                                'Av. Siempre viva 123',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              )
+                              ,
                             ],
                           ),
                         ),
@@ -890,8 +776,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             child: Text(
-                              // type.vs!,
-                              '9 vs 9',
+                              this.matches[index]!.type.vs!,
                               style: TextStyle(
                                 // add a RGB color #8B9586
                                 color: Color(0xFF8B9586),
@@ -912,443 +797,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget PlayThisMatchesSection_old() {
-
-    BoxDecoration boxDecoration = BoxDecoration(
-      image: DecorationImage(
-        image: AssetImage('assets/cancha-futbol-5.jpeg'),
-        fit: BoxFit.cover,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.green[100]!,
-          blurRadius: 6.0,
-          offset: Offset(0, 8),
-        ),
-      ],
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(10.0),
-        topRight: Radius.circular(10.0),
-      ),
-    );
-    //Booking? booking = match.booking;
-    // String? imageUrl = booking?.field!.image;
-    // if (imageUrl != null) {
-    //   boxDecoration = BoxDecoration(
-    //     image: DecorationImage(
-    //       image: NetworkImage(imageUrl),
-    //       fit: BoxFit.cover,
-    //     ),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         color: Colors.green[100]!,
-    //         blurRadius: 6.0,
-    //         offset: Offset(0, 8),
-    //       ),
-    //     ],
-    //     borderRadius: BorderRadius.only(
-    //       topLeft: Radius.circular(10.0),
-    //       topRight: Radius.circular(10.0),
-    //     ),
-    //   );
-    // }
-
-    return Container(
-      margin: EdgeInsets.only(top: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Play now!',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 10.0),
-          Container(
-              width: MediaQuery.of(context).size.width,
-              // occupy the necessary height
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                      onTap: () {},
-                      child: Column(
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: boxDecoration,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                height: 85.0,
-                              ),
-                              Positioned(
-                                top: 10.0,
-                                right: 10.0,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12.0,
-                                    vertical: 2.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20.0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    // match.type.vs!,
-                                    '9 vs 9',
-                                    style: TextStyle(
-                                      // add a RGB color #8B9586
-                                      color: Color(0xFF8B9586),
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.green[600]!,
-                                  Colors.green[500]!,
-                                ],
-                                stops: [0.1, 0.9],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green[100]!,
-                                  blurRadius: 8.0,
-                                  offset: Offset(3, 4),
-                                ),
-                              ],
-                              color: Colors.green[400],
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10.0),
-                                bottomRight: Radius.circular(10.0),
-                              ),
-                            ),
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            height: 80.0,
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // (booking != null)
-                                      (false)
-                                          ? Row(
-                                        children: [
-                                          // Text(
-                                          //   booking.field!.name,
-                                          //   style: TextStyle(
-                                          //     color: Colors.white,
-                                          //     fontSize: 12.0,
-                                          //     fontWeight: FontWeight.bold,
-                                          //   ),
-                                          // ),
-                                          // SizedBox(
-                                          //   width: 5.0,
-                                          // ),
-                                          // Text(
-                                          //   booking.field!.address,
-                                          //   style: TextStyle(
-                                          //     color: Colors.white,
-                                          //     fontSize: 12.0,
-                                          //     fontWeight: FontWeight.normal,
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ) : Row(
-                                        children: [
-                                          Text(
-                                            // (match.location != null)
-                                            (false)
-                                                ? 'asdas'
-                                            // ? match.location!.city
-                                                : "",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 8.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(top: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              // '${DateFormat('HH:mm').format(match.whenPlay)} hs',
-                                              '21:00 hs',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              // '${DateFormat('MMMMd').format(match.whenPlay)}',
-                                              'July 22',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              translations[localeName]!['match.missing']!,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  '6',
-                                                  // (match.numPlayers - match.participants!.length).toString(),
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 4.0),
-                                                Icon(
-                                                  Icons.group_outlined,
-                                                  color: Colors.white,
-                                                  size: 18.0,
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 12.0)
-                        ],
-                      )
-                  ),
-                  GestureDetector(
-                      onTap: () {},
-                      child: Column(
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: boxDecoration,
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                height: 85.0,
-                              ),
-                              Positioned(
-                                top: 10.0,
-                                right: 10.0,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12.0,
-                                    vertical: 2.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20.0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    // match.type.vs!,
-                                    '9 vs 9',
-                                    style: TextStyle(
-                                      // add a RGB color #8B9586
-                                      color: Color(0xFF8B9586),
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.green[600]!,
-                                  Colors.green[500]!,
-                                ],
-                                stops: [0.1, 0.9],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green[100]!,
-                                  blurRadius: 8.0,
-                                  offset: Offset(3, 4),
-                                ),
-                              ],
-                              color: Colors.green[400],
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10.0),
-                                bottomRight: Radius.circular(10.0),
-                              ),
-                            ),
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            height: 80.0,
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // (booking != null)
-                                      (false)
-                                          ? Row(
-                                        children: [
-                                          // Text(
-                                          //   booking.field!.name,
-                                          //   style: TextStyle(
-                                          //     color: Colors.white,
-                                          //     fontSize: 12.0,
-                                          //     fontWeight: FontWeight.bold,
-                                          //   ),
-                                          // ),
-                                          // SizedBox(
-                                          //   width: 5.0,
-                                          // ),
-                                          // Text(
-                                          //   booking.field!.address,
-                                          //   style: TextStyle(
-                                          //     color: Colors.white,
-                                          //     fontSize: 12.0,
-                                          //     fontWeight: FontWeight.normal,
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ) : Row(
-                                        children: [
-                                          Text(
-                                            // (match.location != null)
-                                            (false)
-                                                ? 'asdas'
-                                            // ? match.location!.city
-                                                : "",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 8.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(top: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              // '${DateFormat('HH:mm').format(match.whenPlay)} hs',
-                                              '21:00 hs',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              // '${DateFormat('MMMMd').format(match.whenPlay)}',
-                                              'July 22',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              translations[localeName]!['match.missing']!,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  '6',
-                                                  // (match.numPlayers - match.participants!.length).toString(),
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 4.0),
-                                                Icon(
-                                                  Icons.group_outlined,
-                                                  color: Colors.white,
-                                                  size: 18.0,
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 12.0)
-                        ],
-                      )
-                  )
-                ],
-              )
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -297,22 +297,21 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
             child: Scaffold(
               appBar: PreferredSize(
                 child: Container(
-                  margin: EdgeInsets.only(
-                    top: 30.0,
-                    left: 5.0,
-                    right: 5.0,
-                  ),
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
                     image: DecorationImage(
                       image: AssetImage('assets/match_info_header.png'),
                       fit: BoxFit.cover,
                     ),
                   ),
                   child: Container(
+                    padding: EdgeInsets.only(
+                      top: 40.0,
+                      bottom: 10.0,
+                      left: 5.0,
+                      right: 5.0,
+                    ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
@@ -499,25 +498,20 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                 ),
               ),
               resizeToAvoidBottomInset: false,
-              body: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: Platform.isIOS
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark,
-                child: Container(
-                  margin: EdgeInsets.only(top: 20.0, left: 5.0, right: 5.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          imInscribed ? _buildLeaveButton("Leave") : _buildJoinButton("Join"),
-                          _buildOutlinedButton(translations[localeName]!['general.invite']!)
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      buildMatchStreamBuilder(),
-                    ],
-                  ),
+              body: Container(
+                margin: EdgeInsets.only(top: 20.0, left: 5.0, right: 5.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        imInscribed ? _buildLeaveButton("Leave") : _buildJoinButton("Join"),
+                        _buildOutlinedButton(translations[localeName]!['general.invite']!)
+                      ],
+                    ),
+                    SizedBox(height: 20.0),
+                    buildMatchStreamBuilder(),
+                  ],
                 ),
               ),
             ),

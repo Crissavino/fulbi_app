@@ -304,9 +304,7 @@ class _MatchesState extends State<MatchesScreen> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           body: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: Platform.isIOS
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
+            value: SystemUiOverlayStyle.dark,
             child: Center(
               child: Container(
                 width: _width,

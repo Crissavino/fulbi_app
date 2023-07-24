@@ -187,10 +187,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   ),
                 ),
                 resizeToAvoidBottomInset: true,
-                body: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: Platform.isIOS
-                      ? SystemUiOverlayStyle.light
-                      : SystemUiOverlayStyle.dark,
+                body: Container(
+                  color: Colors.white,
                   child: Center(
                     child: Column(
                       children: <Widget>[
@@ -207,7 +205,6 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                           ),
                         ),
                         _buildMessageComposer(),
-                        SizedBox(height: 30.0)
                       ],
                     ),
                   ),
@@ -527,9 +524,19 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   Widget _buildMessageComposer() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 60.0,
-      color: Colors.white,
+      margin: EdgeInsets.only(top: 8.0),
+      padding: EdgeInsets.all(8.0),
+      height: 80.0,
+      // add a line on the top of the container
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         children: <Widget>[
           // IconButton(
@@ -538,19 +545,28 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           //   color: Colors.green[400],
           //   onPressed: () {},
           // ),
-          SizedBox(
-            width: 25.0,
-          ),
+
           Expanded(
-            child: TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              controller: _textController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration.collapsed(
-                hintText: translations[localeName]!['match.chat.sendMessage'],
+            child: Container(
+              // add a border to simulate input field
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(25.0),
               ),
-              focusNode: _focusNode,
+              child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                controller: _textController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration.collapsed(
+                  hintText: translations[localeName]!['match.chat.sendMessage'],
+                ),
+                focusNode: _focusNode,
+              ),
             ),
           ),
           Platform.isIOS

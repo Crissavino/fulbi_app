@@ -16,6 +16,7 @@ String matchToJson(Match data) => json.encode(data.toJson());
 class Match {
 
   int id;
+  String? name;
   int locationId;
   DateTime whenPlay;
   int genreId;
@@ -39,6 +40,7 @@ class Match {
 
   Match({
     required this.id,
+    this.name,
     required this.locationId,
     required this.whenPlay,
     required this.genreId,
@@ -63,6 +65,7 @@ class Match {
 
   factory Match.fromJson(Map<String, dynamic> json) => Match(
     id: json["id"],
+    name: json["name"],
     locationId: json["location_id"],
     whenPlay: DateTime.parse(json["when_play"]),
     genreId: json["genre_id"],
@@ -87,6 +90,7 @@ class Match {
 
   Map<String, dynamic> toJson() => {
     "id": id,
+    "name": name,
     "location_id": locationId,
     "when_play": whenPlay.toIso8601String(),
     "genre_id": genreId,

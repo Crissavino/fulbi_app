@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:fulbito_app/models/player.dart';
+import 'package:fulbito_app/models/user.dart';
 import 'package:fulbito_app/utils/api.dart';
 
 import 'package:fulbito_app/models/field.dart';
@@ -35,50 +37,30 @@ class HomeRepository {
     return body;
   }
 
-  Future getNewsForHome() async {
-    final res = await api.postData({}, '/home/get-news-for-home');
-
-    Map body = json.decode(res.body);
-
-    if (body.containsKey('success') && body['success'] == true) {
-
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
-
-      List news = body['news'];
-      localStorage.setString('homeInfo-news', jsonEncode(news));
-
-    }
-
-    return body;
-  }
-
-  Future getFieldsForHome() async {
-    final res = await api.postData({}, '/home/get-fields-for-home');
+  Future search(textToSearch) async {
+    final res = await api.postData({
+      'text_to_search': textToSearch
+    }, '/home/search');
 
     Map body = json.decode(res.body);
 
     if (body.containsKey('success') && body['success'] == true) {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
+
       // fields
       List fields = body['fields'];
       body['fields'] = fields.map((field) => Field.fromJson(field)).toList();
-      localStorage.setString('homeInfo-fields', jsonEncode(body['fields']));
-    }
+      localStorage.setString('search-fields', json.encode(body['fields'], toEncodable: (e) => e.toJson()));
 
-    return body;
-  }
-
-  Future getMatchesForHome() async {
-    final res = await api.postData({}, '/home/get-matches-for-home');
-
-    Map body = json.decode(res.body);
-
-    if (body.containsKey('success') && body['success'] == true) {
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
       // matches
       List matches = body['matches'];
       body['matches'] = matches.map((match) => Match.fromJson(match)).toList();
-      localStorage.setString('homeInfo-matches', jsonEncode(body['matches']));
+      localStorage.setString('search-matches', json.encode(body['matches'], toEncodable: (e) => e.toJson()));
+
+      // users
+      List users = body['users'];
+      body['users'] = users.map((player) => User.fromJson(player)).toList();
+      localStorage.setString('search-users', json.encode(body['users'], toEncodable: (e) => e.toJson()));
     }
 
     return body;

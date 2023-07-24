@@ -9,6 +9,7 @@ import 'package:fulbito_app/repositories/home_repository.dart';
 import 'package:fulbito_app/screens/auth/login_screen.dart';
 import 'package:fulbito_app/screens/bookings/bookings_screen.dart';
 import 'package:fulbito_app/screens/home/news_screen.dart';
+import 'package:fulbito_app/screens/home/search_screen.dart';
 import 'package:fulbito_app/screens/matches/match_info_screen.dart';
 import 'package:fulbito_app/screens/matches/matches_screen.dart';
 import 'package:intl/intl.dart';
@@ -131,9 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 hintText: translations[localeName]!['search']!,
                 hintStyle: kHintTextStyle,
               ),
-              onChanged: (val) async {
-                val = val.toLowerCase();
-
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) => SearchScreen(),
+                    transitionDuration: Duration(seconds: 0),
+                  ),
+                );
               },
             ),
           ),

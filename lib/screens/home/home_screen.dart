@@ -207,10 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     // latest news
                                     LatestNewsSection(),
-                                    // book this fields
-                                    BookThisFieldsSection(),
                                     // play this matches
                                     PlayThisMatchesSection(),
+                                    // book this fields
+                                    BookThisFieldsSection(),
                                     SizedBox(height: 30.0),
                                   ],
                                 ),
@@ -334,6 +334,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget BookThisFieldsSection() {
+
+    bool showFields = false;
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(height: 10.0),
-          Container(
+          showFields ? Container(
             height: 200.0,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -515,6 +518,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
+            ),
+          ) : Container(
+            margin: EdgeInsets.only(right: 10.0),
+            height: 200.0,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              image: DecorationImage(
+                image: AssetImage('assets/cancha-futbol-5.jpeg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: Container(
+                height: 200.0,
+                child: Center(
+                  child: Text(
+                    'Coming soon...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

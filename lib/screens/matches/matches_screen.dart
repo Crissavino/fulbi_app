@@ -672,14 +672,6 @@ class _MatchesState extends State<MatchesScreen> {
               padding: EdgeInsets.all(10.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                  ],
-                ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -889,13 +881,26 @@ class _MatchesState extends State<MatchesScreen> {
               child: Row(
                 children: [
                   SizedBox(width: 20.0),
-                  CircleAvatar(
-                    radius: 25.0,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.sports_soccer,
-                      color: Colors.green[700],
-                      size: 50.0,
+                  // CircleAvatar(
+                  //   radius: 25.0,
+                  //   backgroundColor: Colors.green[600],
+                  //   child: Icon(
+                  //     Icons.sports_soccer,
+                  //     color: Colors.green[700],
+                  //     size: 50.0,
+                  //   ),
+                  // ),
+                  Container(
+                    width: 50.0,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/my-matches-football.png'),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(50.0),
+                      ),
                     ),
                   ),
                   Expanded(

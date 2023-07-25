@@ -1085,13 +1085,16 @@ class _MatchInfoScreenState extends State<MatchInfoScreen> {
                 ),
                 SizedBox(height: 10.0),
                 participants.isEmpty
-                    ? Container(
-                        width: _width,
-                        height: _height,
-                        child: Center(
-                            child: Text(translations[localeName]![
-                                'general.noParticipants']!)),
-                      )
+                    ? Column(
+                      children: [
+                        SizedBox(height: 20.0),
+                        Container(
+                            child: Center(
+                                child: Text(translations[localeName]![
+                                    'general.noParticipants']!)),
+                          ),
+                      ],
+                    )
                     : Column(
                         children: participants
                             .map((user) => _buildPlayerRow(user!))

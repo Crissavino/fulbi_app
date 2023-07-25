@@ -90,6 +90,8 @@ flutter:
     - assets/icons/secondary/
     - assets/cancha-futbol-5.jpeg
     - assets/match_info_header.png
+    - assets/my-matches-football.png
+    - assets/grass-background.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
